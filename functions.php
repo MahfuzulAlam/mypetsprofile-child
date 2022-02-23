@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @package BuddyBoss Child
+ * @package MyPetsProfile Child
  * The parent theme functions are located at /buddyboss-theme/inc/theme/functions.php
  * Add your own functions at the bottom of this file.
  */
@@ -11,24 +12,24 @@
 /**
  * Sets up theme for translation
  *
- * @since BuddyBoss Child 1.0.0
+ * @since MyPetsProfile Child 1.0.0
  */
 function buddyboss_theme_child_languages()
 {
-  /**
-   * Makes child theme available for translation.
-   * Translations can be added into the /languages/ directory.
-   */
+	/**
+	 * Makes child theme available for translation.
+	 * Translations can be added into the /languages/ directory.
+	 */
 
-  // Translate text from the PARENT theme.
-  load_theme_textdomain( 'buddyboss-theme', get_stylesheet_directory() . '/languages' );
+	// Translate text from the PARENT theme.
+	load_theme_textdomain('buddyboss-theme', get_stylesheet_directory() . '/languages');
 
-  // Translate text from the CHILD theme only.
-  // Change 'buddyboss-theme' instances in all child theme files to 'buddyboss-theme-child'.
-  // load_theme_textdomain( 'buddyboss-theme-child', get_stylesheet_directory() . '/languages' );
+	// Translate text from the CHILD theme only.
+	// Change 'buddyboss-theme' instances in all child theme files to 'buddyboss-theme-child'.
+	// load_theme_textdomain( 'buddyboss-theme-child', get_stylesheet_directory() . '/languages' );
 
 }
-add_action( 'after_setup_theme', 'buddyboss_theme_child_languages' );
+add_action('after_setup_theme', 'buddyboss_theme_child_languages');
 
 /**
  * Enqueues scripts and styles for child theme front-end.
@@ -37,23 +38,23 @@ add_action( 'after_setup_theme', 'buddyboss_theme_child_languages' );
  */
 function buddyboss_theme_child_scripts_styles()
 {
-  /**
-   * Scripts and Styles loaded by the parent theme can be unloaded if needed
-   * using wp_deregister_script or wp_deregister_style.
-   *
-   * See the WordPress Codex for more information about those functions:
-   * http://codex.wordpress.org/Function_Reference/wp_deregister_script
-   * http://codex.wordpress.org/Function_Reference/wp_deregister_style
-   **/
+	/**
+	 * Scripts and Styles loaded by the parent theme can be unloaded if needed
+	 * using wp_deregister_script or wp_deregister_style.
+	 *
+	 * See the WordPress Codex for more information about those functions:
+	 * http://codex.wordpress.org/Function_Reference/wp_deregister_script
+	 * http://codex.wordpress.org/Function_Reference/wp_deregister_style
+	 **/
 
-  // Styles
-  wp_enqueue_style( 'buddyboss-child-css', get_stylesheet_directory_uri().'/assets/css/custom.css', '', '1.0.0' );
-   wp_enqueue_style( 'buddyboss-child-map-css', get_stylesheet_directory_uri().'/assets/css/map.css', '', '1.0.0' );
+	// Styles
+	wp_enqueue_style('buddyboss-child-css', get_stylesheet_directory_uri() . '/assets/css/custom.css', '', '1.0.0');
+	wp_enqueue_style('buddyboss-child-map-css', get_stylesheet_directory_uri() . '/assets/css/map.css', '', '1.0.0');
 
-  // Javascript
-  wp_enqueue_script( 'buddyboss-child-js', get_stylesheet_directory_uri().'/assets/js/custom.js', '', '1.0.0' );
+	// Javascript
+	wp_enqueue_script('buddyboss-child-js', get_stylesheet_directory_uri() . '/assets/js/custom.js', '', '1.0.0');
 }
-add_action( 'wp_enqueue_scripts', 'buddyboss_theme_child_scripts_styles', 9999 );
+add_action('wp_enqueue_scripts', 'buddyboss_theme_child_scripts_styles', 9999);
 
 /******************************** INCLUDE FILES *******************************/
 
@@ -64,24 +65,26 @@ require_once(get_stylesheet_directory() . '/includes/buddyboss/class-group.php')
 
 // Add your own custom functions here
 
-add_filter( 'woocommerce_add_to_cart_redirect', 'bbloomer_redirect_checkout_add_cart' );
- 
-function bbloomer_redirect_checkout_add_cart() {
-   return wc_get_checkout_url();
+add_filter('woocommerce_add_to_cart_redirect', 'bbloomer_redirect_checkout_add_cart');
+
+function bbloomer_redirect_checkout_add_cart()
+{
+	return wc_get_checkout_url();
 }
 
 // Remove "Returning customer? Click here to login" From Checkout Page
-remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
+remove_action('woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10);
 
 // Remove "category? From product Page
-remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40 );
+remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40);
 
-add_filter( 'bp_core_signup_send_activation_key', 'ps_disable_activation_email' );
-function ps_disable_activation_email() {
+add_filter('bp_core_signup_send_activation_key', 'ps_disable_activation_email');
+function ps_disable_activation_email()
+{
 	return false;
 }
 
-remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20 );
+remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20);
 
 // Custom Code by Alam - Starts Here
 function custom_google_map_scripts()
@@ -141,7 +144,7 @@ function mypetsprofile_loop_get_the_thumbnail($class = '')
 		$thumbnail_id = 0;
 
 		// GET CATEGORY IMAGE
-		
+
 		$category_list = get_the_terms($id, ATBDP_CATEGORY);
 		if ($category_list && !is_wp_error($category_list) && count($category_list) > 0) {
 			$category_img = get_term_meta($category_list[0]->term_id, 'image', true);
@@ -154,7 +157,6 @@ function mypetsprofile_loop_get_the_thumbnail($class = '')
 				}
 			}
 		}
-		
 	}
 
 	$image_src    = $thumbnail_img;
@@ -197,7 +199,7 @@ function mypetsprofile_listing_get_the_thumbnail($class = '')
 		$thumbnail_id = 0;
 
 		// GET CATEGORY IMAGE
-		
+
 		$category_list = get_the_terms($id, ATBDP_CATEGORY);
 		if ($category_list && !is_wp_error($category_list) && count($category_list) > 0) {
 			$category_img = get_term_meta($category_list[0]->term_id, 'image', true);
@@ -210,7 +212,6 @@ function mypetsprofile_listing_get_the_thumbnail($class = '')
 				}
 			}
 		}
-		
 	}
 
 	$image_src    = $thumbnail_img;
@@ -218,34 +219,33 @@ function mypetsprofile_listing_get_the_thumbnail($class = '')
 	$image_alt = (!empty($image_alt)) ? esc_attr($image_alt) : esc_html(get_the_title($thumbnail_id));
 	$image_alt = (!empty($image_alt)) ? $image_alt : esc_html(get_the_title());
 
-	return array( 'image_src' => $image_src, 'image_alt' => $image_alt, 'image_class' => $class );
+	return array('image_src' => $image_src, 'image_alt' => $image_alt, 'image_class' => $class);
 }
 
-add_action('admin_head', function(){
+add_action('admin_head', function () {
 ?>
-    <style>
-        /* ADMIN */
-        .atbdp-importer-mapping-table-name code
-        {
-        	line-break: anywhere;
-        }
-    </style>
+	<style>
+		/* ADMIN */
+		.atbdp-importer-mapping-table-name code {
+			line-break: anywhere;
+		}
+	</style>
 <?php
 });
 
 // Add custom fields in Import
 
-add_action('init', function(){
-    $tools = ATBDP()->tools;
-    $tools->importable_fields['directorist_listing_rating'] = "Average Rating";
-    $tools->importable_fields['social_facebook'] = "Facebook Url";
+add_action('init', function () {
+	$tools = ATBDP()->tools;
+	$tools->importable_fields['directorist_listing_rating'] = "Average Rating";
+	$tools->importable_fields['social_facebook'] = "Facebook Url";
 });
 
 add_shortcode('show-bb-group', function () {
-    $group_avatar = bp_is_active( 'groups' ) ? bp_get_group_avatar_url( groups_get_group( 57 ) ) : '';
-    e_var_dump( $group_avatar );
-    //e_var_dump( get_post_meta( 14 ) );
-    return '--';
+	$group_avatar = bp_is_active('groups') ? bp_get_group_avatar_url(groups_get_group(57)) : '';
+	e_var_dump($group_avatar);
+	//e_var_dump( get_post_meta( 14 ) );
+	return '--';
 });
 
 function bbd_inspect_scripts()
