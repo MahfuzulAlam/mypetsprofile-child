@@ -261,4 +261,69 @@ function bbd_get_option_data()
 	$options['script_debugging'] = get_directorist_option('script_debugging', DIRECTORIST_LOAD_MIN_FILES, true);
 	return $options;
 }
+
+// IAP Connection to the Pricing Plan
+
+add_action('init', function () {
+	if (class_exists('bbapp')) {
+		require_once(get_stylesheet_directory() . '/includes/buddyboss/class-purchase.php');
+		BuddyBossApp\Custom\IAP::instance();
+	}
+});
+
+
+function iap_get_directorist_pricing_plans()
+{
+	$plans = array();
+	$args = array(
+		'post_type' => 'atbdp_pricing_plans',
+		'posts_per_page' => -1,
+		'status' => 'publish',
+	);
+
+	// The Query
+
+	$atbdp_query = new WP_Query($args);
+	$has_plan = $atbdp_query->have_posts();
+
+	$plans_all = $atbdp_query->posts;
+
+	if ($has_plan && $plans_all) {
+		foreach ($plans_all as $value) {
+			$plan_id           = $value->ID;
+			$plan_title = $value->post_title;
+			$plans[] = array(
+				'id' => $plan_id,
+				'text' => $plan_title
+			);
+		}
+	}
+	return $plans;
+}
+
+
+function bb_atpp_gifting_plan($iap_order_id = 0, $user_id = 0, $plan_id = 0)
+{
+	if (!empty($user_id)) {
+
+		$order_id = wp_insert_post(array(
+			'post_content' => '',
+			'post_title' => sprintf('Order for the IAP Order ID #%d', $iap_order_id),
+			'post_status' => 'publish',
+			'post_author' => $user_id,
+			'post_type' => 'atbdp_orders',
+			'comment_status' => false,
+		));
+
+		$gateway = 'free';
+		// save required data as order post meta
+		update_post_meta($order_id, '_transaction_id', wp_generate_password(15, false));
+		update_post_meta($order_id, '_payment_gateway', $gateway);
+		update_post_meta($order_id, '_payment_status', 'completed');
+		update_post_meta($order_id, '_fm_plan_ordered', $plan_id);
+		update_post_meta($order_id, '_iap_order_id', $iap_order_id);
+	}
+}
+
+
 // Custom Code by Alam - Ends Here
