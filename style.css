@@ -27,8 +27,3 @@ parent theme and are located in /buddyboss-theme/assets/css/ in the parent theme
 3. Navigate into the /css/ folder of your child theme to edit custom.css.
 
 */
-
-.directorist-listing-single .directorist-listing-single__info .directorist-listing-single__info--excerpt p
-{
-    max-width: 200px;
-}
