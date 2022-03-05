@@ -15,8 +15,10 @@ class MPP_Child_Hooks
     // Change the pricing plan url for mobile
     public function atbdp_pricing_plan_to_checkout_url($url, $plan_id)
     {
-        e_var_dump($_SERVER['HTTP_USER_AGENT']);
-        if (strpos($_SERVER['HTTP_USER_AGENT'], 'wv') !== false) {
+        if (
+            strpos($_SERVER['HTTP_USER_AGENT'], 'wv') !== false || (strpos($_SERVER['HTTP_USER_AGENT'], 'iPhone') !== false &&
+                (strpos($_SERVER['HTTP_USER_AGENT'], 'chrome') == false && strpos($_SERVER['HTTP_USER_AGENT'], 'safari') == false))
+        ) {
             $iap_plan_id = 0;
             switch ($plan_id) {
                 case 12172:
