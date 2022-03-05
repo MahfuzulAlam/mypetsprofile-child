@@ -74,3 +74,4 @@ require_once(get_stylesheet_directory() . '/includes/buddyboss/class-affiliatewp
 /****************************** CUSTOM FUNCTIONS ******************************/
 
 require_once(get_stylesheet_directory() . '/includes/custom-functions.php');
+require_once(get_stylesheet_directory() . '/includes/custom-hooks.php');
