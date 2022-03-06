@@ -285,3 +285,39 @@ function bb_atpp_gifting_plan($iap_order_id = 0, $user_id = 0, $plan_id = 0)
     );
     do_action('after_bb_atpp_gifting_plan', $order_info);
 }); */
+
+/* 
+function bb_atpp_cancelled_plan($iap_order_id = 0, $user_id = 0, $plan_id = 0)
+{
+    $order_id = get_order_by_iap($iap_order_id);
+    // Change order status to cancel
+    update_post_meta($order_id, '_payment_status', 'cancelled');
+
+    $order_info = [];
+
+    do_action('after_bb_atpp_cancelled_plan', $order_info);
+}
+
+function get_order_by_iap($iap_order_id)
+{
+    $args = array(
+        'meta_key'      =>      '_iap_order_id',
+        'meta_value'    =>      $iap_order_id,
+        'post_type'     =>      'atbdp_orders',
+        'fields'        =>      'ids'
+    );
+
+    $orders = new WP_Query($args);
+    e_var_dump($orders->posts);
+
+    if ($orders && count($orders->posts) > 0) {
+        return $orders->posts[0];
+    } else {
+        return false;
+    }
+}
+
+add_action('init', function () {
+    get_order_by_iap(2);
+});
+ */

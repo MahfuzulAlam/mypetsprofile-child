@@ -8,6 +8,7 @@ if (!defined('ABSPATH')) {
 
 use BuddyBossApp\InAppPurchases\IntegrationAbstract;
 use BuddyBossApp\InAppPurchases\Orders;
+use WP_Query;
 
 // Directorist Listing Integration for BuddyBossApp InAppPurchases.
 final class IAP extends IntegrationAbstract
@@ -122,22 +123,12 @@ final class IAP extends IntegrationAbstract
     public function on_order_cancelled($item_ids, $order)
     {
 
-        //$item_ids = unserialize( Orders::instance()->get_meta( $order->id, "_learndash_course_ids" ) );
-
         foreach ($item_ids as $item_identifier) {
             $split    = explode(':', $item_identifier);
-            $group_id = $split[0];
+            $plan_id = $split[0];
 
-            $readable_item_ids[] = "<a href=\"post.php?post=$group_id&action=edit\" target='_blank'>$group_id</a>";
-
-            // revoke the group access
-            ld_update_group_access($order->user_id, $group_id, true);
-            // update user group count.
-            $this->user_update_count($group_id, $order->user_id, "minus");
+            $this->bb_atpp_cancelled_plan($order->id, $order->user_id, $plan_id);
         }
-        $readable_item_ids = implode(', ', $readable_item_ids);
-
-        Orders::instance()->add_history($order->id, 'info', sprintf(__("User un-enrolled in group(s), ID(s) are : %s ", 'buddyboss-app'), $readable_item_ids));
     }
 
     /**
@@ -147,28 +138,40 @@ final class IAP extends IntegrationAbstract
      * @param        $user_id
      * @param string $action
      */
-    public function user_update_count($group_id, $user_id, $action = "plus")
+    public function bb_atpp_cancelled_plan($iap_order_id = 0, $user_id = 0, $plan_id = 0)
     {
+        $order_id = $this->get_order_by_iap($iap_order_id);
+        // Change order status to cancel
+        update_post_meta($order_id, '_payment_status', 'cancelled');
 
-        $groups = get_user_meta($user_id, '_learndash_inapp_purchase_enrolled_group_access_counter', true);
+        $order_info = array(
+            'user_id' => $user_id,
+            'order_id' => $order_id,
+            'plan_id' => $plan_id,
+            'iap_order_id' => $iap_order_id,
+            'ref_type' => 'sale',
+            'price' => 99
+        );
 
-        if (!empty($groups)) {
-            $groups = maybe_unserialize($groups);
+        do_action('after_bb_atpp_cancelled_plan', $order_info);
+    }
+
+    public function get_order_by_iap($iap_order_id)
+    {
+        $args = array(
+            'meta_key'      =>      '_iap_order_id',
+            'meta_value'    =>      $iap_order_id,
+            'post_type'     =>      'atbdp_orders',
+            'fields'        =>      'ids'
+        );
+
+        $orders = new WP_Query($args);
+
+        if ($orders && count($orders->posts) > 0) {
+            return $orders->posts[0];
         } else {
-            $groups = array();
+            return false;
         }
-
-        if (isset($groups[$group_id])) {
-            if ($action == "plus") {
-                $groups[$group_id] += 1;
-            } else {
-                $groups[$group_id] -= 1;
-            }
-        } else {
-            $groups[$group_id] = ($action == "plus") ? 1 : 0;
-        }
-
-        update_user_meta($user_id, '_learndash_inapp_purchase_enrolled_group_access_counter', $groups);
     }
 
     function iap_linking_options($results)
