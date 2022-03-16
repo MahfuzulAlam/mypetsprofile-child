@@ -321,3 +321,12 @@ add_action('init', function () {
     get_order_by_iap(2);
 });
  */
+
+/* add_action('init', function () {
+    //bp_groups_set_group_type(84, array("cruise-ships-pet-friendly574"), false);
+    $bb_group_type = get_page_by_title('Cruise Ships (Pet-friendly)', OBJECT, 'bp-group-type');
+    if (!is_wp_error($bb_group_type)) {
+        echo $bb_group_type_key = get_post_meta($bb_group_type->ID, '_bp_group_type_key', true);
+        bp_groups_set_group_type(82, array($bb_group_type_key), false);
+    }
+}); */
