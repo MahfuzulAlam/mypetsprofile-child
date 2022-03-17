@@ -66,6 +66,15 @@ function mpp_custom_google_map_scripts()
 }
 add_action('wp_enqueue_scripts', 'mpp_custom_google_map_scripts');
 
+/**************************** CUSTOM ADMIN ENQUEUES ****************************/
+
+function mpp_custom_admin_enqueue_scripts()
+{
+	wp_enqueue_style('custom-css', get_stylesheet_directory_uri() . '/assets/admin/css/custom.css');
+	wp_enqueue_script('bbd-custom-google', get_stylesheet_directory_uri() . '/assets/admin/js/custom.js', array('jquery'));
+}
+add_action('admin_enqueue_scripts', 'mpp_custom_admin_enqueue_scripts');
+
 /******************************** INCLUDE FILES *******************************/
 
 require_once(get_stylesheet_directory() . '/includes/buddyboss/class-group.php');

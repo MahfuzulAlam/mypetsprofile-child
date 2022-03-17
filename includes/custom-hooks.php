@@ -16,6 +16,10 @@ class MPP_Child_Hooks
         add_filter('bp_get_group_avatar', array($this, 'bp_get_group_avatar'));
         // Default Group Avatar for App
         add_filter('bp_rest_groups_prepare_value', array($this, 'bp_rest_groups_prepare_value'), 10, 3);
+        // Add Custom Field on Category Form
+        add_action(ATBDP_CATEGORY . '_edit_form_fields', array($this, 'edit_category_icon_field'), 10, 2);
+        // Update App Image Meta
+        add_action('edited_' . ATBDP_CATEGORY, array($this, 'update_category_app_image'), 10, 2);
     }
 
     // Change the pricing plan url for mobile
@@ -133,7 +137,7 @@ class MPP_Child_Hooks
         $custom_avatar = get_stylesheet_directory_uri() . '/assets/img/default-group.png';
         $directorist_category = groups_get_groupmeta($item->id, 'directorist_category', true);
         if ($directorist_category) {
-            $category_image = get_term_meta($directorist_category,  'image', true);
+            $category_image = get_term_meta($directorist_category,  'app_image', true);
             if ($category_image) {
                 $custom_avatar = wp_get_attachment_image_url($category_image);
             }
@@ -142,6 +146,44 @@ class MPP_Child_Hooks
         $response->data['avatar_urls']['full'] = $custom_avatar;
 
         return $response;
+    }
+
+    // Edit Custom Category Fields
+    function edit_category_icon_field($term, $taxonomy)
+    {
+        $image_id = get_term_meta($term->term_id, 'app_image', true);
+        $image_src = ($image_id) ? wp_get_attachment_url((int)$image_id) : '';
+?>
+        <tr class="form-field term-group-wrap">
+            <th scope="row">
+                <label for="atbdp-categories-app-image-id"><?php _e('App Image', 'directorist'); ?></label>
+            </th>
+            <td>
+                <input type="hidden" id="atbdp-categories-app-image-id" name="app_image" value="<?php echo $image_id; ?>" />
+                <div id="atbdp-categories-app-image-wrapper">
+                    <?php
+                    if ($image_src) : ?>
+                        <img src="<?php echo $image_src; ?>" />
+                        <a href="" class="remove_cat_app_img"><span class="fa fa-times" title="Remove it"></span></a>
+                    <?php endif; ?>
+                </div>
+                <p>
+                    <input type="button" class="button button-secondary" id="atbdp-categories-upload-app-image" value="<?php _e('Add Image', 'directorist'); ?>" />
+                </p>
+            </td>
+        </tr>
+<?php
+    }
+
+    // Save Category App Image Meta
+    public function update_category_app_image($term_id, $tt_id)
+    {
+        //UPDATED CATEGORY IMAGE
+        if (isset($_POST['app_image']) && '' !== $_POST['app_image']) {
+            update_term_meta($term_id, 'app_image', (int)$_POST['app_image']);
+        } else {
+            update_term_meta($term_id, 'app_image', '');
+        }
     }
 }
 

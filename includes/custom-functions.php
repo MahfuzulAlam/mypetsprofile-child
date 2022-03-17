@@ -153,18 +153,6 @@ function mypetsprofile_listing_get_the_thumbnail($class = '')
     return array('image_src' => $image_src, 'image_alt' => $image_alt, 'image_class' => $class);
 }
 
-// Code snippet to solve import table style
-add_action('admin_head', function () {
-?>
-    <style>
-        /* ADMIN */
-        .atbdp-importer-mapping-table-name code {
-            line-break: anywhere;
-        }
-    </style>
-<?php
-});
-
 // Add custom fields in Import
 add_action('init', function () {
     $tools = ATBDP()->tools;

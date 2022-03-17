@@ -1,0 +1,42 @@
+.atbdp-importer-mapping-table-name code {
+    line-break: anywhere;
+}
+
+#atbdp-categories-app-image-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+#atbdp-categories-app-image-wrapper img{
+    width: 150px;
+}
+
+#atbdp-categories-app-image-wrapper .remove_cat_app_img {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #c4c4c4;
+    right: -5px;
+    top: -5px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    text-decoration: none;
+    -webkit-transition: 0.2s ease;
+    transition: 0.2s ease;
+}
+
+#atbdp-categories-app-image-wrapper .remove_cat_app_img:hover {
+    background: #ff0000;
+    color: #fff;
+}
