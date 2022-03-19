@@ -65,7 +65,9 @@ class MPP_Child_Hooks
         if (function_exists('groups_create_group')) {
             $bb_group_id = groups_create_group($bb_group_args);
             if (!is_wp_error($bb_group_id) && $bb_group_id) {
+                // Connect Groups and Directorist Listings with each other
                 update_post_meta($post_id, '_bb_group_id', $bb_group_id);
+                $this->connect_with_directorist_listing($post_id, $bb_group_id);
                 // Update BB Group Type like listing Category
 
                 $category_term = isset($tax_inputs['category']) ? $tax_inputs['category'] : '';
@@ -79,6 +81,9 @@ class MPP_Child_Hooks
             }
         }
         // Create BuddyBoss Group Ends
+
+        // Update post status to publish
+        wp_update_post(array('ID' => $post_id, 'post_status' => 'publish'));
     }
 
     // Set BB Group type from Directorist Category
@@ -102,6 +107,16 @@ class MPP_Child_Hooks
             if (!is_wp_error($category_obj)) {
                 groups_update_groupmeta($group_id, 'directorist_category', $category_obj->term_id);
             }
+        }
+    }
+
+    // Create Connection with Directorist Listings
+
+    public function connect_with_directorist_listing($listing_id = 0, $group_id = 0)
+    {
+        if ($listing_id !== 0 && $group_id !== 0) {
+            groups_update_groupmeta($group_id, 'directorist_listings_enabled', 1);
+            groups_update_groupmeta($group_id, 'directorist_listings_ids', array($listing_id));
         }
     }
 
