@@ -84,3 +84,4 @@ require_once(get_stylesheet_directory() . '/includes/buddyboss/class-affiliatewp
 
 require_once(get_stylesheet_directory() . '/includes/custom-functions.php');
 require_once(get_stylesheet_directory() . '/includes/custom-hooks.php');
+require_once(get_stylesheet_directory() . '/includes/custom-shortcodes.php');
