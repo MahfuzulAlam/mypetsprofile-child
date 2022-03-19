@@ -11,7 +11,7 @@ class MPP_Child_Hooks
         // Change the pricing plan url for mobile
         add_filter('atbdp_pricing_plan_to_checkout_url', array($this, 'atbdp_pricing_plan_to_checkout_url'), 10, 2);
         // Custom import hooks
-        add_action('directorist_after_import_listing', array($this, 'directorist_after_import_listing'), 10, 3);
+        add_action('directorist_listing_imported', array($this, 'directorist_after_import_listing'), 10, 3);
         // Default Group Avatar For Web
         add_filter('bp_get_group_avatar', array($this, 'bp_get_group_avatar'));
         // Default Group Avatar for App
