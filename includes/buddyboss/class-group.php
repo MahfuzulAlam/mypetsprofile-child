@@ -16,9 +16,11 @@ class BuddyBoss_Group_Custom
         add_action('atbdp_after_created_listing', array($this, 'buddyboss_group_on_directorist_listing_creation'));
         // Update a group on update a listing with listing details
         add_action('atbdp_listing_updated', array($this, 'buddyboss_group_on_directorist_listing_creation'));
+        // Custom import hooks
+        add_action('directorist_listing_imported', array($this, 'buddyboss_create_group_after_import_listing'), 10, 2);
     }
 
-    public static function buddyboss_group_on_directorist_listing_creation($listing_id = 0)
+    public function buddyboss_group_on_directorist_listing_creation($listing_id = 0)
     {
         if ($listing_id) {
 
@@ -40,25 +42,88 @@ class BuddyBoss_Group_Custom
             if (function_exists('groups_create_group')) {
                 $group_id = groups_create_group($args);
                 if (!is_wp_error($group_id) && $group_id) {
-                    self::save_categpry_name_as_group_type($_POST, $group_id);
-                    update_post_meta($listing_id, '_bb_group_id', $group_id);
+                    $this->connect_with_directorist_listing($listing_id, $group_id);
+                    $this->save_category_name_as_group_type($_POST, $group_id);
                 }
             }
-
         }
     }
-    
-    public function save_categpry_name_as_group_type($post = array(), $group_id = 0)
+
+    public function save_category_name_as_group_type($post = array(), $group_id = 0)
     {
         $categories = isset($post['tax_input']['at_biz_dir-category']) ? $post['tax_input']['at_biz_dir-category'] : array();
         if ($categories && count($categories) > 0) $category = $categories[0];
         if (!empty($category)) {
             $category_title = get_term($category, ATBDP_CATEGORY)->name;
-            $result = bp_groups_set_group_type($group_id, array($category_title), false);
-            file_put_contents(dirname(__FILE__) . '/log.json',  json_encode(array($result, 'here')));
+            $this->set_bb_group_type_from_directorist_category($category_title, $group_id);
         }
     }
 
+    //Custom Import Hook
+    public function buddyboss_create_group_after_import_listing($post_id, $post)
+    {
+        // Create BuddyBoss Group Starts
+        $bb_group_args = array(
+            'name'          => get_the_title($post_id),
+            'creator_id'    => get_current_user_id(),
+            'description'   => get_post_meta($post_id, '_excerpt', true),
+            'enable_forum'  => true,
+            'status'        => 'public'
+        );
+        if (function_exists('groups_create_group')) {
+            $bb_group_id = groups_create_group($bb_group_args);
+            if (!is_wp_error($bb_group_id) && $bb_group_id) {
+
+                // Connect Groups and Directorist Listings with each other
+                $this->connect_with_directorist_listing($post_id, $bb_group_id);
+
+                // Update BB Group Type like listing Category
+                $tax_inputs    = isset($_POST['tax_input']) ? atbdp_sanitize_array($_POST['tax_input']) : array();
+                $category_term = isset($tax_inputs['category']) ? $tax_inputs['category'] : '';
+                $final_category = isset($post[$category_term]) ? $post[$category_term] : '';
+
+                if (!empty($final_category)) {
+                    $this->set_bb_group_type_from_directorist_category($final_category, $bb_group_id);
+                }
+                // Update BB Group Type like listing Category
+            }
+        }
+        // Create BuddyBoss Group Ends
+    }
+
+    // Set BB Group type from Directorist Category
+    public function set_bb_group_type_from_directorist_category($category = "", $bb_group_id = 0)
+    {
+        if (!empty($category) && !empty($bb_group_id)) {
+            $bb_group_type = get_page_by_title($category, OBJECT, 'bp-group-type');
+            if (!is_wp_error($bb_group_type)) {
+                $bb_group_type_key = get_post_meta($bb_group_type->ID, '_bp_group_type_key', true);
+                bp_groups_set_group_type($bb_group_id, array($bb_group_type_key), false);
+                $this->set_category_id_as_bb_group_meta($category, $bb_group_id);
+            }
+        }
+    }
+
+    // Set category as BB Group Meta
+    public function set_category_id_as_bb_group_meta($category = "", $group_id = 0)
+    {
+        if (!empty($category) && $group_id !== 0) {
+            $category_obj = get_term_by('name', $category, ATBDP_CATEGORY);
+            if (!is_wp_error($category_obj)) {
+                groups_update_groupmeta($group_id, 'directorist_category', $category_obj->term_id);
+            }
+        }
+    }
+
+    // Create Connection with Directorist Listings
+    public function connect_with_directorist_listing($listing_id = 0, $group_id = 0)
+    {
+        if ($listing_id !== 0 && $group_id !== 0) {
+            update_post_meta($listing_id, '_bb_group_id', $group_id);
+            groups_update_groupmeta($group_id, 'directorist_listings_enabled', 1);
+            groups_update_groupmeta($group_id, 'directorist_listings_ids', array($listing_id));
+        }
+    }
 }
 
 new BuddyBoss_Group_Custom;

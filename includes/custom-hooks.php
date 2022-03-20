@@ -11,7 +11,7 @@ class MPP_Child_Hooks
         // Change the pricing plan url for mobile
         add_filter('atbdp_pricing_plan_to_checkout_url', array($this, 'atbdp_pricing_plan_to_checkout_url'), 10, 2);
         // Custom import hooks
-        add_action('directorist_listing_imported', array($this, 'directorist_after_import_listing'), 10, 3);
+        add_action('directorist_listing_imported', array($this, 'directorist_after_import_listing'), 10, 2);
         // Default Group Avatar For Web
         add_filter('bp_get_group_avatar', array($this, 'bp_get_group_avatar'));
         // Default Group Avatar for App
@@ -46,78 +46,16 @@ class MPP_Child_Hooks
         return $url;
     }
 
-    //Custom Import Hook
-    public function directorist_after_import_listing($post_id, $post, $tax_inputs)
+    // Custom Listing Import Hook
+    public function directorist_after_import_listing($post_id, $post)
     {
+        // Assign Pricing Plan
         update_post_meta($post_id, '_fm_plans_by_admin', 1);
         update_post_meta($post_id, '_fm_plans', 4337);
         update_post_meta($post_id, '_never_expire', 1);
 
-        // Create BuddyBoss Group Starts
-
-        $bb_group_args = array(
-            'name'          => get_the_title($post_id),
-            'creator_id'    => get_current_user_id(),
-            'description'   => get_post_meta($post_id, '_excerpt', true),
-            'enable_forum'  => true,
-            'status'        => 'public'
-        );
-        if (function_exists('groups_create_group')) {
-            $bb_group_id = groups_create_group($bb_group_args);
-            if (!is_wp_error($bb_group_id) && $bb_group_id) {
-                // Connect Groups and Directorist Listings with each other
-                update_post_meta($post_id, '_bb_group_id', $bb_group_id);
-                $this->connect_with_directorist_listing($post_id, $bb_group_id);
-                // Update BB Group Type like listing Category
-
-                $category_term = isset($tax_inputs['category']) ? $tax_inputs['category'] : '';
-                $final_category = isset($post[$category_term]) ? $post[$category_term] : '';
-
-                if (!empty($final_category)) {
-                    $this->set_bb_group_type_from_directorist_category($final_category, $bb_group_id);
-                }
-
-                // Update BB Group Type like listing Category
-            }
-        }
-        // Create BuddyBoss Group Ends
-
         // Update post status to publish
         wp_update_post(array('ID' => $post_id, 'post_status' => 'publish'));
-    }
-
-    // Set BB Group type from Directorist Category
-    public function set_bb_group_type_from_directorist_category($category = "", $bb_group_id = 0)
-    {
-        if (!empty($category) && !empty($bb_group_id)) {
-            $bb_group_type = get_page_by_title($category, OBJECT, 'bp-group-type');
-            if (!is_wp_error($bb_group_type)) {
-                $bb_group_type_key = get_post_meta($bb_group_type->ID, '_bp_group_type_key', true);
-                bp_groups_set_group_type($bb_group_id, array($bb_group_type_key), false);
-                $this->set_category_id_as_bb_group_meta($category, $bb_group_id);
-            }
-        }
-    }
-
-    // Set category as BB Group Meta
-    public function set_category_id_as_bb_group_meta($category = "", $group_id = 0)
-    {
-        if (!empty($category) && $group_id !== 0) {
-            $category_obj = get_term_by('name', $category, ATBDP_CATEGORY);
-            if (!is_wp_error($category_obj)) {
-                groups_update_groupmeta($group_id, 'directorist_category', $category_obj->term_id);
-            }
-        }
-    }
-
-    // Create Connection with Directorist Listings
-
-    public function connect_with_directorist_listing($listing_id = 0, $group_id = 0)
-    {
-        if ($listing_id !== 0 && $group_id !== 0) {
-            groups_update_groupmeta($group_id, 'directorist_listings_enabled', 1);
-            groups_update_groupmeta($group_id, 'directorist_listings_ids', array($listing_id));
-        }
     }
 
     // Default Group Avatar For Web
@@ -147,7 +85,7 @@ class MPP_Child_Hooks
     }
 
     // Default Group Avatar for App
-    function bp_rest_groups_prepare_value($response, $request, $item)
+    public function bp_rest_groups_prepare_value($response, $request, $item)
     {
         $custom_avatar = get_stylesheet_directory_uri() . '/assets/img/default-group.png';
         $directorist_category = groups_get_groupmeta($item->id, 'directorist_category', true);
@@ -164,7 +102,7 @@ class MPP_Child_Hooks
     }
 
     // Edit Custom Category Fields
-    function edit_category_icon_field($term, $taxonomy)
+    public function edit_category_icon_field($term, $taxonomy)
     {
         $image_id = get_term_meta($term->term_id, 'app_image', true);
         $image_src = ($image_id) ? wp_get_attachment_url((int)$image_id) : '';
