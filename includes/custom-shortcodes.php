@@ -43,12 +43,17 @@ class MPP_Child_Shortcode
         if ($affiliate_id) :
             $msg = "Please click on this link to buy the Affiliate plan - https://communityportal.mypetsprofile.com/?ref=" . $affiliate_id;
             $encoded_sms = rawurlencode($msg);
-            echo '<a class="button" href="sms://?&amp;body=' . $encoded_sms . '">Send Refferan link through SMS</a>';
+            if (strpos($_SERVER['HTTP_USER_AGENT'], 'iPhone') !== false) {
+                $sms_string = 'sms://?&amp;';
+            } else {
+                $sms_string = 'sms:?';
+            }
+            echo '<a class="button" href="' . $sms_string . 'body=' . $encoded_sms . '">Send Refferan link through SMS</a>';
         else :
             echo '<p>You donot have an affiliate account yet!</p>';
         endif;
 
-        e_var_dump($_SERVER['HTTP_USER_AGENT']);
+        //e_var_dump($_SERVER['HTTP_USER_AGENT']);
     }
 
     // Buddyboss Listing to Group Migration
