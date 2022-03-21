@@ -15,6 +15,8 @@ class MPP_Child_Shortcode
     {
         // Change the pricing plan url for mobile
         add_shortcode('bb-group-link-on-listing-page', array($this, 'buddyboss_group_link_on_listing_page'));
+        // Affiliate WP Link through SMS
+        add_shortcode('affiliatewp-link-through-sms', array($this, 'affiliatewp_link_through_sms'));
         // Listing to group Migration
         add_shortcode('bb-listing-to-group-migration', array($this, 'buddyboss_listing_to_group_migration'));
     }
@@ -31,6 +33,22 @@ class MPP_Child_Shortcode
                 echo '<a class="directorist-btn directorist-btn-primary" href="' . $group_link . '">' . $post->post_title . '</a>';
             }
         }
+    }
+
+    // Affiliate WP Link through SMS
+    public function affiliatewp_link_through_sms()
+    {
+
+        $affiliate_id = affwp_get_affiliate_id(get_current_user_id());
+        if ($affiliate_id) :
+            $msg = "Please click on this link to buy the Affiliate plan - https://communityportal.mypetsprofile.com/?ref=" . $affiliate_id;
+            $encoded_sms = rawurlencode($msg);
+            echo '<a class="button" href="sms://?&amp;body=' . $encoded_sms . '">Send Refferan link through SMS</a>';
+        else :
+            echo '<p>You donot have an affiliate account yet!</p>';
+        endif;
+
+        e_var_dump($_SERVER['HTTP_USER_AGENT']);
     }
 
     // Buddyboss Listing to Group Migration
