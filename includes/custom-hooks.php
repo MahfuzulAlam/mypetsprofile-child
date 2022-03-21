@@ -77,6 +77,9 @@ class MPP_Child_Hooks
                 }
             }
 
+            $custom_avatar_fetch = $this->bp_process_group_icon($groups_template->group->id);
+            $custom_avatar = !empty($custom_avatar_fetch) ? $custom_avatar_fetch : $custom_avatar;
+
             if ($bp->current_action == "")
                 return '<img class="avatar" src="' . $custom_avatar . '" alt="' . attribute_escape($groups_template->group->name) . '" width="' . BP_AVATAR_THUMB_WIDTH . '" height="' . BP_AVATAR_THUMB_HEIGHT . '" />';
             else
@@ -88,17 +91,39 @@ class MPP_Child_Hooks
     public function bp_rest_groups_prepare_value($response, $request, $item)
     {
         $custom_avatar = get_stylesheet_directory_uri() . '/assets/img/default-group.png';
-        $directorist_category = groups_get_groupmeta($item->id, 'directorist_category', true);
-        if ($directorist_category) {
-            $category_image = get_term_meta($directorist_category,  'app_image', true);
-            if ($category_image) {
-                $custom_avatar = wp_get_attachment_image_url($category_image);
-            }
-        }
+        $custom_avatar_fetch = $this->bp_process_group_icon($item->id, 'app_image');
+        $custom_avatar = !empty($custom_avatar_fetch) ? $custom_avatar_fetch : $custom_avatar;
+
         $response->data['avatar_urls']['thumb'] = $custom_avatar;
         $response->data['avatar_urls']['full'] = $custom_avatar;
 
         return $response;
+    }
+
+    // Get/Process Group Icon
+    public function bp_process_group_icon($group_id = 0, $image_type = 'image')
+    {
+        $custom_avatar = "";
+        if ($group_id == 0) return $custom_avatar;
+        $directorist_category = groups_get_groupmeta($group_id, 'directorist_category', true);
+        if (!$directorist_category || empty($directorist_category)) {
+            $group_type = bp_groups_get_group_type($group_id);
+            $group_type_obj = bp_groups_get_group_type_object($group_type);
+            if ($group_type_obj) {
+                $category_obj = get_term_by('name', $group_type_obj->labels['name'], ATBDP_CATEGORY);
+                if (!is_wp_error($category_obj)) {
+                    $directorist_category = $category_obj->term_id;
+                    groups_update_groupmeta($group_id, 'directorist_category', $category_obj->term_id);
+                }
+            }
+        }
+        if ($directorist_category) {
+            $category_image = get_term_meta($directorist_category,  $image_type, true);
+            if ($category_image) {
+                $custom_avatar = wp_get_attachment_image_url($category_image);
+            }
+        }
+        return $custom_avatar;
     }
 
     // Edit Custom Category Fields

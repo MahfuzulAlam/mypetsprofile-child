@@ -1,5 +1,7 @@
 <?php
 
+use ElementorPro\Modules\Woocommerce\Widgets\Categories;
+
 /**
  * 
  * MPP Child Theme Custom Shortcodes
@@ -61,7 +63,6 @@ class MPP_Child_Shortcode
                 if ($group_exists && $group_exists['total'] > 0) {
                     foreach ($group_exists['groups'] as $group) {
                         if ($post->post_title === $group->name) {
-
                             echo $group->name . '<br>';
                             //break;
                         }
@@ -70,15 +71,29 @@ class MPP_Child_Shortcode
             endwhile;
             wp_reset_query();
         } */
-        $group_list = groups_get_groups(array('fields' => 'ids', 'per_page' => '-1'));
-        $count = 0;
+        /* $group_list = groups_get_groups(array('per_page' => '-1'));
+        $list = [];
         foreach ($group_list['groups'] as $group) {
-            $listings = groups_get_groupmeta($group, 'directorist_listings_ids', true);
+            $group_type = bp_groups_get_group_type($group->id);
+            if (!$group_type || empty($group_type)) {
+                $listing = get_page_by_title($group->name, OBJECT, 'at_biz_dir');
+                if ($listing && isset($listing->ID) && !empty($listing->ID)) {
+                    //e_var_dump($listing->post_title);
+                    $categories = get_the_terms($listing->ID, ATBDP_CATEGORY);
+                    if (!$categories) $list[$listing->ID] = $listing->post_title;
+                }
+            }
+            $listings = groups_get_groupmeta($group->id, 'directorist_listings_ids', true);
             if (!$listings || count($listings) < 1) {
-                $count++;
+                $listing = get_page_by_title($group->name, OBJECT, 'at_biz_dir');
+                if ($listing && isset($listing->ID) && !empty($listing->ID)) {
+                    update_post_meta($listing->ID, '_bb_group_id', $group->id);
+                    groups_update_groupmeta($group->id, 'directorist_listings_enabled', 1);
+                    groups_update_groupmeta($group->id, 'directorist_listings_ids', array($listing->ID));
+                }
             }
         }
-        e_var_dump($count);
+        e_var_dump($list); */
     }
 }
 
