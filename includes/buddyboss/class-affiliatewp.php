@@ -136,7 +136,6 @@ class Affiliate_Directorist_Pricting_Plan extends Affiliate_WP_Base
         if (!$this->was_referred() && empty($affiliate_id)) {
             return; // Referral not created because affiliate not referred and not a coupon.
         }
-        file_put_contents(dirname(__FILE__) . '/log-1.json', json_encode($order_id));
 
         // create draft referral.
         $referral_id = $this->insert_draft_referral(
