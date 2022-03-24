@@ -51,7 +51,7 @@ class MPP_Child_Hooks
     {
         // Assign Pricing Plan
         update_post_meta($post_id, '_fm_plans_by_admin', 1);
-        update_post_meta($post_id, '_fm_plans', 4337);
+        update_post_meta($post_id, '_fm_plans', 413);
         update_post_meta($post_id, '_never_expire', 1);
 
         // Update post status to publish

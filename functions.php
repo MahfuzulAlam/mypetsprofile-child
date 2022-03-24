@@ -78,7 +78,14 @@ add_action('admin_enqueue_scripts', 'mpp_custom_admin_enqueue_scripts');
 /******************************** INCLUDE FILES *******************************/
 
 require_once(get_stylesheet_directory() . '/includes/buddyboss/class-group.php');
-require_once(get_stylesheet_directory() . '/includes/buddyboss/class-affiliatewp.php');
+
+// IAP Connection to the Pricing Plan
+add_action('init', function () {
+	if (class_exists('bbapp')) {
+		require_once(get_stylesheet_directory() . '/includes/buddyboss/class-purchase.php');
+		BuddyBossApp\Custom\IAP::instance();
+	}
+});
 
 /****************************** CUSTOM FUNCTIONS ******************************/
 

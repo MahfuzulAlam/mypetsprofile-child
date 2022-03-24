@@ -45,10 +45,10 @@ final class IAP extends IntegrationAbstract
     public function register()
     {
 
-        $this->integration_slug  = 'directorist-plan';
-        $this->integration_type  = 'directorist-plan';
-        $this->integration_label = __('Directorist Plan', 'buddyboss-app');
-        $this->item_label        = __('Directorist Plan', 'buddyboss-app');;
+        $this->integration_slug  = 'woocommerce-plan';
+        $this->integration_type  = 'woocommerce-plan';
+        $this->integration_label = __('Woocommerce Plan', 'buddyboss-app');
+        $this->item_label        = __('Woocommerce Plan', 'buddyboss-app');;
 
         // Register 3rd party plugin for iap
         bbapp_iap()->integrations[$this->integration_slug] = array(
@@ -80,7 +80,7 @@ final class IAP extends IntegrationAbstract
             $split    = explode(':', $item_identifier);
             $plan_id = $split[0];
 
-            bb_atpp_gifting_plan($order->id, $order->user_id, $plan_id);
+            $this->bb_atwc_gifting_plan($order, $plan_id);
         }
     }
 
@@ -127,41 +127,18 @@ final class IAP extends IntegrationAbstract
             $split    = explode(':', $item_identifier);
             $plan_id = $split[0];
 
-            $this->bb_atpp_cancelled_plan($order->id, $order->user_id, $plan_id);
+            $this->bb_atwc_cancelled_plan($order->id, $order->user_id, $plan_id);
         }
     }
 
-    /**
-     * Helper function to update users group counts.
-     *
-     * @param        $group_id
-     * @param        $user_id
-     * @param string $action
-     */
-    public function bb_atpp_cancelled_plan($iap_order_id = 0, $user_id = 0, $plan_id = 0)
-    {
-        $order_id = $this->get_order_by_iap($iap_order_id);
-        // Change order status to cancel
-        update_post_meta($order_id, '_payment_status', 'cancelled');
-
-        $order_info = array(
-            'user_id' => $user_id,
-            'order_id' => $order_id,
-            'plan_id' => $plan_id,
-            'iap_order_id' => $iap_order_id,
-            'ref_type' => 'sale',
-            'price' => 99
-        );
-
-        do_action('after_bb_atpp_cancelled_plan', $order_info);
-    }
+    // Helper Functions
 
     public function get_order_by_iap($iap_order_id)
     {
         $args = array(
             'meta_key'      =>      '_iap_order_id',
             'meta_value'    =>      $iap_order_id,
-            'post_type'     =>      'atbdp_orders',
+            'post_type'     =>      'shop_order',
             'fields'        =>      'ids'
         );
 
@@ -174,12 +151,90 @@ final class IAP extends IntegrationAbstract
         }
     }
 
-    function iap_linking_options($results)
+    public function iap_linking_options($results)
     {
 
-        $plans = iap_get_directorist_pricing_plans();
+        $plans = $this->iap_get_woocommerce_pricing_plans();
 
         return $plans;
+    }
+
+    public function iap_get_woocommerce_pricing_plans()
+    {
+        $plans = array();
+        $args = array(
+            'type' => 'listing_pricing_plans',
+            'limit' => -1,
+            'status' => 'publish',
+        );
+
+        // The Query
+        $woo_plans = wc_get_products($args);
+
+        if ($woo_plans && count($woo_plans) > 0) {
+            foreach ($woo_plans as $product) {
+                $plan = $product->get_data();
+                $plans[] = array(
+                    'id' => $plan['id'],
+                    'text' => $plan['name']
+                );
+            }
+        }
+        return $plans;
+    }
+
+    // Assign/Create Plan to woocommerce
+    public function bb_atwc_gifting_plan($iap_order, $plan_id = 0)
+    {
+        $iap_order_id = $iap_order->id;
+        $user_id = $iap_order->user_id;
+
+        if (!empty($user_id)) {
+
+            $address = array(
+                'first_name' => get_user_meta($user_id, 'first_name', true),
+                'last_name'  => get_user_meta($user_id, 'last_name', true),
+                'company'    => get_user_meta($user_id, 'billing_company', true),
+                'email'      => get_user_meta($user_id, 'billing_email', true) ? get_user_meta($user_id, 'billing_email', true) : $iap_order->user_email,
+                'phone'      => get_user_meta($user_id, 'billing_phone', true),
+                'address_1'  => get_user_meta($user_id, 'billing_address_1', true),
+                'address_2'  => get_user_meta($user_id, 'billing_address_2', true),
+                'city'       => get_user_meta($user_id, 'billing_city', true),
+                'state'      => get_user_meta($user_id, 'billing_state', true),
+                'postcode'   => get_user_meta($user_id, 'billing_postcode', true),
+                'country'    => get_user_meta($user_id, 'billing_country', true),
+            );
+
+            // Now we create the order
+            $order = wc_create_order();
+
+            // The add_product() function below is located in /plugins/woocommerce/includes/abstracts/abstract_wc_order.php
+            $order->add_product(get_product($plan_id), 1); // This is an existing SIMPLE product
+            $order->set_address($address, 'billing');
+
+            $order->calculate_totals();
+            $order->update_status("wc-completed", "IAP order", TRUE);
+
+            $order_id = $order->get_id();
+
+            // save required data as order post meta
+            update_post_meta($order_id, '_fm_plan_ordered', $plan_id);
+            update_post_meta($order_id, '_iap_order_id', $iap_order_id);
+            update_post_meta($order_id, '_iap_order_info', $iap_order);
+            //update_post_meta($order_id, '_order_status', 'exit');
+
+            do_action('after_bb_atwc_created_plan', $iap_order_id);
+        }
+    }
+
+    // On Cancel the plan
+    public function bb_atwc_cancelled_plan($iap_order_id = 0, $user_id = 0, $plan_id = 0)
+    {
+        $order_id = $this->get_order_by_iap($iap_order_id);
+        // Change order status to cancel
+        wp_update_post(array('ID' => $order_id, 'post_status' => 'wc-cancelled'));
+
+        do_action('after_bb_atwc_cancelled_plan', $iap_order_id);
     }
 
     function iap_integration_ids($results, $integration_ids)
@@ -217,8 +272,8 @@ final class IAP extends IntegrationAbstract
 
         foreach ($item_ids as $item_identifier) {
             $split    = explode(':', $item_identifier);
-            $group_id = $split[0];
-            if (learndash_is_user_in_group($order->user_id, $group_id)) {
+            $plan_id = $split[0];
+            if ('publish' == get_post_status($plan_id)) {
                 $has_access = true;
                 break;
             }
