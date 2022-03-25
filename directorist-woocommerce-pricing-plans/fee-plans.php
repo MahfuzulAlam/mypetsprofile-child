@@ -89,12 +89,12 @@ if ($listing_type && $term) {
             $args['meta_query'] = ($count_meta_queries > 1) ? array_merge(array('relation' => 'AND'), $meta_queries) : $meta_queries;
         }
 
-        $plans_id = [18064, 18065, 18066];
-
-        if (!empty($plans_id)) {
-            $args['post__in'] = $plans_id;
-            $args['orderby']    = 'post__in';
+        if (empty($plans_id)) {
+            $plans_id = [18064, 18065, 18066];
         }
+
+        $args['post__in'] = $plans_id;
+        $args['orderby']    = 'post__in';
 
         $atbdp_query = new WP_Query($args);
         $has_plan = $atbdp_query->have_posts();
