@@ -270,14 +270,14 @@ final class IAP extends IntegrationAbstract
     {
         $has_access = false;
 
-        foreach ($item_ids as $item_identifier) {
+        /* foreach ($item_ids as $item_identifier) {
             $split    = explode(':', $item_identifier);
             $plan_id = $split[0];
             if ('publish' == get_post_status($plan_id)) {
                 $has_access = true;
                 break;
             }
-        }
+        } */
 
         return $has_access;
     }
