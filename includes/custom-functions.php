@@ -154,3 +154,54 @@ function bbd_get_option_data()
     $options['script_debugging'] = get_directorist_option('script_debugging', DIRECTORIST_LOAD_MIN_FILES, true);
     return $options;
 }
+
+
+// Woocommerce Pricing Plan
+function directorist_wc_active_orders_without_listing($plan_id = '')
+{
+    $status = ["wc-completed"];
+    if (directoirst_wc_plan_auto_renewal($plan_id)) {
+        $plan_id = directoirst_wc_plan_auto_renewal($plan_id);
+        $subscription = true;
+        $status = ["wc-completed", "wc-processing"];
+    }
+    $args = [
+        'post_type'   => 'shop_order',
+        'post_status' => $status,
+        'numberposts' => -1,
+        'meta_query'  => [
+            'relation' => 'AND',
+            [
+                'key'     => '_fm_plan_ordered',
+                'value'   => $plan_id,
+                'compare' => '=',
+            ],
+            [
+                'key'     => '_customer_user',
+                'value'   => get_current_user_id(),
+                'compare' => '=',
+            ],
+            [
+                'relation' => 'OR',
+                [
+                    'key'     => '_listing_id',
+                    'value'   => '0',
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => '_listing_id',
+                    'value'   => '',
+                    'compare' => '=',
+                ],
+            ],
+        ],
+    ];
+
+    $active_plan = new WP_Query($args);
+
+    if ($active_plan->have_posts()) {
+        return true;
+    } else {
+        return false;
+    }
+}

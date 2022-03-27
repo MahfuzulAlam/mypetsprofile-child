@@ -180,7 +180,7 @@ if ($listing_type && $term) {
                     $active_plan = false;
                 }
 
-                $fresh_active_order = directorist_active_orders_without_listing($plan_id);
+                $fresh_active_order = directorist_wc_active_orders_without_listing($plan_id);
 
                 // var_dump($fresh_active_order);
                 $is_active         = false;

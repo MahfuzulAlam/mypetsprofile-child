@@ -221,6 +221,8 @@ final class IAP extends IntegrationAbstract
             update_post_meta($order_id, '_fm_plan_ordered', $plan_id);
             update_post_meta($order_id, '_iap_order_id', $iap_order_id);
             update_post_meta($order_id, '_iap_order_info', $iap_order);
+            update_post_meta($order_id, '_customer_user', $user_id);
+            update_post_meta($order_id, '_listing_id', '');
             //update_post_meta($order_id, '_order_status', 'exit');
 
             do_action('after_bb_atwc_created_plan', $iap_order_id);
