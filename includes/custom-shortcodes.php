@@ -41,7 +41,8 @@ class MPP_Child_Shortcode
 
         $affiliate_id = affwp_get_affiliate_id(get_current_user_id());
         if ($affiliate_id) :
-            $msg = "Please click on this link to buy the Affiliate plan - https://communityportal.mypetsprofile.com/?ref=" . $affiliate_id;
+            $msg = "Check out the MyPetsProfile app to find local pet-friendly businesses and meet pet-minded friends";
+            $msg .= " - https://communityportal.mypetsprofile.com/elite-affiliate-program/?ref=" . $affiliate_id;
             $encoded_sms = rawurlencode($msg);
             if (strpos($_SERVER['HTTP_USER_AGENT'], 'iPhone') !== false) {
                 $sms_string = 'sms://?&amp;';

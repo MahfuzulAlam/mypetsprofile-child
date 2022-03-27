@@ -89,6 +89,8 @@ if ($listing_type && $term) {
             $args['meta_query'] = ($count_meta_queries > 1) ? array_merge(array('relation' => 'AND'), $meta_queries) : $meta_queries;
         }
 
+        //e_var_dump($plans_id);
+
         if (empty($plans_id)) {
             $plans_id = [18064, 18065, 18066];
         }
@@ -148,6 +150,7 @@ if ($listing_type && $term) {
                     $signup_fee     = get_post_meta($linked_subscription, '_subscription_sign_up_fee', true);
                     $expire_after   = get_post_meta($linked_subscription, '_subscription_length', true);
                     $trail          = \WC_Subscriptions_Product::get_trial_length($linked_subscription);
+                    $trail_period   = \WC_Subscriptions_Product::get_trial_period($linked_subscription);
                 }
 
                 $num_regular = !empty($plan_metas['num_regular'][0]) ? esc_attr($plan_metas['num_regular'][0]) : '';
@@ -240,7 +243,7 @@ if ($listing_type && $term) {
                             </div>
                             <p class="pricing_subtitle"><?php echo ($plan_type == 'pay_per_listng') ? __('Per Listing', 'directorist-woocommerce-pricing-plans') : __('Per Package', 'directorist-woocommerce-pricing-plans') ?></p>
                             <?php if (!empty($trail)) {
-                                $day_text = $trail > 1 ? __('days', 'directorist-woocommerce-pricing-plans') : __('day', 'directorist-woocommerce-pricing-plans');
+                                $day_text = $trail_period;
                             ?>
                                 <small class="pricing_description">
                                     <?php echo esc_attr($trail) . sprintf(' ' . __('%s %s Trial', 'directorist-woocommerce-pricing-plans'), $day_text, '<strong>' . __('FREE', 'directorist-woocommerce-pricing-plans') . '</strong>'); ?>
@@ -262,156 +265,169 @@ if ($listing_type && $term) {
                             </div>
 
                             <?php
-                            if (!empty($value->post_excerpt)) {
+                            if (!empty($value->post_excerpt) && $plan_id !== 18059) {
                             ?>
                                 <p class="pricing_description"><?php echo !empty($value->post_excerpt) ? $value->post_excerpt : ''; ?></p>
                             <?php } ?>
                         </div>
                         <div class="pricing__features">
                             <ul>
-                                <?php
-                                if (!$hide_recurring) { ?>
-                                    <li>
-                                        <span class="fa fa-<?php echo !empty($recurring) ? 'check' : 'times'; ?>"> </span><?php _e('Auto renewing', 'directorist-woocommerce-pricing-plans') ?>
-                                    </li>
-                                <?php }
-                                if (($plan_type == 'pay_per_listng') && empty(apply_filters('atbdp_plan_featured_compare', $plan_metas['_dwpp_hide_listing_featured'][0]))) { ?>
-                                    <li>
-                                        <span class="fa fa-<?php echo !empty($plan_metas['is_featured_listing'][0]) ? 'check' : 'times'; ?>"> </span><?php _e('Listing as featured', 'directorist-woocommerce-pricing-plans') ?>
-                                    </li>
-                                <?php }
-                                if ($plan_type != 'pay_per_listng') { ?>
-                                    <?php if (empty($plan_metas['_dwpp_hide_listings'][0])) { ?>
-                                        <li><span class="fa fa-<?php if (($num_regular > 0) || $num_regular_unl) {
-                                                                    echo 'check';
-                                                                } else {
-                                                                    echo 'times';
-                                                                } ?>"></span><?php echo $num_regular_unl ? '<span class="atbd_color-success">' . $unl . '</span>' . __(' Regular Listings', 'directorist-woocommerce-pricing-plans') . '' : $num_regular . __(' Regular Listings', 'directorist-woocommerce-pricing-plans'); ?>
+                                <?php if ($plan_id == 18059) : ?>
+                                    <li><span class="fa fa-check"></span>All MPP Platform Access</li>
+                                    <li><span class="fa fa-check"></span>MPP Elite ID and Private Members Portal</li>
+                                    <li><span class="fa fa-check"></span>Get Today's Top Pet Funnies</li>
+                                    <li><span class="fa fa-check"></span>Get Today's Top Pet Events and Photos</li>
+                                    <li><span class="fa fa-check"></span>Win Cash and Prizes - MPP Funnies</li>
+                                    <li><span class="fa fa-check"></span>10% Commissions on all paid referrals</li>
+                                    <li><span class="fa fa-check"></span>Win Cash and Prizes - MPP Referral Contests</li>
+                                    <li><span class="fa fa-check"></span>Unlimited Access to Profiles, Groups, Listings and Forums</li>
+                                    <li><span class="fa fa-check"></span>Unlimited Access to Pet Training Portal</li>
+                                    <li><span class="fa fa-check"></span>Unlimited Messaging, SMS and Email</li>
+                                    <li><span class="fa fa-check"></span>Public or Private Pet Social Group</li>
+                                <?php else : ?>
+                                    <?php
+                                    if (!$hide_recurring) { ?>
+                                        <li>
+                                            <span class="fa fa-<?php echo !empty($recurring) ? 'check' : 'times'; ?>"> </span><?php _e('Auto renewing', 'directorist-woocommerce-pricing-plans') ?>
                                         </li>
                                     <?php }
-                                    if (empty(apply_filters('atbdp_plan_featured_compare', $plan_metas['_dwpp_hide_featured'][0]))) { ?>
-                                        <li><span class="fa fa-<?php if (($num_featured > 0) || $num_featured_unl) {
+                                    if (($plan_type == 'pay_per_listng') && empty(apply_filters('atbdp_plan_featured_compare', $plan_metas['_dwpp_hide_listing_featured'][0]))) { ?>
+                                        <li>
+                                            <span class="fa fa-<?php echo !empty($plan_metas['is_featured_listing'][0]) ? 'check' : 'times'; ?>"> </span><?php _e('Listing as featured', 'directorist-woocommerce-pricing-plans') ?>
+                                        </li>
+                                    <?php }
+                                    if ($plan_type != 'pay_per_listng') { ?>
+                                        <?php if (empty($plan_metas['_dwpp_hide_listings'][0])) { ?>
+                                            <li><span class="fa fa-<?php if (($num_regular > 0) || $num_regular_unl) {
+                                                                        echo 'check';
+                                                                    } else {
+                                                                        echo 'times';
+                                                                    } ?>"></span><?php echo $num_regular_unl ? '<span class="atbd_color-success">' . $unl . '</span>' . __(' Regular Listings', 'directorist-woocommerce-pricing-plans') . '' : $num_regular . __(' Regular Listings', 'directorist-woocommerce-pricing-plans'); ?>
+                                            </li>
+                                        <?php }
+                                        if (empty(apply_filters('atbdp_plan_featured_compare', $plan_metas['_dwpp_hide_featured'][0]))) { ?>
+                                            <li><span class="fa fa-<?php if (($num_featured > 0) || $num_featured_unl) {
+                                                                        echo 'check';
+                                                                    } else {
+                                                                        echo 'times';
+                                                                    } ?>"></span><?php echo $num_featured_unl ? '<span class="atbd_color-success">' . $unl . '</span>' . __(' Featured Listings', 'directorist-woocommerce-pricing-plans') . '' : $num_featured . __(' Featured Listings', 'directorist-woocommerce-pricing-plans'); ?>
+                                            </li>
+                                            <?php }
+                                    }
+
+                                    if ($submission_form_fields) {
+                                        foreach ($submission_form_fields as $field) {
+                                            $label       = !empty($field['label']) ? $field['label'] : '';
+                                            $field_key   = !empty($field['field_key']) ? $field['field_key'] : '';
+                                            $widget_name = !empty($field['widget_name']) ? $field['widget_name'] : '';
+
+                                            if ('tax_input[at_biz_dir-location][]'  == $field_key) {
+                                                $field_key = 'location';
+                                            }
+                                            if ('admin_category_select[]'           == $field_key) {
+                                                $field_key = 'category';
+                                            }
+                                            if ('tax_input[at_biz_dir-tags][]'      == $field_key) {
+                                                $field_key = 'tag';
+                                            }
+
+                                            //if( 'faqs' == $widget_name ) continue;
+                                            if ('booking' == $widget_name) continue;
+                                            if ('listing_type' == $widget_name) continue;
+
+                                            if ('pricing' == $widget_name) {
+                                                $field_key  = 'pricing';
+                                            }
+
+                                            $field_allow    = get_post_meta($plan_id, '_' . $field_key, true);
+                                            $hide           = get_post_meta($plan_id, '_hide_' . $field_key, true);
+                                            $max            = get_post_meta($plan_id, '_max_' . $field_key, true);
+                                            $unlimited      = get_post_meta($plan_id, '_unlimited_' . $field_key, true);
+
+                                            if (!$hide) { ?>
+                                                <li>
+                                                    <span class="fa fa-<?php echo !empty($field_allow) ? 'check' : 'times'; ?>"> </span>
+
+                                                    <?php
+                                                    echo esc_attr($label);
+                                                    if (!empty($max) || !empty($unlimited)) {  ?>
+                                                        <small><?php
+                                                                if (!empty($unlimited)) {
+                                                                    echo __('(Unlimited ', 'directorist-woocommerce-pricing-plans') . $label . ')';
+                                                                } else {
+                                                                    echo __('(Maximum of ', 'directorist-woocommerce-pricing-plans') . $max . ')';
+                                                                } ?>
+                                                        </small>
+                                                    <?php } ?>
+
+                                                </li>
+                                        <?php
+                                            }
+                                        }
+                                    }
+
+                                    if (empty(apply_filters('atbdp_plan_contact_owner_compare', $plan_metas['_dwpp_hide_cl_owner'][0]))) {
+                                        ?>
+                                        <li>
+                                            <span class="fa fa-<?php echo !empty($cf_owner) ? 'check' : 'times'; ?>"> </span><?php _e('Contact Owner', 'directorist-woocommerce-pricing-plans') ?>
+                                        </li>
+                                    <?php }
+                                    if (empty(apply_filters('atbdp_plan_review_compare', $plan_metas['_dwpp_hide_customer_review'][0]))) {
+                                    ?>
+                                        <li>
+                                            <span class="fa fa-<?php echo !empty($fm_cs_review) ? 'check' : 'times'; ?>"> </span><?php _e('Allow Customer Review', 'directorist-woocommerce-pricing-plans') ?>
+                                        </li>
+                                    <?php }
+                                    if (empty($plan_metas['_dwpp_hide_category'][0])) {
+                                        $is_cat = selected_plan_meta($plan_id, 'exclude_cat');
+                                    ?>
+                                        <li><span class="fa fa-<?php if (empty($is_cat)) {
                                                                     echo 'check';
                                                                 } else {
                                                                     echo 'times';
-                                                                } ?>"></span><?php echo $num_featured_unl ? '<span class="atbd_color-success">' . $unl . '</span>' . __(' Featured Listings', 'directorist-woocommerce-pricing-plans') . '' : $num_featured . __(' Featured Listings', 'directorist-woocommerce-pricing-plans'); ?>
+                                                                } ?>"> </span><?php _e('All Categories', 'directorist-woocommerce-pricing-plans') ?>
                                         </li>
-                                        <?php }
-                                }
-
-                                if ($submission_form_fields) {
-                                    foreach ($submission_form_fields as $field) {
-                                        $label       = !empty($field['label']) ? $field['label'] : '';
-                                        $field_key   = !empty($field['field_key']) ? $field['field_key'] : '';
-                                        $widget_name = !empty($field['widget_name']) ? $field['widget_name'] : '';
-
-                                        if ('tax_input[at_biz_dir-location][]'  == $field_key) {
-                                            $field_key = 'location';
-                                        }
-                                        if ('admin_category_select[]'           == $field_key) {
-                                            $field_key = 'category';
-                                        }
-                                        if ('tax_input[at_biz_dir-tags][]'      == $field_key) {
-                                            $field_key = 'tag';
-                                        }
-
-                                        //if( 'faqs' == $widget_name ) continue;
-                                        if ('booking' == $widget_name) continue;
-                                        if ('listing_type' == $widget_name) continue;
-
-                                        if ('pricing' == $widget_name) {
-                                            $field_key  = 'pricing';
-                                        }
-
-                                        $field_allow    = get_post_meta($plan_id, '_' . $field_key, true);
-                                        $hide           = get_post_meta($plan_id, '_hide_' . $field_key, true);
-                                        $max            = get_post_meta($plan_id, '_max_' . $field_key, true);
-                                        $unlimited      = get_post_meta($plan_id, '_unlimited_' . $field_key, true);
-
-                                        if (!$hide) { ?>
-                                            <li>
-                                                <span class="fa fa-<?php echo !empty($field_allow) ? 'check' : 'times'; ?>"> </span>
-
-                                                <?php
-                                                echo esc_attr($label);
-                                                if (!empty($max) || !empty($unlimited)) {  ?>
-                                                    <small><?php
-                                                            if (!empty($unlimited)) {
-                                                                echo __('(Unlimited ', 'directorist-woocommerce-pricing-plans') . $label . ')';
-                                                            } else {
-                                                                echo __('(Maximum of ', 'directorist-woocommerce-pricing-plans') . $max . ')';
-                                                            } ?>
-                                                    </small>
-                                                <?php } ?>
-
-                                            </li>
-                                    <?php
-                                        }
-                                    }
-                                }
-
-                                if (empty(apply_filters('atbdp_plan_contact_owner_compare', $plan_metas['_dwpp_hide_cl_owner'][0]))) {
+                                    <?php }
+                                    if (empty(apply_filters('atbdp_plan_claim_compare', $hide_claim))) {
                                     ?>
-                                    <li>
-                                        <span class="fa fa-<?php echo !empty($cf_owner) ? 'check' : 'times'; ?>"> </span><?php _e('Contact Owner', 'directorist-woocommerce-pricing-plans') ?>
-                                    </li>
-                                <?php }
-                                if (empty(apply_filters('atbdp_plan_review_compare', $plan_metas['_dwpp_hide_customer_review'][0]))) {
-                                ?>
-                                    <li>
-                                        <span class="fa fa-<?php echo !empty($fm_cs_review) ? 'check' : 'times'; ?>"> </span><?php _e('Allow Customer Review', 'directorist-woocommerce-pricing-plans') ?>
-                                    </li>
-                                <?php }
-                                if (empty($plan_metas['_dwpp_hide_category'][0])) {
-                                    $is_cat = selected_plan_meta($plan_id, 'exclude_cat');
-                                ?>
-                                    <li><span class="fa fa-<?php if (empty($is_cat)) {
-                                                                echo 'check';
-                                                            } else {
-                                                                echo 'times';
-                                                            } ?>"> </span><?php _e('All Categories', 'directorist-woocommerce-pricing-plans') ?>
-                                    </li>
-                                <?php }
-                                if (empty(apply_filters('atbdp_plan_claim_compare', $hide_claim))) {
-                                ?>
-                                    <li>
-                                        <span class="fa fa-<?php echo !empty($fm_claim) ? 'check' : 'times'; ?>"> </span><?php _e('Claim Badge Included', 'directorist-woocommerce-pricing-plans') ?>
-                                    </li>
-                                <?php }
+                                        <li>
+                                            <span class="fa fa-<?php echo !empty($fm_claim) ? 'check' : 'times'; ?>"> </span><?php _e('Claim Badge Included', 'directorist-woocommerce-pricing-plans') ?>
+                                        </li>
+                                    <?php }
 
-                                // Booking
-                                if (empty(apply_filters('atbdp_plan_booking_compare', $hide_booking))) { ?>
-                                    <li>
-                                        <span class="fa fa-<?php echo !empty($fm_booking) ? 'check' : 'times'; ?>"> </span><?php _e('Booking Included', 'directorist-woocommerce-pricing-plans') ?>
-                                    </li>
-                                <?php }
+                                    // Booking
+                                    if (empty(apply_filters('atbdp_plan_booking_compare', $hide_booking))) { ?>
+                                        <li>
+                                            <span class="fa fa-<?php echo !empty($fm_booking) ? 'check' : 'times'; ?>"> </span><?php _e('Booking Included', 'directorist-woocommerce-pricing-plans') ?>
+                                        </li>
+                                    <?php }
 
-                                // Live Chat
-                                if (empty(apply_filters('atbdp_plan_live_chat_compare', $hide_live_chat))) { ?>
-                                    <li>
-                                        <span class="fa fa-<?php echo !empty($fm_live_chat) ? 'check' : 'times'; ?>"> </span><?php _e('Live Chat Included', 'directorist-woocommerce-pricing-plans') ?>
-                                    </li>
-                                <?php }
+                                    // Live Chat
+                                    if (empty(apply_filters('atbdp_plan_live_chat_compare', $hide_live_chat))) { ?>
+                                        <li>
+                                            <span class="fa fa-<?php echo !empty($fm_live_chat) ? 'check' : 'times'; ?>"> </span><?php _e('Live Chat Included', 'directorist-woocommerce-pricing-plans') ?>
+                                        </li>
+                                    <?php }
 
-                                // Mark as sold
-                                if (empty(apply_filters('atbdp_plan_mark_as_sold_compare', $hide_mark_as_sold))) { ?>
-                                    <li>
-                                        <span class="fa fa-<?php echo !empty($fm_mark_as_sold) ? 'check' : 'times'; ?>"> </span><?php _e('Mark as Sold Included', 'directorist-woocommerce-pricing-plans') ?>
-                                    </li>
-                                <?php }
+                                    // Mark as sold
+                                    if (empty(apply_filters('atbdp_plan_mark_as_sold_compare', $hide_mark_as_sold))) { ?>
+                                        <li>
+                                            <span class="fa fa-<?php echo !empty($fm_mark_as_sold) ? 'check' : 'times'; ?>"> </span><?php _e('Mark as Sold Included', 'directorist-woocommerce-pricing-plans') ?>
+                                        </li>
+                                    <?php }
 
-                                /*
+                                    /*
                                  * @since 1.0.0
                                  * Fires in plan compare page
                                  * hook for future dev
                                  */
-                                do_action('atpp_after_pricing_plans_compare_fields', $value->ID);
-                                $used_free_plan = true;
-                                if (package_or_PPL($value->ID) === 'pay_per_listng') {
-                                    $used_free_plan = dwpp_get_used_free_plan($value->ID, get_current_user_id());
-                                }
-                                ?>
-
+                                    do_action('atpp_after_pricing_plans_compare_fields', $value->ID);
+                                    $used_free_plan = true;
+                                    if (package_or_PPL($value->ID) === 'pay_per_listng') {
+                                        $used_free_plan = dwpp_get_used_free_plan($value->ID, get_current_user_id());
+                                    }
+                                    ?>
+                                <?php endif; ?>
                             </ul>
                             <div class="directorist-pricing__action">
                                 <?php
