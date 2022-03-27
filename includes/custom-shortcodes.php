@@ -49,7 +49,8 @@ class MPP_Child_Shortcode
             } else {
                 $sms_string = 'sms:?';
             }
-            echo '<a class="button" href="' . $sms_string . 'body=' . $encoded_sms . '">Send Refferan link through SMS</a>';
+            echo '<a class="button" href="' . $sms_string . 'body=' . $encoded_sms . '">Send Referral link through SMS</a>';
+            echo '<a class="button" href="https://wa.me/?text=' . $encoded_sms . '">Send Referral link through WhatsApp</a>';
         else :
             echo '<p>You donot have an affiliate account yet!</p>';
         endif;
