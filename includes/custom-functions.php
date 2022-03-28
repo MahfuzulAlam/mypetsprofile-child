@@ -205,3 +205,27 @@ function directorist_wc_active_orders_without_listing($plan_id = '')
         return false;
     }
 }
+
+
+// NOTE: Of course change 3 to the appropriate user ID
+
+/*
+add_action('woocommerce_payment_complete', 'wpp_assign_role_after_payment_complete');
+function wpp_assign_role_after_payment_complete($order_id)
+{
+    if ($order_id == 422) :
+        $order = wc_get_order($order_id);
+        $user = $order->get_user();
+        if ($user) {
+            $u = new WP_User($user->ID);
+
+            // Remove role
+            //$u->remove_role('subscriber');
+
+            // Add role
+            $u->add_role('editor');
+        }
+    endif;
+}
+
+*/

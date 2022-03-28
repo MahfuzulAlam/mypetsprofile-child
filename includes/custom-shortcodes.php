@@ -38,7 +38,7 @@ class MPP_Child_Shortcode
     // Affiliate WP Link through SMS
     public function affiliatewp_link_through_sms()
     {
-
+        ob_start();
         $affiliate_id = affwp_get_affiliate_id(get_current_user_id());
         if ($affiliate_id) :
             $msg = "Check out the MyPetsProfile app to find local pet-friendly businesses and meet pet-minded friends";
@@ -49,13 +49,17 @@ class MPP_Child_Shortcode
             } else {
                 $sms_string = 'sms:?';
             }
-            echo '<a class="button" href="' . $sms_string . 'body=' . $encoded_sms . '">Send Referral link through SMS</a>';
-            echo '<a class="button" href="https://wa.me/?text=' . $encoded_sms . '">Send Referral link through WhatsApp</a>';
+?>
+            <a class="button" href="<?php echo $sms_string; ?>body=<?php echo $encoded_sms; ?>">Send Referral link through SMS</a>
+            <a class="button" href="https://wa.me/?text=<?php echo $encoded_sms; ?>">Send Referral link through WhatsApp</a>
+            <a class="button" href="mailto:abc@example.com?subject=MyPetsProfile&body=<?php echo $encoded_sms; ?>">Send Email</a>
+        <?php
         else :
-            echo '<p>You donot have an affiliate account yet!</p>';
+        ?>
+            <p>You donot have an affiliate account yet!</p>
+<?php
         endif;
-
-        //e_var_dump($_SERVER['HTTP_USER_AGENT']);
+        return ob_get_clean();
     }
 
     // Buddyboss Listing to Group Migration
