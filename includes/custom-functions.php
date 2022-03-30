@@ -209,23 +209,59 @@ function directorist_wc_active_orders_without_listing($plan_id = '')
 
 // NOTE: Of course change 3 to the appropriate user ID
 
+
+//add_action('woocommerce_payment_complete', 'wpp_assign_role_after_payment_complete');
 /*
-add_action('woocommerce_payment_complete', 'wpp_assign_role_after_payment_complete');
 function wpp_assign_role_after_payment_complete($order_id)
 {
-    if ($order_id == 422) :
-        $order = wc_get_order($order_id);
-        $user = $order->get_user();
-        if ($user) {
-            $u = new WP_User($user->ID);
 
-            // Remove role
-            //$u->remove_role('subscriber');
+    $order = wc_get_order($order_id);
+    foreach ($order->get_items() as $item_key => $item) :
+        $item_id = $item->get_product_id();
 
-            // Add role
-            $u->add_role('editor');
-        }
-    endif;
+        if (in_array($item_id, array(422))) :
+
+            $user = $order->get_user();
+            if ($user) {
+                $u = new WP_User($user->ID);
+
+                // Remove role
+                //$u->remove_role('subscriber');
+
+                // Add role
+                $u->add_role('editor');
+            }
+
+        endif;
+
+    endforeach;
 }
 
+add_action('woocommerce_order_status_changed', 'user_role_change_on_order_complete', 10, 4);
+
+function user_role_change_on_order_complete($order_id, $from, $to, $order)
+{
+    if ($to == 'completed') :
+        $order = wc_get_order($order_id);
+        foreach ($order->get_items() as $item) :
+            $item_id = $item->get_product_id();
+
+            if (in_array($item_id, array(422))) : // Insert Pricing Plan IDs here
+
+                $user = $order->get_user();
+                if ($user) {
+                    $u = new WP_User($user->ID);
+
+                    // Remove role
+                    //$u->remove_role('subscriber');
+
+                    // Add role
+                    $u->add_role('editor');
+                }
+
+            endif;
+
+        endforeach;
+    endif;
+}
 */

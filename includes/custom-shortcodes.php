@@ -41,8 +41,8 @@ class MPP_Child_Shortcode
         ob_start();
         $affiliate_id = affwp_get_affiliate_id(get_current_user_id());
         if ($affiliate_id) :
-            $msg = "Check out the MyPetsProfile app to find local pet-friendly businesses and meet pet-minded friends";
-            $msg .= " - https://communityportal.mypetsprofile.com/elite-affiliate-program/?ref=" . $affiliate_id;
+            $msg = "Check out the MyPetsProfile™ app to find local pet-friendly businesses and meet pet-minded friends";
+            $msg .= " - https://communityportal.mypetsprofile.com/elite-affiliate-program/?ep=" . $affiliate_id;
             $encoded_sms = rawurlencode($msg);
             if (strpos($_SERVER['HTTP_USER_AGENT'], 'iPhone') !== false) {
                 $sms_string = 'sms://?&amp;';
@@ -50,9 +50,9 @@ class MPP_Child_Shortcode
                 $sms_string = 'sms:?';
             }
 ?>
-            <a class="button" href="<?php echo $sms_string; ?>body=<?php echo $encoded_sms; ?>">Send Referral link through SMS</a>
-            <a class="button" href="https://wa.me/?text=<?php echo $encoded_sms; ?>">Send Referral link through WhatsApp</a>
-            <a class="button" href="mailto:abc@example.com?subject=MyPetsProfile&body=<?php echo $encoded_sms; ?>">Send Email</a>
+            <a class="button" href="<?php echo $sms_string; ?>body=<?php echo $encoded_sms; ?>">Send Referral invite via SMS</a>
+            <a class="button" href="https://wa.me/?text=<?php echo $encoded_sms; ?>">Send Referral invite via WhatsApp</a>
+            <a class="button" href="mailto:abc@example.com?subject=MyPetsProfile&body=<?php echo $encoded_sms; ?>">Send Referral invite via Email</a>
         <?php
         else :
         ?>
