@@ -78,6 +78,7 @@ add_action('admin_enqueue_scripts', 'mpp_custom_admin_enqueue_scripts');
 /******************************** INCLUDE FILES *******************************/
 
 require_once(get_stylesheet_directory() . '/includes/buddyboss/class-group.php');
+require_once(get_stylesheet_directory() . '/includes/buddyboss/class-event.php');
 
 // IAP Connection to the Pricing Plan
 add_action('init', function () {

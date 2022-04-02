@@ -265,3 +265,8 @@ function user_role_change_on_order_complete($order_id, $from, $to, $order)
     endif;
 }
 */
+
+add_filter('directorist_custom_field_meta_key_field_args', function ($args) {
+    $args['type'] = 'text';
+    return $args;
+});
