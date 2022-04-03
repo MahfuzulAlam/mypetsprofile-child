@@ -14,7 +14,7 @@ remove_action('woocommerce_before_checkout_form', 'woocommerce_checkout_login_fo
 // Remove "category? From product Page
 remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40);
 
-add_filter('bp_core_signup_send_activation_key', 'ps_disable_activation_email');
+//add_filter('bp_core_signup_send_activation_key', 'ps_disable_activation_email');
 function ps_disable_activation_email()
 {
     return false;

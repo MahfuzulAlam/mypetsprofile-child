@@ -432,9 +432,18 @@ if ($listing_type && $term) {
                             <div class="directorist-pricing__action">
                                 <?php
                                 $url = apply_filters('atbdp_pricing_plan_to_checkout_url', dwpp_add_listing_page_link_with_plan($value->ID, $active_plan, $is_active), $value->ID);
+                                $web_class = '';
+                                if (
+                                    strpos($_SERVER['HTTP_USER_AGENT'], 'wv') !== false || (strpos($_SERVER['HTTP_USER_AGENT'], 'iPhone') !== false &&
+                                        (strpos($_SERVER['HTTP_USER_AGENT'], 'chrome') == false && strpos($_SERVER['HTTP_USER_AGENT'], 'safari') == false))
+                                ) {
+                                    $web_class = 'app-directorist-pricing__action--btn';
+                                } else {
+                                    $web_class = 'directorist-pricing__action--btn';
+                                }
                                 ?>
                                 <input id="fee_plans[<?php echo $value->ID; ?>]" type="hidden" value="<?php echo $value->ID; ?>" name="fm_plans">
-                                <label for="fee_plans[<?php echo $value->ID; ?>]"><a href="<?= esc_url($url); ?>" onclick="return <?php echo !$used_free_plan ? 'false' : 'true' ?>;" class="btn btn-block directorist-pricing__action--btn" data-active_status="<?php echo $is_active ? 'yes' : ''; ?>"><?php !$used_free_plan ? _e('Already Used!', 'directorist-woocommerce-pricing-plans') : _e('Continue', 'directorist-woocommerce-pricing-plans') ?></a></label>
+                                <label for="fee_plans[<?php echo $value->ID; ?>]"><a href="<?php echo esc_url($url); ?>" onclick="return <?php echo !$used_free_plan ? 'false' : 'true' ?>;" class="btn btn-block <?php echo $web_class; ?>" data-active_status="<?php echo $is_active ? 'yes' : ''; ?>"><?php !$used_free_plan ? _e('Already Used!', 'directorist-woocommerce-pricing-plans') : _e('Continue', 'directorist-woocommerce-pricing-plans') ?></a></label>
                             </div>
                         </div>
                     </div>

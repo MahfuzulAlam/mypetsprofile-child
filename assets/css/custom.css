@@ -387,3 +387,19 @@
     margin-bottom: 10px;
     margin-left: 10px;
 }
+
+.directorist-type-nav{
+    display:none
+}
+
+.app-directorist-pricing__action--btn {
+	background: #444752;
+	display: block;
+	color: #fff;
+	line-height: 30px;
+	transition: 0.3s ease;
+	text-decoration: none;
+	padding: 6px 12px;
+	border-radius: 3px;
+	text-align: center;
+}

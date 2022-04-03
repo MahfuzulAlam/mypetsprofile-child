@@ -21,7 +21,7 @@ class Event_Calendar_Listing_Creation
     public function atbdp_listing_form_submission_info($data)
     {
         $dir_type = get_post_meta($data['id'], '_directory_type', true);
-        $get_event_dir_type = get_term_by('slug', 'event', ATBDP_DIRECTORY_TYPE);
+        $get_event_dir_type = get_term_by('slug', 'mpp-event', ATBDP_DIRECTORY_TYPE);
 
         if ($get_event_dir_type && $dir_type == $get_event_dir_type->term_id) {
 

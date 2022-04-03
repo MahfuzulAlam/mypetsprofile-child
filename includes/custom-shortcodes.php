@@ -100,8 +100,17 @@ class MPP_Child_Shortcode
             endwhile;
             wp_reset_query();
         } */
-        /* $group_list = groups_get_groups(array('per_page' => '-1'));
-        $list = [];
+        $args = array(
+            'per_page' => '-1',
+            'meta_query' => array(
+                array(
+                    'key' => 'directorist_listings_ids',
+                    'compare' => 'NOT EXISTS'
+                )
+            )
+        );
+        $group_list = groups_get_groups($args);
+        /* $list = [];
         foreach ($group_list['groups'] as $group) {
             $group_type = bp_groups_get_group_type($group->id);
             if (!$group_type || empty($group_type)) {
@@ -121,8 +130,8 @@ class MPP_Child_Shortcode
                     groups_update_groupmeta($group->id, 'directorist_listings_ids', array($listing->ID));
                 }
             }
-        }
-        e_var_dump($list); */
+        } */
+        e_var_dump($group_list['total']);
     }
 }
 
