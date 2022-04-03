@@ -52,7 +52,7 @@ function buddyboss_theme_child_scripts_styles()
 	wp_enqueue_style('buddyboss-child-map-css', get_stylesheet_directory_uri() . '/assets/css/map.css', '', '1.0.0');
 
 	// Javascript
-	wp_enqueue_script('buddyboss-child-js', get_stylesheet_directory_uri() . '/assets/js/custom.js', '', '1.0.0');
+	wp_enqueue_script('buddyboss-child-js', get_stylesheet_directory_uri() . '/assets/js/custom.js', array('jquery'), '1.0.0');
 }
 add_action('wp_enqueue_scripts', 'buddyboss_theme_child_scripts_styles', 9999);
 
@@ -78,7 +78,7 @@ add_action('admin_enqueue_scripts', 'mpp_custom_admin_enqueue_scripts');
 /******************************** INCLUDE FILES *******************************/
 
 require_once(get_stylesheet_directory() . '/includes/buddyboss/class-group.php');
-require_once(get_stylesheet_directory() . '/includes/buddyboss/class-event.php');
+//require_once(get_stylesheet_directory() . '/includes/buddyboss/class-event.php');
 
 // IAP Connection to the Pricing Plan
 add_action('init', function () {

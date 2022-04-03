@@ -211,7 +211,7 @@ function directorist_wc_active_orders_without_listing($plan_id = '')
 
 
 //add_action('woocommerce_payment_complete', 'wpp_assign_role_after_payment_complete');
-/*
+
 function wpp_assign_role_after_payment_complete($order_id)
 {
 
@@ -219,7 +219,7 @@ function wpp_assign_role_after_payment_complete($order_id)
     foreach ($order->get_items() as $item_key => $item) :
         $item_id = $item->get_product_id();
 
-        if (in_array($item_id, array(422))) :
+        if (in_array($item_id, array(422, 18053))) :
 
             $user = $order->get_user();
             if ($user) {
@@ -237,7 +237,7 @@ function wpp_assign_role_after_payment_complete($order_id)
     endforeach;
 }
 
-add_action('woocommerce_order_status_changed', 'user_role_change_on_order_complete', 10, 4);
+//add_action('woocommerce_order_status_changed', 'user_role_change_on_order_complete', 10, 4);
 
 function user_role_change_on_order_complete($order_id, $from, $to, $order)
 {
@@ -246,7 +246,7 @@ function user_role_change_on_order_complete($order_id, $from, $to, $order)
         foreach ($order->get_items() as $item) :
             $item_id = $item->get_product_id();
 
-            if (in_array($item_id, array(422))) : // Insert Pricing Plan IDs here
+            if (in_array($item_id, array(422, 18053))) : // Insert Pricing Plan IDs here
 
                 $user = $order->get_user();
                 if ($user) {
@@ -264,9 +264,9 @@ function user_role_change_on_order_complete($order_id, $from, $to, $order)
         endforeach;
     endif;
 }
-*/
 
-add_filter('directorist_custom_field_meta_key_field_args', function ($args) {
+
+/* add_filter('directorist_custom_field_meta_key_field_args', function ($args) {
     $args['type'] = 'text';
     return $args;
-});
+}); */

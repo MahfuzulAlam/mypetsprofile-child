@@ -31,14 +31,26 @@ class MPP_Child_Hooks
         ) {
             $iap_plan_id = 0;
             switch ($plan_id) {
-                case 12172:
+                case 18059:
                     $iap_plan_id = 1;
                     break;
-                case 4183:
+                case 18064:
+                    $iap_plan_id = 4;
+                    break;
+                case 18065:
                     $iap_plan_id = 3;
                     break;
-                case 4182:
-                    $iap_plan_id = 4;
+                case 18066:
+                    $iap_plan_id = 7;
+                    break;
+                case 18242:
+                    $iap_plan_id = 8;
+                    break;
+                case 18243:
+                    $iap_plan_id = 9;
+                    break;
+                case 18244:
+                    $iap_plan_id = 10;
                     break;
             }
             if ($iap_plan_id !== 0) $url = 'https://communityportal.mypetsprofile.com/bbapp/products/' . $iap_plan_id;

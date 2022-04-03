@@ -56,7 +56,7 @@ class MPP_Child_Shortcode
         <?php
         else :
         ?>
-            <p>You donot have an affiliate account yet!</p>
+            <a class="button become-an-affiliate" href="https://communityportal.mypetsprofile.com/bbapp/products/1">Become an Affiliate</a>
 <?php
         endif;
         return ob_get_clean();
@@ -100,16 +100,7 @@ class MPP_Child_Shortcode
             endwhile;
             wp_reset_query();
         } */
-        $args = array(
-            'per_page' => '-1',
-            'meta_query' => array(
-                array(
-                    'key' => 'directorist_listings_ids',
-                    'compare' => 'NOT EXISTS'
-                )
-            )
-        );
-        $group_list = groups_get_groups($args);
+
         /* $list = [];
         foreach ($group_list['groups'] as $group) {
             $group_type = bp_groups_get_group_type($group->id);
@@ -131,7 +122,6 @@ class MPP_Child_Shortcode
                 }
             }
         } */
-        e_var_dump($group_list['total']);
     }
 }
 
