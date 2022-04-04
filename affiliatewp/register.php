@@ -5,8 +5,12 @@ if (
         (strpos($_SERVER['HTTP_USER_AGENT'], 'chrome') == false && strpos($_SERVER['HTTP_USER_AGENT'], 'safari') == false))
 ) {
 ?>
-    <p class="no-access"><?php _e('The affiliate area is available only for registered affiliates.', 'affiliate-wp'); ?></p>
-    <a class="btn btn-primary button" href="https://communityportal.mypetsprofile.com/bbapp/products/1">Register as an Affiliate</a>
+    <div class="no-access">
+        <p>Hello,</p>
+        <p>You’ve selected an area that is exclusive to “Elite Members”.</p>
+        <p>Please click the following button to learn how you can become an “MPP Elite Member”.</p>
+    </div>
+    <a class="btn btn-primary button" href="https://communityportal.mypetsprofile.com/bbapp/products/1">MPP Elite Membership</a>
 <?php
 } else {
 
@@ -65,7 +69,7 @@ if (
         ?>
 
         <fieldset>
-            <legend><?php _e('Register a new affiliate account', 'affiliate-wp'); ?></legend>
+            <legend><?php _e('Register a new MPP Elite Member account', 'affiliate-wp'); ?></legend>
 
             <?php
             /**
