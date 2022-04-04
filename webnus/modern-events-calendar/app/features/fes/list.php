@@ -70,7 +70,7 @@ $this->factory->params('footer', $javascript);
 // User ID
 
 $user_id = get_current_user_id();
-$active_event = get_user_meta($user_meta, 'mec_event_status', true);
+$active_event = get_user_meta($user_id, 'mec_event_status', true);
 
 ?>
 <div class="mec-fes-list">
@@ -79,6 +79,8 @@ $active_event = get_user_meta($user_meta, 'mec_event_status', true);
             <div class="mec-fes-list-top-actions">
                 <a href="<?php echo esc_url($this->link_add_event()); ?>"><?php echo esc_html__('Add new event', 'mec'); ?></a>
             </div>
+        <?php else : ?>
+            <p><?php echo sprintf(__('No events found! %s', 'mec'), '<a href="https://communityportal.mypetsprofile.com/bbapp/products/8">' . esc_html__('Get Pet-friendly Event', 'mec') . '</a>'); ?></p>
         <?php endif; ?>
         <?php do_action('mec_fes_list'); ?>
         <ul>
@@ -163,6 +165,10 @@ $active_event = get_user_meta($user_meta, 'mec_event_status', true);
             ?>
         </ul>
     <?php else : ?>
-        <p><?php echo sprintf(__('No events found! %s', 'mec'), '<a href="' . $this->link_add_event() . '">' . esc_html__('Add new', 'mec') . '</a>'); ?></p>
+        <?php if ($active_event && $active_event == 'active') : ?>
+            <p><?php echo sprintf(__('No events found! %s', 'mec'), '<a href="' . $this->link_add_event() . '">' . esc_html__('Add new', 'mec') . '</a>'); ?></p>
+        <?php else : ?>
+            <p><?php echo sprintf(__('No events found! %s', 'mec'), '<a href="https://communityportal.mypetsprofile.com/bbapp/products/8">' . esc_html__('Get Pet-friendly Event', 'mec') . '</a>'); ?></p>
+        <?php endif; ?>
     <?php endif; ?>
 </div>
