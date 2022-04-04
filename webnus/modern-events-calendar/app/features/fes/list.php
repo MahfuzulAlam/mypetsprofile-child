@@ -66,12 +66,20 @@ jQuery(document).ready(function()
 
 // Include javascript code into the footer
 $this->factory->params('footer', $javascript);
+
+// User ID
+
+$user_id = get_current_user_id();
+$active_event = get_user_meta($user_meta, 'mec_event_status', true);
+
 ?>
 <div class="mec-fes-list">
     <?php if ($query->have_posts()) : ?>
-        <div class="mec-fes-list-top-actions">
-            <a href="<?php echo esc_url($this->link_add_event()); ?>"><?php echo esc_html__('Add new event', 'mec'); ?></a>
-        </div>
+        <?php if ($active_event && $active_event == 'active') : ?>
+            <div class="mec-fes-list-top-actions">
+                <a href="<?php echo esc_url($this->link_add_event()); ?>"><?php echo esc_html__('Add new event', 'mec'); ?></a>
+            </div>
+        <?php endif; ?>
         <?php do_action('mec_fes_list'); ?>
         <ul>
             <?php

@@ -91,6 +91,12 @@ final class IAP extends IntegrationAbstract
                     affwp_add_affiliate(array('user_id' => $order->user_id));
                 }
             }
+
+            // Activate Order
+            if ($order->id == 8) {
+                update_user_meta($order->user_id, 'mec_active_plan', 8);
+                update_user_meta($order->user_id, 'mec_event_status', 'active');
+            }
         }
     }
 
@@ -144,6 +150,12 @@ final class IAP extends IntegrationAbstract
         if (function_exists("affwp_get_affiliate_id") && $order->id == 1) {
             $affiliate_id = affwp_get_affiliate_id($order->user_id);
             if ($affiliate_id) affwp_set_affiliate_status($affiliate_id, 'inactive'); // rejected, active, inactive
+        }
+
+        // Deactivate Order
+        if ($order->id == 8) {
+            update_user_meta($order->user_id, 'mec_active_plan', 8);
+            update_user_meta($order->user_id, 'mec_event_status', 'inactive');
         }
     }
 
