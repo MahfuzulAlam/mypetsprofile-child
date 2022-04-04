@@ -81,6 +81,16 @@ final class IAP extends IntegrationAbstract
             $plan_id = $split[0];
 
             $this->bb_atwc_gifting_plan($order, $plan_id);
+
+            // Add/Activate Affiliate
+            if (function_exists("affwp_get_affiliate_id") && $order->id == 1) {
+                $affiliate_id = affwp_get_affiliate_id($order->user_id);
+                if ($affiliate_id) {
+                    affwp_set_affiliate_status($affiliate_id, 'active');
+                } else {
+                    affwp_add_affiliate(array('user_id' => $order->user_id));
+                }
+            }
         }
     }
 
@@ -128,6 +138,12 @@ final class IAP extends IntegrationAbstract
             $plan_id = $split[0];
 
             $this->bb_atwc_cancelled_plan($order->id, $order->user_id, $plan_id);
+        }
+
+        // Deactivate Affiliate Acount
+        if (function_exists("affwp_get_affiliate_id") && $order->id == 1) {
+            $affiliate_id = affwp_get_affiliate_id($order->user_id);
+            if ($affiliate_id) affwp_set_affiliate_status($affiliate_id, 'inactive'); // rejected, active, inactive
         }
     }
 
