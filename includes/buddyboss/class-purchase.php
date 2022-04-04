@@ -83,7 +83,7 @@ final class IAP extends IntegrationAbstract
             $this->bb_atwc_gifting_plan($order, $plan_id);
 
             // Add/Activate Affiliate
-            if (function_exists("affwp_get_affiliate_id") && $order->id == 1) {
+            if (function_exists("affwp_get_affiliate_id") && $order->bbapp_product_id == 1) {
                 $affiliate_id = affwp_get_affiliate_id($order->user_id);
                 if ($affiliate_id) {
                     affwp_set_affiliate_status($affiliate_id, 'active');
@@ -93,7 +93,7 @@ final class IAP extends IntegrationAbstract
             }
 
             // Activate Order
-            if ($order->id == 8) {
+            if ($order->bbapp_product_id == 8) {
                 update_user_meta($order->user_id, 'mec_active_plan', 8);
                 update_user_meta($order->user_id, 'mec_event_status', 'active');
             }
@@ -147,13 +147,13 @@ final class IAP extends IntegrationAbstract
         }
 
         // Deactivate Affiliate Acount
-        if (function_exists("affwp_get_affiliate_id") && $order->id == 1) {
+        if (function_exists("affwp_get_affiliate_id") && $order->bbapp_product_id == 1) {
             $affiliate_id = affwp_get_affiliate_id($order->user_id);
             if ($affiliate_id) affwp_set_affiliate_status($affiliate_id, 'inactive'); // rejected, active, inactive
         }
 
         // Deactivate Order
-        if ($order->id == 8) {
+        if ($order->bbapp_product_id == 8) {
             update_user_meta($order->user_id, 'mec_active_plan', 8);
             update_user_meta($order->user_id, 'mec_event_status', 'inactive');
         }
