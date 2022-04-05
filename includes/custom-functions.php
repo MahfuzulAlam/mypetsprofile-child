@@ -270,3 +270,25 @@ function user_role_change_on_order_complete($order_id, $from, $to, $order)
     $args['type'] = 'text';
     return $args;
 }); */
+
+add_action('mec_save_event_data', function ($post_id) {
+    update_user_meta(get_current_user_id(), 'mec_event_status', 'used');
+    $u = new WP_User(get_current_user_id());
+    $u->add_role('event_creator');
+});
+
+
+// NEW ROLE
+function mec_custom_new_role()
+{
+    //add the new user role
+    add_role(
+        'event_creator',
+        'Event Creator',
+        array(
+            'read'          => true,
+            'edit_posts'     => true,
+        )
+    );
+}
+add_action('admin_init', 'mec_custom_new_role');

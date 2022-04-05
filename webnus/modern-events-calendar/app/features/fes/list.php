@@ -77,10 +77,12 @@ $active_event = get_user_meta($user_id, 'mec_event_status', true);
     <?php if ($query->have_posts()) : ?>
         <?php if ($active_event && $active_event == 'active') : ?>
             <div class="mec-fes-list-top-actions">
-                <a href="<?php echo esc_url($this->link_add_event()); ?>"><?php echo esc_html__('Add new event', 'mec'); ?></a>
+                <a href="<?php echo esc_url($this->link_add_event()); ?>"><?php echo esc_html__('Add new event!!', 'mec'); ?></a>
             </div>
         <?php else : ?>
-            <p><?php echo sprintf(__('No events found! %s', 'mec'), '<a href="https://communityportal.mypetsprofile.com/bbapp/products/8">' . esc_html__('Get Pet-friendly Event', 'mec') . '</a>'); ?></p>
+            <div class="mec-fes-list-top-actions">
+                <?php echo sprintf('<a href="https://communityportal.mypetsprofile.com/bbapp/products/8">' . esc_html__('Get Pet-friendly Event', 'mec') . '</a>'); ?>
+            </div>
         <?php endif; ?>
         <?php do_action('mec_fes_list'); ?>
         <ul>
@@ -166,9 +168,9 @@ $active_event = get_user_meta($user_id, 'mec_event_status', true);
         </ul>
     <?php else : ?>
         <?php if ($active_event && $active_event == 'active') : ?>
-            <p><?php echo sprintf(__('No events found! %s', 'mec'), '<a href="' . $this->link_add_event() . '">' . esc_html__('Add new', 'mec') . '</a>'); ?></p>
+            <div class="mec-fes-list-top-actions"><?php echo sprintf('<a href="' . $this->link_add_event() . '">' . esc_html__('Add new event', 'mec') . '</a>'); ?></div>
         <?php else : ?>
-            <p><?php echo sprintf(__('No events found! %s', 'mec'), '<a href="https://communityportal.mypetsprofile.com/bbapp/products/8">' . esc_html__('Get Pet-friendly Event', 'mec') . '</a>'); ?></p>
+            <div class="mec-fes-list-top-actions"><?php echo sprintf('<a href="https://communityportal.mypetsprofile.com/bbapp/products/8">' . esc_html__('Get (1) Pet-friendly Event', 'mec') . '</a>'); ?></div>
         <?php endif; ?>
     <?php endif; ?>
 </div>
