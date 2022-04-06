@@ -454,9 +454,9 @@ if ($listing_type && $term) {
                 }
             } else {
                 ?>
-                <div style="text-align:center">
+                <div class="iap-redirect">
                     <p>Please buy a Pet-friendly Biz Bundle to continue.</p>
-                    <a class="button" href="https://communityportal.mypetsprofile.com/bbapp/page/18398">Pet-friendly Biz Bundle</a>
+                    <a class="button" href="https://communityportal.mypetsprofile.com/bbapp/page/18398">Pet-friendly Biz Bundles</a>
                 </div>
             <?php
             }

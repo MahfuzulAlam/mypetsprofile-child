@@ -297,24 +297,32 @@ add_action('admin_init', 'mec_custom_new_role');
 // bbapp_is_active_biz_plan
 function bbapp_is_active_biz_plan($plans)
 {
-    $is_active = false;
+    $is_active = true;
 
-    foreach ($plans as $key => $value) {
-        $plan_id = $value->ID;
-        if (is_user_logged_in()) {
-            $active_plan = subscribed_package_or_PPL_plans(get_current_user_id(), 'completed', $plan_id);
-        } else {
-            $active_plan = false;
-        }
+    if (
+        strpos($_SERVER['HTTP_USER_AGENT'], 'wv') !== false || (strpos($_SERVER['HTTP_USER_AGENT'], 'iPhone') !== false &&
+            (strpos($_SERVER['HTTP_USER_AGENT'], 'chrome') == false && strpos($_SERVER['HTTP_USER_AGENT'], 'safari') == false))
+    ) {
 
-        $fresh_active_order = directorist_wc_active_orders_without_listing($plan_id);
+        $is_active = false;
 
-        if ('package' === package_or_PPL($plan_id) && $active_plan) {
-            $is_active = true;
-        }
+        foreach ($plans as $key => $value) {
+            $plan_id = $value->ID;
+            if (is_user_logged_in()) {
+                $active_plan = subscribed_package_or_PPL_plans(get_current_user_id(), 'completed', $plan_id);
+            } else {
+                $active_plan = false;
+            }
 
-        if ('package' !== package_or_PPL($plan_id) && $fresh_active_order && $active_plan) {
-            $is_active = true;
+            $fresh_active_order = directorist_wc_active_orders_without_listing($plan_id);
+
+            if ('package' === package_or_PPL($plan_id) && $active_plan) {
+                $is_active = true;
+            }
+
+            if ('package' !== package_or_PPL($plan_id) && $fresh_active_order && $active_plan) {
+                $is_active = true;
+            }
         }
     }
 
