@@ -292,3 +292,31 @@ function mec_custom_new_role()
     );
 }
 add_action('admin_init', 'mec_custom_new_role');
+
+
+// bbapp_is_active_biz_plan
+function bbapp_is_active_biz_plan($plans)
+{
+    $is_active = false;
+
+    foreach ($plans as $key => $value) {
+        $plan_id = $value->ID;
+        if (is_user_logged_in()) {
+            $active_plan = subscribed_package_or_PPL_plans(get_current_user_id(), 'completed', $plan_id);
+        } else {
+            $active_plan = false;
+        }
+
+        $fresh_active_order = directorist_wc_active_orders_without_listing($plan_id);
+
+        if ('package' === package_or_PPL($plan_id) && $active_plan) {
+            $is_active = true;
+        }
+
+        if ('package' !== package_or_PPL($plan_id) && $fresh_active_order && $active_plan) {
+            $is_active = true;
+        }
+    }
+
+    return $is_active;
+}
