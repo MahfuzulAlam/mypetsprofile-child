@@ -56,6 +56,10 @@ function buddyboss_theme_child_scripts_styles()
 }
 add_action('wp_enqueue_scripts', 'buddyboss_theme_child_scripts_styles', 9999);
 
+/********************* THEME SUPPORTS ******************************/
+add_theme_support('post-thumbnails');
+add_image_size('bb-app-group-avatar', 150, 150, true);
+
 /****************************** CUSTOM ENQUEUES ******************************/
 
 function mpp_custom_google_map_scripts()

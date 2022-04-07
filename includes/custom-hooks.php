@@ -20,6 +20,8 @@ class MPP_Child_Hooks
         add_action(ATBDP_CATEGORY . '_edit_form_fields', array($this, 'edit_category_icon_field'), 10, 2);
         // Update App Image Meta
         add_action('edited_' . ATBDP_CATEGORY, array($this, 'update_category_app_image'), 10, 2);
+        // Create Order Create a WooMembership
+        add_action('wc_memberships_user_membership_created', array($this, 'wc_memberships_user_membership_created'), 10, 2);
     }
 
     // Change the pricing plan url for mobile
@@ -102,12 +104,12 @@ class MPP_Child_Hooks
     // Default Group Avatar for App
     public function bp_rest_groups_prepare_value($response, $request, $item)
     {
-        $custom_avatar = get_stylesheet_directory_uri() . '/assets/img/default-group.png';
-        $custom_avatar_fetch = $this->bp_process_group_icon($item->id, 'app_image');
-        $custom_avatar = !empty($custom_avatar_fetch) ? $custom_avatar_fetch : $custom_avatar;
-
-        $response->data['avatar_urls']['thumb'] = $custom_avatar;
-        $response->data['avatar_urls']['full'] = $custom_avatar;
+        $custom_avatars = $this->bp_process_group_icon($item->id, 'app_image');
+        if (!empty($custom_avatars)) {
+            $response->data['avatar_urls']['thumb'] = $custom_avatars['full'];
+            $response->data['avatar_urls']['full'] = $custom_avatars['thumb'];
+            $response->data['avatar_urls']['is_default'] = false;
+        }
 
         return $response;
     }
@@ -115,7 +117,7 @@ class MPP_Child_Hooks
     // Get/Process Group Icon
     public function bp_process_group_icon($group_id = 0, $image_type = 'image')
     {
-        $custom_avatar = "";
+        $custom_avatars = array();
         if ($group_id == 0) return $custom_avatar;
         $directorist_category = groups_get_groupmeta($group_id, 'directorist_category', true);
         if (!$directorist_category || empty($directorist_category)) {
@@ -132,10 +134,11 @@ class MPP_Child_Hooks
         if ($directorist_category) {
             $category_image = get_term_meta($directorist_category,  $image_type, true);
             if ($category_image) {
-                $custom_avatar = wp_get_attachment_image_url($category_image);
+                $custom_avatars['thumb'] = wp_get_attachment_image_url($category_image, 'bb-app-group-avatar');
+                $custom_avatars['full'] = wp_get_attachment_image_url($category_image, 'full');
             }
         }
-        return $custom_avatar;
+        return $custom_avatars;
     }
 
     // Edit Custom Category Fields
@@ -173,6 +176,63 @@ class MPP_Child_Hooks
             update_term_meta($term_id, 'app_image', (int)$_POST['app_image']);
         } else {
             update_term_meta($term_id, 'app_image', '');
+        }
+    }
+
+    // Create Order Create a WooMembership
+    public function wc_memberships_user_membership_created($membership_plan, $data)
+    {
+        $product_ids = get_post_meta($membership_plan->id, '_product_ids', true);
+
+        if ($product_ids && count($product_ids) > 0) {
+            $this->add_woocommerce_order_on_create_membership($data, $product_ids);
+        }
+    }
+
+    // Create an Order on create a membership
+    public function add_woocommerce_order_on_create_membership($user, $product_ids)
+    {
+        $user_id = $user['user_id'];
+        $user_membership_id = $user['user_membership_id'];
+
+        if (!empty($user_id)) {
+
+            $address = array(
+                'first_name' => get_user_meta($user_id, 'first_name', true),
+                'last_name'  => get_user_meta($user_id, 'last_name', true),
+                'company'    => get_user_meta($user_id, 'billing_company', true),
+                'email'      => get_user_meta($user_id, 'billing_email', true),
+                'phone'      => get_user_meta($user_id, 'billing_phone', true),
+                'address_1'  => get_user_meta($user_id, 'billing_address_1', true),
+                'address_2'  => get_user_meta($user_id, 'billing_address_2', true),
+                'city'       => get_user_meta($user_id, 'billing_city', true),
+                'state'      => get_user_meta($user_id, 'billing_state', true),
+                'postcode'   => get_user_meta($user_id, 'billing_postcode', true),
+                'country'    => get_user_meta($user_id, 'billing_country', true),
+            );
+
+            // Now we create the order
+            $order = wc_create_order();
+
+            // The add_product() function below is located in /plugins/woocommerce/includes/abstracts/abstract_wc_order.php
+            if ($product_ids && count($product_ids) > 0) {
+                foreach ($product_ids as $product) {
+                    $order->add_product(get_product($product), 1); // This is an existing SIMPLE product
+                }
+            }
+
+            $order->set_address($address, 'billing');
+
+            $order->calculate_totals();
+            $order->update_status("wc-completed", "IAP order", TRUE);
+
+            $order_id = $order->get_id();
+
+            // save required data as order post meta
+            update_post_meta($order_id, '_fm_plan_ordered', $product[0]);
+            update_post_meta($order_id, '_user_membership_id', $user_membership_id);
+            update_post_meta($order_id, '_customer_user', $user_id);
+            update_post_meta($order_id, '_listing_id', '');
         }
     }
 }
