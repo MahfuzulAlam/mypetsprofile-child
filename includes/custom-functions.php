@@ -328,3 +328,14 @@ function bbapp_is_active_biz_plan($plans)
 
     return $is_active;
 }
+
+/*
+add_action('wp_footer', function () {
+    if (is_page(553)) {
+        wc_memberships_create_user_membership(array(
+            'user_id' => 2,
+            'plan_id' => 516,
+        ), 'create');
+    }
+});
+*/

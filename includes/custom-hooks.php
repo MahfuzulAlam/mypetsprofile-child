@@ -186,6 +186,11 @@ class MPP_Child_Hooks
 
         if ($product_ids && count($product_ids) > 0) {
             $this->add_woocommerce_order_on_create_membership($data, $product_ids);
+            // SEND ADD LISTING LINK
+            if (!empty($data['user_id'])) {
+                $user_membership = wc_memberships_get_user_membership($data['user_id'], $membership_plan->id);
+                $user_membership->add_note('Please go to the following link and add your listing - <a href="https://communityportal.mypetsprofile.com/add-listing/">Add Biz/Event</a>', true);
+            }
         }
     }
 
