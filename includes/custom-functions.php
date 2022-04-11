@@ -160,11 +160,13 @@ function bbd_get_option_data()
 function directorist_wc_active_orders_without_listing($plan_id = '')
 {
     $status = ["wc-completed"];
+    /*
     if (directoirst_wc_plan_auto_renewal($plan_id)) {
         $plan_id = directoirst_wc_plan_auto_renewal($plan_id);
         $subscription = true;
         $status = ["wc-completed", "wc-processing"];
     }
+    */
     $args = [
         'post_type'   => 'shop_order',
         'post_status' => $status,
@@ -336,6 +338,39 @@ add_action('wp_footer', function () {
             'user_id' => 2,
             'plan_id' => 516,
         ), 'create');
+    }
+});
+*/
+
+/*
+add_action('wp_footer', function () {
+    $plan_id = isset($_GET['plan']) && !empty($_GET['plan']) ? $_GET['plan'] : 0;
+    // CHECK IF USER HAS OWN A PLAN ALREADY
+    if ($plan_id) {
+        $iap_plan = 0;
+        switch ($plan_id) {
+            case '18535':
+                $iap_plan = 17;
+                break;
+            case '18531':
+                $iap_plan = 13;
+                break;
+            default:
+                $iap_plan = 1;
+                break;
+        }
+        e_var_dump($iap_plan);
+?>
+        <script type="text/javascript">
+            jQuery(document).ready(function($) {
+                var plan = <?php echo $iap_plan; ?>;
+                if ($('body').hasClass('page-id-3911')) {
+                    window.location.replace("https://communityportal.mypetsprofile.com/bbapp/products/" + plan);
+                    //window.location.href = "https://communityportal.mypetsprofile.com/bbapp/products/13";
+                }
+            });
+        </script>
+<?php
     }
 });
 */

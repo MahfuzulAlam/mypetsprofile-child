@@ -234,10 +234,11 @@ class MPP_Child_Hooks
             $order_id = $order->get_id();
 
             // save required data as order post meta
-            update_post_meta($order_id, '_fm_plan_ordered', $product[0]);
+            update_post_meta($order_id, '_fm_plan_ordered', $product_ids[0]);
             update_post_meta($order_id, '_user_membership_id', $user_membership_id);
             update_post_meta($order_id, '_customer_user', $user_id);
             update_post_meta($order_id, '_listing_id', '');
+            update_post_meta($order_id, '_order_status', 'exit');
         }
     }
 }
