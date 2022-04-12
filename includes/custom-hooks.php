@@ -186,10 +186,18 @@ class MPP_Child_Hooks
 
         if ($product_ids && count($product_ids) > 0) {
             $this->add_woocommerce_order_on_create_membership($data, $product_ids);
+
             // SEND ADD LISTING LINK
-            if (!empty($data['user_id'])) {
-                $user_membership = wc_memberships_get_user_membership($data['user_id'], $membership_plan->id);
-                $user_membership->add_note('Please go to the following link and add your listing - <a href="https://communityportal.mypetsprofile.com/add-listing/">Add Biz/Event</a>', true);
+            // if (!empty($data['user_id'])) {
+            //     $user_membership = wc_memberships_get_user_membership($data['user_id'], $membership_plan->id);
+            //     $user_membership->add_note('Please go to the following link and add your listing - <a href="https://communityportal.mypetsprofile.com/add-listing/">Add Biz/Event</a>', true);
+            // }
+
+            foreach ($product_ids as $product) {
+                // Add/Activate Affiliate
+                $this->add_affiliate_member($product, $data['user_id']);
+                // Event Activate Order
+                $this->on_activate_event_plan($product, $data['user_id']);
             }
         }
     }
@@ -239,6 +247,28 @@ class MPP_Child_Hooks
             update_post_meta($order_id, '_customer_user', $user_id);
             update_post_meta($order_id, '_listing_id', '');
             update_post_meta($order_id, '_order_status', 'exit');
+        }
+    }
+
+    // ADD Affiliate Member
+    public function add_affiliate_member($product_id, $user_id)
+    {
+        if (function_exists("affwp_get_affiliate_id") && $product_id == 18480) {
+            $affiliate_id = affwp_get_affiliate_id($user_id);
+            if ($affiliate_id) {
+                affwp_set_affiliate_status($affiliate_id, 'active');
+            } else {
+                affwp_add_affiliate(array('user_id' => $user_id));
+            }
+        }
+    }
+
+    // On Activate Events
+    public function on_activate_event_plan($product_id, $user_id)
+    {
+        if ($product_id == 18489) {
+            update_user_meta($user_id, 'mec_active_plan', 8);
+            update_user_meta($user_id, 'mec_event_status', 'active');
         }
     }
 }

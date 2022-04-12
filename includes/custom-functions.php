@@ -374,3 +374,40 @@ add_action('wp_footer', function () {
     }
 });
 */
+
+// require(get_stylesheet_directory() . '/assets/fpdf/fpdf.php');
+
+// add_action('init', function () {
+//     $pdf = new FPDF();
+//     $pdf->AddPage();
+//     $pdf->SetFont('Arial', 'B', 16);
+//     $pdf->Cell(40, 10, 'Hello World!');
+//     $pdf->Output('D', 'filename.pdf');
+// });
+
+add_action('wp_footer', function () {
+    if (bp_is_user_profile_edit()) :
+
+?>
+        <script type="text/javascript">
+            jQuery('document').ready(function() {
+                $('.download-user-info').on('click', function() {
+                    startPdfProcessing();
+                });
+            });
+        </script>
+    <?php
+    endif;
+});
+
+
+add_action('wp_footer', function () {
+    if (is_page('download-profile-information')) {
+        echo $link = bp_members_edit_profile_url('', get_current_user_id());
+    ?>
+        <script type="text/javascript">
+            window.location.href = "<?php echo $link; ?>";
+        </script>
+<?php
+    }
+});
