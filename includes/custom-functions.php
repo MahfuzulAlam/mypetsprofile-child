@@ -396,18 +396,6 @@ add_action('wp_footer', function () {
                 });
             });
         </script>
-    <?php
-    endif;
-});
-
-
-add_action('wp_footer', function () {
-    if (is_page('download-profile-information')) {
-        echo $link = bp_members_edit_profile_url('', get_current_user_id());
-    ?>
-        <script type="text/javascript">
-            window.location.href = "<?php echo $link; ?>";
-        </script>
 <?php
-    }
+    endif;
 });

@@ -19,6 +19,7 @@ async function createPdf(text) {
   const { width, height } = page.getSize();
 
   // Image Handling
+  //https://communityportal.mypetsprofile.com/wp-content/uploads/2020/06/MPP-Transparent-logo.png
   const emblemUrl =
     "http://mpp.local/wp-content/uploads/2022/04/MPP-Transparent-logo-1024x485-1.png";
   const emblemImageBytes = await fetch(emblemUrl).then((res) =>
