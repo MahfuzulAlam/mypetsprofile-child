@@ -396,6 +396,150 @@ add_action('wp_footer', function () {
                 });
             });
         </script>
-<?php
+    <?php
     endif;
 });
+
+
+add_action('wp_footer', function () {
+    //e_var_dump(mpp_is_user_mpp_elite_member());
+    if (is_page('pet-housing-applicaiton')) {
+        echo $link = bp_members_edit_profile_url('', get_current_user_id());
+
+    ?>
+        <script type="text/javascript">
+            window.location.href = "<?php echo $link; ?>";
+        </script>
+<?php
+    }
+});
+
+
+add_action('template_redirect', function () {
+    if (is_user_logged_in() && (is_home() || is_front_page())) {
+        if (!current_user_can('editor') && !current_user_can('administrator')) {
+            exit(wp_redirect(home_url('/news-feed/')));
+        }
+    }
+});
+
+
+// add_filter('bp_activity_user_can_edit', function ($can) {
+//     return false;
+// });
+
+
+//apply_filters( 'bp_current_user_can', $retval, $capability, $args['site_id'], $args );
+
+
+function mpp_is_user_mpp_elite_member($user_id = 0)
+{
+    $user_id = $user_id ? $user_id : get_current_user_id();
+    return wc_memberships_is_user_member($user_id, 516);
+}
+
+
+// Work on it
+// add_action('init', function () {
+//     //groups_is_user_mod or groups_is_user_member
+//     groups_join_group(184, 4);
+//     groups_promote_member(4, 184, 'mod');
+// });
+
+
+function mpp_get_funnies_activities($group_id = 0, $month = 1, $year = 2022)
+{
+    $activity_query = bp_activity_get(array(
+        'page' => 1,
+        'filter_query' => array(
+            array(
+                'column' => 'component',
+                'value' => 'groups',
+            ),
+            array(
+                'column' => 'item_id',
+                'value' => $group_id,
+            ),
+            array(
+                'column' => 'type',
+                'value' => 'activity_update',
+            )
+        ),
+        'meta_query' => array(
+            'relation' => 'AND',
+            array(
+                array(
+                    'key' => 'bp_media_ids',
+                    'compare' => 'EXISTS',
+                ),
+                array(
+                    'key' => 'bp_media_ids',
+                    'value' => '',
+                    'compare' => '!=',
+                )
+            ),
+            'activity_count' => array(
+                'key' => 'favorite_count',
+                'compare' => 'EXISTS',
+            )
+        ),
+        'date_query' => array(
+            array(
+                'before'    => array(
+                    'year'  => $year,
+                    'month' => $month,
+                    'day'   => 1,
+                ),
+                'before'    => array(
+                    'year'  => $year,
+                    'month' => $month,
+                    'day'   => 30,
+                ),
+                'inclusive' => true,
+            ),
+        ),
+    ));
+
+    if ($activity_query && count($activity_query['activities']) > 0) {
+        $activities = $activity_query['activities'];
+        foreach ($activities as $activity) {
+            $activity->favorite_count = bp_activity_get_meta($activity->id, 'favorite_count', true);
+        }
+        usort($activities, fn ($a, $b) => $b->favorite_count <=> $a->favorite_count);
+        return $activities;
+    }
+
+    return false;
+}
+
+
+/*
+add_filter('bp_activity_user_can_edit', function ($can) {
+    return false;
+});
+*/
+
+/*
+add_filter('bp_current_user_can', function ($retval) {
+    return 1;
+});
+*/
+
+/*
+add_filter('bb_user_can_create_video', function($permission){
+    return false;
+});
+*/
+
+/*
+add_filter('bp_rest_members_permissions_get_items', function($data){
+    $data['can_create_activity'] = false;
+    return $data;
+});
+*/
+
+/*
+add_filter('bb_user_can_create_activity', function($permission){
+    return false;
+});
+*/

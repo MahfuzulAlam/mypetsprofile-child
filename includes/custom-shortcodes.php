@@ -21,6 +21,8 @@ class MPP_Child_Shortcode
         add_shortcode('bb-listing-to-group-migration', array($this, 'buddyboss_listing_to_group_migration'));
         // BB Profile Search Form
         add_shortcode('mpp-profile-search-form', array($this, 'mpp_profile_search_form'));
+        // MPP Funnies Contest
+        add_shortcode('mpp-funnies-contest', array($this, 'mpp_funnies_contest'));
     }
 
     // BuddyBoss Group Link on Linsting Page
@@ -118,9 +120,9 @@ class MPP_Child_Shortcode
                                         break;
 
                                     case 'date_range': ?><span class="date-from date-label"><?php _e(
-                                                                                            'From',
-                                                                                            'buddyboss'
-                                                                                        ); ?></span>
+                                                                                                'From',
+                                                                                                'buddyboss'
+                                                                                            ); ?></span>
                                         <div class="date-wrapper">
                                             <select name="<?php echo $name . '[min][day]'; ?>">
                                                 <?php
@@ -377,25 +379,25 @@ class MPP_Child_Shortcode
                                                                                                                                                                 } ?> name="<?php echo $name; ?>" value="<?php echo $key; ?>" />
                                             <label for="bb-search-<?php echo str_replace(' ', '', $key . '-' . $id); ?>"><?php echo $label; ?></label>
                                         </div><?php
-                                                            }
+                                                                }
 
-                                                            break;
+                                                                break;
 
-                                                        case 'checkbox': ?><?php foreach ($f->options as $key => $label) { ?>
+                                                            case 'checkbox': ?><?php foreach ($f->options as $key => $label) { ?>
                                         <div class="bp-checkbox-wrap">
                                             <input class="bs-styled-checkbox" id="bb-search-<?php echo str_replace(' ', '', $key . '-' . $id); ?>" type="checkbox" <?php if (in_array($key, $f->values)) {
                                                                                                                                                                         echo 'checked="checked"';
                                                                                                                                                                     } ?> name="<?php echo $name . '[]'; ?>" value="<?php echo $key; ?>" />
                                             <label for="bb-search-<?php echo str_replace(' ', '', $key . '-' . $id); ?>"><?php echo $label; ?></label>
                                         </div><?php
-                                                                            }
-                                                                            break;
+                                                                                }
+                                                                                break;
 
-                                                                        default: ?>
+                                                                            default: ?>
                                     <p class="bps-error"><?php echo "BP Profile Search: unknown display <em>$display</em> for field <em>$f->name</em>."; ?></p>
                             <?php
-                                                                            break;
-                                                                    } ?>
+                                                                                break;
+                                                                        } ?>
 
                             <?php if (!empty($f->description)) { ?>
                                 <p class="bps-description"><?php echo $f->description; ?></p>
@@ -426,9 +428,55 @@ class MPP_Child_Shortcode
                     ?>
                 </form>
             </aside>
-<?php
+        <?php
         endif;
         return ob_get_clean();
+    }
+
+    //MPP Funnies Contest
+    public function mpp_funnies_contest()
+    {
+        ob_start();
+        //bp_activity_thumbnail_content_images
+        $activities = mpp_get_funnies_activities(184, 4, 2022);
+        ?>
+        <div>
+            <?php
+
+            if ($activities) {
+                foreach ($activities as $activity) {
+            ?>
+                    <div>
+                        <div><?php echo bp_core_fetch_avatar(array('item_id' => $activity->user_id, 'width' => 100)); ?></div>
+                        <?php $this->activity_media_html($activity->id); ?>
+                        <div>Count: <?php echo $activity->favorite_count; ?></div>
+                        <div>Comment: <?php echo bp_activity_recurse_comment_count($activity->id); ?></div>
+                    </div>
+            <?php
+                }
+            }
+
+            ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    public function activity_media_html($activity_id)
+    {
+        if ($activity_id) {
+            $media_ids = bp_activity_get_meta($activity_id, 'bp_media_ids', true);
+            $media_ids = explode(",", $media_ids);
+            if ($media_ids) {
+                foreach ($media_ids as $media_id) {
+                    $media          = new BP_Media($media_id);
+                    $attachment_url = wp_get_attachment_url($media->attachment_id);
+        ?>
+                    <img src="<?php echo $attachment_url; ?>" width="100"></img>
+<?php
+                }
+            }
+        }
     }
 
     // Buddyboss Listing to Group Migration
