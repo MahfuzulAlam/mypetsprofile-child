@@ -438,22 +438,39 @@ class MPP_Child_Shortcode
     {
         ob_start();
         //bp_activity_thumbnail_content_images
-        $activities = mpp_get_funnies_activities(184, 4, 2022);
+        $activities = get_option('mpp_funnies_contest');
+        $count = 0;
         ?>
-        <div>
+        <div class="mpp-funnies-contest-holder">
             <?php
 
             if ($activities) {
-                foreach ($activities as $activity) {
             ?>
-                    <div>
-                        <div><?php echo bp_core_fetch_avatar(array('item_id' => $activity->user_id, 'width' => 100)); ?></div>
-                        <?php $this->activity_media_html($activity->id); ?>
-                        <div>Count: <?php echo $activity->favorite_count; ?></div>
-                        <div>Comment: <?php echo bp_activity_recurse_comment_count($activity->id); ?></div>
+                <div class="mpp-funnies-contest">
+                    <div class="mfc-rank">Rank</div>
+                    <div class="mfc-avatar">Pofile</div>
+                    <div class="mfc-image">Image</div>
+                    <div class="mfc-count">Likes</div>
+                    <div class="mfc-comment">Comments</div>
+                </div>
+
+                <?php
+                foreach ($activities as $activity) {
+                    $count++;
+                ?>
+                    <div class="mpp-funnies-contest">
+                        <div class="mfc-rank"><?php echo $count; ?></div>
+                        <div class="mfc-avatar"><?php echo bp_core_fetch_avatar(array('item_id' => $activity->user_id, 'width' => 100)); ?></div>
+                        <div class="mfc-image"><?php $this->activity_media_html($activity->id); ?></div>
+                        <div class="mfc-count"><?php echo $activity->favorite_count; ?></div>
+                        <div class="mfc-comment"><?php echo $activity->comment_count; ?></div>
                     </div>
-            <?php
+                <?php
                 }
+            } else {
+                ?>
+                <p>No post found.</p>
+            <?php
             }
 
             ?>

@@ -447,8 +447,13 @@ function mpp_is_user_mpp_elite_member($user_id = 0)
 // });
 
 
-function mpp_get_funnies_activities($group_id = 0, $month = 1, $year = 2022)
+function mpp_get_funnies_activities($group_id = 0)
 {
+    if (!$group_id) return false;
+
+    $year = date('Y');
+    $month = date('n');
+    $day = date('j');
     $activity_query = bp_activity_get(array(
         'page' => 1,
         'filter_query' => array(
@@ -493,7 +498,7 @@ function mpp_get_funnies_activities($group_id = 0, $month = 1, $year = 2022)
                 'before'    => array(
                     'year'  => $year,
                     'month' => $month,
-                    'day'   => 30,
+                    'day'   => $day,
                 ),
                 'inclusive' => true,
             ),
@@ -506,12 +511,46 @@ function mpp_get_funnies_activities($group_id = 0, $month = 1, $year = 2022)
             $activity->favorite_count = bp_activity_get_meta($activity->id, 'favorite_count', true);
         }
         usort($activities, fn ($a, $b) => $b->favorite_count <=> $a->favorite_count);
+        $activities = array_slice($activities, 0, 10);
+        foreach ($activities as $activity) {
+            $activity->comment_count = mpp_count_activity_comments($activity->id);
+        }
         return $activities;
     }
 
     return false;
 }
 
+function mpp_count_activity_comments($activity_id = 0)
+{
+    if ($activity_id) {
+        $comment_query = bp_activity_get(
+            array(
+                'page' => 1,
+                'filter_query' => array(
+                    array(
+                        'column' => 'component',
+                        'value' => 'activity',
+                    ),
+                    array(
+                        'column' => 'item_id',
+                        'value' => $activity_id,
+                    ),
+                    array(
+                        'column' => 'type',
+                        'value' => 'activity_comment',
+                    ),
+                ),
+                'display_comments' => true
+            )
+        );
+
+        if ($comment_query && count($comment_query['activities']) > 0) {
+            return count($comment_query['activities']);
+        }
+    }
+    return 0;
+}
 
 /*
 add_filter('bp_activity_user_can_edit', function ($can) {
@@ -543,3 +582,5 @@ add_filter('bb_user_can_create_activity', function($permission){
     return false;
 });
 */
+
+//update_option('mpp_funnies_group', 184);

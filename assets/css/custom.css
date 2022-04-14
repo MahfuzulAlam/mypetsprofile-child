@@ -411,3 +411,36 @@
   text-align: center;
   margin: 20px;
 }
+
+/* MPP FUNNIES CONTEST  */
+
+.mpp-funnies-contest-holder {
+  margin-top: 20px;
+}
+
+.mpp-funnies-contest {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.mpp-funnies-contest > div {
+  width: 20%;
+  text-align: center;
+}
+
+/* .mfc-rank {
+  width: 8%;
+} */
+
+.mfc-avatar img {
+  width: 50px;
+}
+.mfc-image img {
+  width: 80px;
+  margin-bottom: 10px;
+}
+/* MPP FUNNIES CONTEST  */

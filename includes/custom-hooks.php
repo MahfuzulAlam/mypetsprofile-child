@@ -22,6 +22,8 @@ class MPP_Child_Hooks
         add_action('edited_' . ATBDP_CATEGORY, array($this, 'update_category_app_image'), 10, 2);
         // Create Order Create a WooMembership
         add_action('wc_memberships_user_membership_created', array($this, 'wc_memberships_user_membership_created'), 10, 2);
+        // MPP Calculate Funnies Contest CRON Job
+        add_action('mpp_calculate_funnies_contest', array($this, 'mpp_calculate_funnies_contest'));
     }
 
     // Change the pricing plan url for mobile
@@ -270,6 +272,13 @@ class MPP_Child_Hooks
             update_user_meta($user_id, 'mec_active_plan', 8);
             update_user_meta($user_id, 'mec_event_status', 'active');
         }
+    }
+
+    // MPP Funnies Contest calculation CRON Job
+    public function mpp_calculate_funnies_contest()
+    {
+        $group_id = get_option('mpp_funnies_group') ? get_option('mpp_funnies_group') : 0;
+        update_option('mpp_funnies_contest', mpp_get_funnies_activities($group_id));
     }
 }
 
