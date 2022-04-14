@@ -24,6 +24,8 @@ class MPP_Child_Hooks
         add_action('wc_memberships_user_membership_created', array($this, 'wc_memberships_user_membership_created'), 10, 2);
         // MPP Calculate Funnies Contest CRON Job
         add_action('mpp_calculate_funnies_contest', array($this, 'mpp_calculate_funnies_contest'));
+        // Claim listing after the payment
+        add_action('atbdp_order_completed', array($this, 'atbdp_order_completed'), 10, 2);
     }
 
     // Change the pricing plan url for mobile
@@ -279,6 +281,31 @@ class MPP_Child_Hooks
     {
         $group_id = get_option('mpp_funnies_group') ? get_option('mpp_funnies_group') : 0;
         update_option('mpp_funnies_contest', mpp_get_funnies_activities($group_id));
+    }
+
+    // Claim listing automatically afetr the payment
+    public function atbdp_order_completed($order_id, $listing_id)
+    {
+        // Publish the listing
+        $my_post = array();
+        $my_post['ID'] = $listing_id;
+        $my_post['post_status'] = 'publish';
+        wp_update_post($my_post);
+
+        // Approve the claim
+        $claim_posts = get_posts(
+            array(
+                'post_type' => 'dcl_claim_listing',
+                'numberposts' => 1,
+                'meta_key' => '_claimed_listing',
+                'meta_value' => $listing_id,
+                'fields' => 'ids'
+            )
+        );
+
+        if ($claim_posts && count($claim_posts) > 0) {
+            update_post_meta($claim_posts[0], '_claim_status', 'approved');
+        }
     }
 }
 

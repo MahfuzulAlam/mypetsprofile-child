@@ -443,4 +443,14 @@
   width: 80px;
   margin-bottom: 10px;
 }
+
+.mpp-funnies-contest div {
+  font-size: 14px;
+}
 /* MPP FUNNIES CONTEST  */
+
+.mpp-refresh {
+  display: block;
+  margin-top: 10px;
+  padding: 10px;
+}

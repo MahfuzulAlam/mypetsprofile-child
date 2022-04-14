@@ -208,6 +208,59 @@ function directorist_wc_active_orders_without_listing($plan_id = '')
     }
 }
 
+// MPP Check if user has the permission to claim listing.
+
+// Woocommerce Pricing Plan
+function directorist_wc_mpp_user_can_claim()
+{
+    $status = ["wc-completed"];
+    /*
+    if (directoirst_wc_plan_auto_renewal($plan_id)) {
+        $plan_id = directoirst_wc_plan_auto_renewal($plan_id);
+        $subscription = true;
+        $status = ["wc-completed", "wc-processing"];
+    }
+    */
+    $args = [
+        'post_type'   => 'shop_order',
+        'post_status' => $status,
+        'numberposts' => -1,
+        'meta_query'  => [
+            'relation' => 'AND',
+            [
+                'key'     => '_fm_plan_ordered',
+                'value'   => 18952,
+                'compare' => '=',
+            ],
+            [
+                'key'     => '_customer_user',
+                'value'   => get_current_user_id(),
+                'compare' => '=',
+            ],
+            [
+                'relation' => 'OR',
+                [
+                    'key'     => '_listing_id',
+                    'value'   => '0',
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => '_listing_id',
+                    'value'   => '',
+                    'compare' => '=',
+                ],
+            ],
+        ],
+    ];
+
+    $active_plan = new WP_Query($args);
+
+    if ($active_plan->have_posts()) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 // NOTE: Of course change 3 to the appropriate user ID
 
@@ -552,6 +605,19 @@ function mpp_count_activity_comments($activity_id = 0)
     return 0;
 }
 
+// MPP check if it is app
+function mpp_is_android_or_ios()
+{
+    if (
+        strpos($_SERVER['HTTP_USER_AGENT'], 'wv') !== false || (strpos($_SERVER['HTTP_USER_AGENT'], 'iPhone') !== false &&
+            (strpos($_SERVER['HTTP_USER_AGENT'], 'chrome') == false && strpos($_SERVER['HTTP_USER_AGENT'], 'safari') == false))
+    ) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 /*
 add_filter('bp_activity_user_can_edit', function ($can) {
     return false;
@@ -584,3 +650,17 @@ add_filter('bb_user_can_create_activity', function($permission){
 */
 
 //update_option('mpp_funnies_group', 184);
+
+
+// do_action( 'bp_core_signup_user', $user_id, $user_login, $user_password, $user_email, $usermeta );
+
+/*
+add_action('woocommerce_order_details_before_order_table', function ($order) {
+    foreach ($order->get_items() as $item_id => $item) {
+        $product_id = $item->get_product_id();
+    }
+    ?>
+    <a class="button" style="float:right" href="/add-listing/?directory_type=200&plan=<?php echo $product_id; ?>">Add Biz Listing</a>
+<?php
+});
+*/

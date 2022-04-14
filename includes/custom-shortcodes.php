@@ -23,6 +23,8 @@ class MPP_Child_Shortcode
         add_shortcode('mpp-profile-search-form', array($this, 'mpp_profile_search_form'));
         // MPP Funnies Contest
         add_shortcode('mpp-funnies-contest', array($this, 'mpp_funnies_contest'));
+        // Claim Listing IAP
+        add_shortcode('claim-listing-iap', array($this, 'claim_listing_iap'));
     }
 
     // BuddyBoss Group Link on Linsting Page
@@ -487,10 +489,11 @@ class MPP_Child_Shortcode
             if ($media_ids) {
                 foreach ($media_ids as $media_id) {
                     $media          = new BP_Media($media_id);
-                    $attachment_url = wp_get_attachment_url($media->attachment_id);
+                    //$attachment_url = wp_get_attachment_url($media->attachment_id);
+                    $attachment_url = bp_media_get_preview_image_url($media->id, $media->attachment_id, 'bb-media-activity-image');
         ?>
                     <img src="<?php echo $attachment_url; ?>" width="100"></img>
-<?php
+                <?php
                 }
             }
         }
@@ -556,6 +559,26 @@ class MPP_Child_Shortcode
                 }
             }
         } */
+    }
+
+    // Claim Listing IAP
+    public function claim_listing_iap()
+    {
+        ob_start();
+        if (mpp_is_android_or_ios()) :
+            if (directorist_wc_mpp_user_can_claim()) :
+                ?>
+                <a href="#" class="claim-listing-iap-action directorist-btn directorist-btn-primary">Claim Listing</a>
+            <?php
+            else :
+            ?>
+                <p>Please buy a membership plan first to claim this Biz listing.</p>
+                <a href="https://communityportal.mypetsprofile.com/bbapp/products/18" class="claim-listing-iap-action directorist-btn directorist-btn-primary">Membership Plans</a>
+                <a href="" class="mpp-refresh" onclick="location.reload();"><span class="fa fa-redo"></span> Refresh</a>
+<?php
+            endif;
+        endif;
+        return ob_get_clean();
     }
 }
 
