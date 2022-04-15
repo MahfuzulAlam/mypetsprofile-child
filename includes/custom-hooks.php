@@ -26,6 +26,8 @@ class MPP_Child_Hooks
         add_action('mpp_calculate_funnies_contest', array($this, 'mpp_calculate_funnies_contest'));
         // Claim listing after the payment
         add_action('atbdp_order_completed', array($this, 'atbdp_order_completed'), 10, 2);
+        // Tempate Redirects
+        add_action('template_redirect', array($this, 'template_redirect'));
     }
 
     // Change the pricing plan url for mobile
@@ -305,6 +307,40 @@ class MPP_Child_Hooks
 
         if ($claim_posts && count($claim_posts) > 0) {
             update_post_meta($claim_posts[0], '_claim_status', 'approved');
+            update_post_meta($listing_id, '_claimed_by_admin', 1);
+            update_post_meta($listing_id, '_claim_fee', 'claim_approved');
+            update_post_meta($listing_id, '_never_expire', 0);
+            update_post_meta($listing_id, '_expiry_date', date('Y-m-d H:i:s', strtotime('+1 year')));
+        }
+    }
+
+    // Template Redirects
+    public function template_redirect()
+    {
+        $this->redirect_frontpage();
+        $this->redirect_claimed_user();
+    }
+
+    // Redirect template if user is in Homepage ( For logged out user )
+    public function redirect_frontpage()
+    {
+        if (is_user_logged_in() && (is_home() || is_front_page())) {
+            if (!current_user_can('editor') && !current_user_can('administrator')) {
+                exit(wp_redirect(home_url('/news-feed/')));
+            }
+        }
+    }
+
+    // Redirect user to the edit listing page after claiming a listing
+    public function redirect_claimed_user()
+    {
+        if (is_user_logged_in() && is_page('payment-receipt')) {
+            $action = get_query_var('atbdp_action');
+            $order_id = get_query_var('atbdp_order_id');
+            if ($action == 'order' && !empty($order_id)) {
+                $listing_id = get_post_meta($order_id, '_listing_id', true);
+                if ($listing_id) exit(wp_redirect(home_url('/add-listing/edit/' . $listing_id)));
+            }
         }
     }
 }

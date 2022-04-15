@@ -468,15 +468,6 @@ add_action('wp_footer', function () {
 });
 
 
-add_action('template_redirect', function () {
-    if (is_user_logged_in() && (is_home() || is_front_page())) {
-        if (!current_user_can('editor') && !current_user_can('administrator')) {
-            exit(wp_redirect(home_url('/news-feed/')));
-        }
-    }
-});
-
-
 // add_filter('bp_activity_user_can_edit', function ($can) {
 //     return false;
 // });
@@ -662,5 +653,11 @@ add_action('woocommerce_order_details_before_order_table', function ($order) {
     ?>
     <a class="button" style="float:right" href="/add-listing/?directory_type=200&plan=<?php echo $product_id; ?>">Add Biz Listing</a>
 <?php
+});
+*/
+
+/*
+add_action('wp_footer', function () {
+    e_var_dump(date('Y-m-d H:i:s', strtotime('+1 year')));
 });
 */
