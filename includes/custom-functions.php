@@ -28,7 +28,7 @@ remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_re
 
 function mypetsprofile_loop_get_the_thumbnail($class = '')
 {
-    $default_image_src = "https://communityportal.mypetsprofile.com/wp-content/uploads/2020/12/MPP-Transparent-logo-product.jpg";
+    $default_image_src = MPP_SITE_URL . "/wp-content/uploads/2020/12/MPP-Transparent-logo-product.jpg";
 
     $id = get_the_ID();
     $image_quality     = get_directorist_option('preview_image_quality', 'large');
@@ -83,7 +83,7 @@ function mypetsprofile_loop_get_the_thumbnail($class = '')
 
 function mypetsprofile_listing_get_the_thumbnail($class = '')
 {
-    $default_image_src = "https://communityportal.mypetsprofile.com/wp-content/uploads/2020/12/MPP-Transparent-logo-product.jpg";
+    $default_image_src = MPP_SITE_URL . "/wp-content/uploads/2020/12/MPP-Transparent-logo-product.jpg";
 
     $id = get_the_ID();
     $image_quality     = get_directorist_option('preview_image_quality', 'large');
@@ -320,12 +320,6 @@ function user_role_change_on_order_complete($order_id, $from, $to, $order)
     endif;
 }
 
-
-/* add_filter('directorist_custom_field_meta_key_field_args', function ($args) {
-    $args['type'] = 'text';
-    return $args;
-}); */
-
 add_action('mec_save_event_data', function ($post_id) {
     update_user_meta(get_current_user_id(), 'mec_event_status', 'used');
     $u = new WP_User(get_current_user_id());
@@ -384,60 +378,6 @@ function bbapp_is_active_biz_plan($plans)
     return $is_active;
 }
 
-/*
-add_action('wp_footer', function () {
-    if (is_page(553)) {
-        wc_memberships_create_user_membership(array(
-            'user_id' => 2,
-            'plan_id' => 516,
-        ), 'create');
-    }
-});
-*/
-
-/*
-add_action('wp_footer', function () {
-    $plan_id = isset($_GET['plan']) && !empty($_GET['plan']) ? $_GET['plan'] : 0;
-    // CHECK IF USER HAS OWN A PLAN ALREADY
-    if ($plan_id) {
-        $iap_plan = 0;
-        switch ($plan_id) {
-            case '18535':
-                $iap_plan = 17;
-                break;
-            case '18531':
-                $iap_plan = 13;
-                break;
-            default:
-                $iap_plan = 1;
-                break;
-        }
-        e_var_dump($iap_plan);
-?>
-        <script type="text/javascript">
-            jQuery(document).ready(function($) {
-                var plan = <?php echo $iap_plan; ?>;
-                if ($('body').hasClass('page-id-3911')) {
-                    window.location.replace("https://communityportal.mypetsprofile.com/bbapp/products/" + plan);
-                    //window.location.href = "https://communityportal.mypetsprofile.com/bbapp/products/13";
-                }
-            });
-        </script>
-<?php
-    }
-});
-*/
-
-// require(get_stylesheet_directory() . '/assets/fpdf/fpdf.php');
-
-// add_action('init', function () {
-//     $pdf = new FPDF();
-//     $pdf->AddPage();
-//     $pdf->SetFont('Arial', 'B', 16);
-//     $pdf->Cell(40, 10, 'Hello World!');
-//     $pdf->Output('D', 'filename.pdf');
-// });
-
 add_action('wp_footer', function () {
     if (bp_is_user_profile_edit()) :
 
@@ -453,11 +393,11 @@ add_action('wp_footer', function () {
     endif;
 });
 
-
+// Move to template redirect
 add_action('wp_footer', function () {
     //e_var_dump(mpp_is_user_mpp_elite_member());
     if (is_page('pet-housing-applicaiton')) {
-        echo $link = bp_members_edit_profile_url('', get_current_user_id());
+        $link = bp_members_edit_profile_url('', get_current_user_id());
 
     ?>
         <script type="text/javascript">
@@ -466,14 +406,6 @@ add_action('wp_footer', function () {
 <?php
     }
 });
-
-
-// add_filter('bp_activity_user_can_edit', function ($can) {
-//     return false;
-// });
-
-
-//apply_filters( 'bp_current_user_can', $retval, $capability, $args['site_id'], $args );
 
 
 function mpp_is_user_mpp_elite_member($user_id = 0)
@@ -610,54 +542,12 @@ function mpp_is_android_or_ios()
 }
 
 /*
-add_filter('bp_activity_user_can_edit', function ($can) {
-    return false;
-});
-*/
-
-/*
-add_filter('bp_current_user_can', function ($retval) {
-    return 1;
-});
-*/
-
-/*
-add_filter('bb_user_can_create_video', function($permission){
-    return false;
-});
-*/
-
-/*
-add_filter('bp_rest_members_permissions_get_items', function($data){
-    $data['can_create_activity'] = false;
-    return $data;
-});
-*/
-
-/*
-add_filter('bb_user_can_create_activity', function($permission){
-    return false;
-});
-*/
-
-//update_option('mpp_funnies_group', 184);
-
-
-// do_action( 'bp_core_signup_user', $user_id, $user_login, $user_password, $user_email, $usermeta );
-
-/*
-add_action('woocommerce_order_details_before_order_table', function ($order) {
-    foreach ($order->get_items() as $item_id => $item) {
-        $product_id = $item->get_product_id();
-    }
-    ?>
-    <a class="button" style="float:right" href="/add-listing/?directory_type=200&plan=<?php echo $product_id; ?>">Add Biz Listing</a>
-<?php
-});
-*/
-
-/*
 add_action('wp_footer', function () {
     e_var_dump(date('Y-m-d H:i:s', strtotime('+1 year')));
 });
 */
+
+/* add_filter('directorist_custom_field_meta_key_field_args', function ($args) {
+    $args['type'] = 'text';
+    return $args;
+}); */

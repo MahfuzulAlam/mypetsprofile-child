@@ -48,7 +48,7 @@ class MPP_Child_Shortcode
         $affiliate_id = affwp_get_affiliate_id(get_current_user_id());
         if ($affiliate_id) :
             $msg = "Check out the MyPetsProfile™ app to find local pet-friendly businesses and meet pet-minded friends";
-            $msg .= " https://communityportal.mypetsprofile.com/elite-affiliate-program/?ep=" . $affiliate_id;
+            $msg .= " " . MPP_SITE_URL . "/elite-affiliate-program/?ep=" . $affiliate_id;
             $encoded_sms = rawurlencode($msg);
             if (strpos($_SERVER['HTTP_USER_AGENT'], 'iPhone') !== false) {
                 $sms_string = 'sms://?&amp;';
@@ -62,7 +62,7 @@ class MPP_Child_Shortcode
         <?php
         else :
         ?>
-            <a class="button become-an-affiliate" href="https://communityportal.mypetsprofile.com/bbapp/products/1">Become an Affiliate</a>
+            <a class="button become-an-affiliate" href="<?php echo MPP_SITE_URL; ?>/bbapp/products/1">Become an Affiliate</a>
         <?php
         endif;
         return ob_get_clean();
@@ -573,7 +573,7 @@ class MPP_Child_Shortcode
             else :
             ?>
                 <p>Please buy a membership plan first to claim this Biz listing.</p>
-                <a href="https://communityportal.mypetsprofile.com/bbapp/products/18" class="claim-listing-iap-action directorist-btn directorist-btn-primary">Membership Plans</a>
+                <a href="<?php echo MPP_SITE_URL; ?>/bbapp/products/18" class="claim-listing-iap-action directorist-btn directorist-btn-primary">Membership Plans</a>
                 <a href="" class="mpp-refresh" onclick="location.reload();"><span class="fa fa-redo"></span> Refresh</a>
 <?php
             endif;

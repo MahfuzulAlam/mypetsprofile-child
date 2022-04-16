@@ -81,7 +81,7 @@ $active_event = get_user_meta($user_id, 'mec_event_status', true);
             </div>
         <?php else : ?>
             <div class="mec-fes-list-top-actions">
-                <!-- <?php echo sprintf('<a href="https://communityportal.mypetsprofile.com/bbapp/products/8">' . esc_html__('Get Pet-friendly Event', 'mec') . '</a>'); ?> -->
+                <!-- <?php echo sprintf('<a href=' . MPP_SITE_URL . '"/bbapp/products/8">' . esc_html__('Get Pet-friendly Event', 'mec') . '</a>'); ?> -->
                 <p>Please buy a Pet-friendly Event Plan to create a new event.</p>
             </div>
         <?php endif; ?>
@@ -171,7 +171,7 @@ $active_event = get_user_meta($user_id, 'mec_event_status', true);
         <?php if ($active_event && $active_event == 'active') : ?>
             <div class="mec-fes-list-top-actions"><?php echo sprintf('<a href="' . $this->link_add_event() . '">' . esc_html__('Add new event', 'mec') . '</a>'); ?></div>
         <?php else : ?>
-            <!-- <div class="mec-fes-list-top-actions"><?php echo sprintf('<a href="https://communityportal.mypetsprofile.com/bbapp/products/8">' . esc_html__('Get (1) Pet-friendly Event', 'mec') . '</a>'); ?></div> -->
+            <!-- <div class="mec-fes-list-top-actions"><?php echo sprintf('<a href="' . MPP_SITE_URL . '/bbapp/products/8">' . esc_html__('Get (1) Pet-friendly Event', 'mec') . '</a>'); ?></div> -->
             <p>Please buy a Pet-friendly Event Plan to get the access.</p>
         <?php endif; ?>
     <?php endif; ?>

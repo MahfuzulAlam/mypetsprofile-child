@@ -28,6 +28,8 @@ class MPP_Child_Hooks
         add_action('atbdp_order_completed', array($this, 'atbdp_order_completed'), 10, 2);
         // Tempate Redirects
         add_action('template_redirect', array($this, 'template_redirect'));
+        // Remove All Pricing Plan from the Product List Shop Page
+        add_filter('pre_get_posts', array($this, 'remove_pricing_plans_from_shop_page'));
     }
 
     // Change the pricing plan url for mobile
@@ -61,7 +63,7 @@ class MPP_Child_Hooks
                     $iap_plan_id = 10;
                     break;
             }
-            if ($iap_plan_id !== 0) $url = 'https://communityportal.mypetsprofile.com/bbapp/products/' . $iap_plan_id;
+            if ($iap_plan_id !== 0) $url = MPP_SITE_URL . '/bbapp/products/' . $iap_plan_id;
         }
         return $url;
     }
@@ -342,6 +344,22 @@ class MPP_Child_Hooks
                 if ($listing_id) exit(wp_redirect(home_url('/add-listing/edit/' . $listing_id)));
             }
         }
+    }
+
+    // Remove all pricing plans from shop page
+    public function remove_pricing_plans_from_shop_page($query)
+    {
+        if (is_post_type_archive('product') && $query->query_vars['post_type'] == 'product') {
+            $tax_query = $query->query_vars['tax_query'];
+            $tax_query[] = array(
+                'taxonomy' => 'product_type',
+                'field'    => 'slug',
+                'terms'    => array('listing_pricing_plans'),
+                'operator'  => 'NOT IN'
+            );
+            $query->set('tax_query', $tax_query);
+        }
+        return $query;
     }
 }
 

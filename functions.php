@@ -24,6 +24,11 @@ function buddyboss_theme_child_languages()
 	// Translate text from the PARENT theme.
 	load_theme_textdomain('buddyboss-theme', get_stylesheet_directory() . '/languages');
 
+	// Global Fixed Valiable - Constants
+	if (!defined('MPP_SITE_URL')) {
+		define('MPP_SITE_URL', get_site_url());
+	}
+
 	// Translate text from the CHILD theme only.
 	// Change 'buddyboss-theme' instances in all child theme files to 'buddyboss-theme-child'.
 	// load_theme_textdomain( 'buddyboss-theme-child', get_stylesheet_directory() . '/languages' );
@@ -82,22 +87,26 @@ function mpp_custom_admin_enqueue_scripts()
 }
 add_action('admin_enqueue_scripts', 'mpp_custom_admin_enqueue_scripts');
 
-/******************************** INCLUDE FILES *******************************/
+if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 
-require_once(get_stylesheet_directory() . '/includes/buddyboss/class-group.php');
-//require_once(get_stylesheet_directory() . '/includes/buddyboss/class-event.php');
+	/******************************** INCLUDE FILES *******************************/
 
-// IAP Connection to the Pricing Plan
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-group.php');
+	//require_once(get_stylesheet_directory() . '/includes/buddyboss/class-event.php');
 
-// add_action('init', function () {
-// 	if (class_exists('bbapp')) {
-// 		require_once(get_stylesheet_directory() . '/includes/buddyboss/class-purchase.php');
-// 		BuddyBossApp\Custom\IAP::instance();
-// 	}
-// });
+	// IAP Connection to the Pricing Plan
 
-/****************************** CUSTOM FUNCTIONS ******************************/
+	// add_action('init', function () {
+	// 	if (class_exists('bbapp')) {
+	// 		require_once(get_stylesheet_directory() . '/includes/buddyboss/class-purchase.php');
+	// 		BuddyBossApp\Custom\IAP::instance();
+	// 	}
+	// });
 
-require_once(get_stylesheet_directory() . '/includes/custom-functions.php');
-require_once(get_stylesheet_directory() . '/includes/custom-hooks.php');
-require_once(get_stylesheet_directory() . '/includes/custom-shortcodes.php');
+	/****************************** CUSTOM FUNCTIONS ******************************/
+
+	require_once(get_stylesheet_directory() . '/includes/custom-functions.php');
+	require_once(get_stylesheet_directory() . '/includes/custom-hooks.php');
+	require_once(get_stylesheet_directory() . '/includes/custom-shortcodes.php');
+
+endif;

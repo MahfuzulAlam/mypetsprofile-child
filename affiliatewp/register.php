@@ -10,7 +10,7 @@ if (
         <p>You’ve selected an area that is exclusive to “Elite Members”.</p>
         <p>Please click the following button to learn how you can become an “MPP Elite Member”.</p>
     </div>
-    <a class="btn btn-primary button" href="https://communityportal.mypetsprofile.com/bbapp/products/1">MPP Elite Membership</a>
+    <a class="btn btn-primary button" href="<?php echo MPP_SITE_URL; ?>/bbapp/products/1">MPP Elite Membership</a>
 <?php
 } else {
 
