@@ -187,9 +187,36 @@ class MPP_Child_Hooks
         }
     }
 
+    public function wc_user_membership_created_by_order($user_membership = 'UNDEFINED')
+    {
+        $orders = get_posts(
+            array(
+                'post_type' => 'shop_order',
+                'post_status' => 'any',
+                'numberposts' => 1,
+                'fields' => 'ids',
+                'meta_query' => array(
+                    'relation' => 'OR',
+                    array(
+                        'key' => '_user_membership_id',
+                        'value' => $user_membership
+                    ),
+                    array(
+                        'key' => '_wc_memberships_access_granted',
+                        'value' => $user_membership,
+                        'compare' => 'LIKE'
+                    )
+                )
+            )
+        );
+        if ($orders && count($orders) > 0) return true;
+        return false;
+    }
+
     // Create Order Create a WooMembership
     public function wc_memberships_user_membership_created($membership_plan, $data)
     {
+        if ($this->wc_user_membership_created_by_order($data['user_membership_id'])) return;
         $product_ids = get_post_meta($membership_plan->id, '_product_ids', true);
 
         if ($product_ids && count($product_ids) > 0) {
