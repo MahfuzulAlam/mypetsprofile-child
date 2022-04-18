@@ -486,3 +486,22 @@
 }
 
 /* Product Page Design */
+
+.no-access-pricing-plan p {
+  color: #fff;
+}
+
+/* Event Submission Page */
+.page-id-18353 .container {
+  margin: 0 -10px !important;
+  background-color: #1c5877;
+}
+
+.page-id-18353 .mec-fes-form {
+  background-color: #1c5877;
+}
+
+.page-id-18353 a.mec-fes-form-back-to {
+  background-color: #e23636;
+}
+/* Event Submission Page */

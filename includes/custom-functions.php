@@ -598,7 +598,7 @@ function mpp_is_android_or_ios()
 
 add_action('atbdp_before_plan_page_loaded', function () {
     $active_plan = mpp_get_active_pricing_plan_from_all_orders();
-    if ($active_plan) :
+    if (!$active_plan) :
         $url = MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $active_plan;
     ?>
         <script type="text/javascript">
@@ -607,7 +607,11 @@ add_action('atbdp_before_plan_page_loaded', function () {
     <?php
     else :
     ?>
-        <p>Please buy a Membership first to be able to submit a Biz -</p>
+        <div class="no-access-pricing-plan">
+            <p>Hello,</p>
+            <p>You’ve selected an area that is exclusive to Members only.</p>
+            <p>Please click the following button to learn how you can become an Member.</p>
+        </div>
         <a class="button" href="<?php echo MPP_SITE_URL; ?>/bbapp/screen/iap_products/">Membership Plans</a>
 <?php
     endif;

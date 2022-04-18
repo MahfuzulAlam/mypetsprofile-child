@@ -455,7 +455,7 @@ if ($listing_type && $term) {
             } else {
                 ?>
                 <div class="iap-redirect">
-                    <p>Please buy a Pet-friendly Biz Bundle to continue.</p>
+                    <!-- <p>Please buy a Pet-friendly Biz Bundle to continue.</p> -->
                     <!-- <a class="button" href="<?php echo MPP_SITE_URL; ?>/bbapp/products/13">Pet-friendly Housing</a>
                     <a class="button" href="<?php echo MPP_SITE_URL; ?>/bbapp/products/17">Health and Wellness</a>
                     <a class="button" href="<?php echo MPP_SITE_URL; ?>/bbapp/products/16">Pet Product and Services</a>

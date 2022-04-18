@@ -62,6 +62,11 @@ class MPP_Child_Shortcode
         <?php
         else :
         ?>
+            <div class="no-access">
+                <p>Hello,</p>
+                <p>You’ve selected an area that is exclusive to “Elite Members”.</p>
+                <p>Please click the following button to learn how you can become an “MPP Elite Member”.</p>
+            </div>
             <a class="button become-an-affiliate" href="<?php echo MPP_SITE_URL; ?>/bbapp/products/1">Become an Affiliate</a>
         <?php
         endif;
