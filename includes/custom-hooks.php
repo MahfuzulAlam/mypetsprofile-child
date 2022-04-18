@@ -323,6 +323,7 @@ class MPP_Child_Hooks
         $my_post = array();
         $my_post['ID'] = $listing_id;
         $my_post['post_status'] = 'publish';
+        $my_post['post_author'] = get_current_user_id();
         wp_update_post($my_post);
 
         // Approve the claim
