@@ -348,6 +348,7 @@ class MPP_Child_Hooks
     {
         $this->redirect_frontpage();
         $this->redirect_claimed_user();
+        $this->redirect_to_add_listing_page_after_purchase();
     }
 
     // Redirect template if user is in Homepage ( For logged out user )
@@ -373,10 +374,22 @@ class MPP_Child_Hooks
         }
     }
 
+    // Redirect to add listing page after completing an order in woocommerce
+    public function redirect_to_add_listing_page_after_purchase()
+    {
+        global $wp;
+        if (is_checkout() && !empty($wp->query_vars['order-received'])) {
+            $plan_id = mpp_get_pricing_plan_from_the_order($wp->query_vars['order-received']);
+            if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans') {
+                exit(wp_redirect(MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $plan_id));
+            }
+        }
+    }
+
     // Remove all pricing plans from shop page
     public function remove_pricing_plans_from_shop_page($query)
     {
-        if (is_post_type_archive('product') && $query->query_vars['post_type'] == 'product') {
+        if (!is_admin() && is_post_type_archive('product') && $query->query_vars['post_type'] == 'product') {
             $tax_query = $query->query_vars['tax_query'];
             $tax_query[] = array(
                 'taxonomy' => 'product_type',

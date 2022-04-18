@@ -454,3 +454,8 @@
   margin-top: 10px;
   padding: 10px;
 }
+
+/* HIDE PRICING PLAN */
+#fm_plans_container {
+  display: none !important;
+}

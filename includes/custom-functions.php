@@ -262,8 +262,61 @@ function directorist_wc_mpp_user_can_claim()
     }
 }
 
-// NOTE: Of course change 3 to the appropriate user ID
+// GET pricing plan ID from the Order ID
+function mpp_get_pricing_plan_from_the_order($order_id)
+{
+    $order = wc_get_order($order_id);
+    foreach ($order->get_items() as $item_key => $item) :
+        $item_id = $item->get_product_id();
+        $plan_id = get_post_meta($item_id, '_linked_pricing_plan', true) ? get_post_meta($item_id, '_linked_pricing_plan', true) : $item_id;
+        return $plan_id;
+    endforeach;
+    return false;
+}
 
+// GET acive pricing plan from all orders
+function mpp_get_active_pricing_plan_from_all_orders()
+{
+    $args = [
+        'post_type'   => 'shop_order',
+        'post_status' => ["wc-completed"],
+        'numberposts' => -1,
+        'meta_query'  => [
+            'relation' => 'AND',
+            [
+                'key'     => '_customer_user',
+                'value'   => get_current_user_id(),
+                'compare' => '=',
+            ],
+            [
+                'relation' => 'OR',
+                [
+                    'key'     => '_listing_id',
+                    'value'   => '0',
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => '_listing_id',
+                    'value'   => '',
+                    'compare' => '=',
+                ],
+            ],
+        ],
+    ];
+
+    $active_orders = new WP_Query($args);
+
+    while ($active_orders->have_posts()) : $active_orders->the_post();
+        $order = wc_get_order(get_the_ID());
+        foreach ($order->get_items() as $item_key => $item) :
+            $item_id = $item->get_product_id();
+            $plan_id = get_post_meta($item_id, '_linked_pricing_plan', true) ? get_post_meta($item_id, '_linked_pricing_plan', true) : $item_id;
+            if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans')  return $plan_id;
+        endforeach;
+    endwhile;
+
+    return false;
+}
 
 //add_action('woocommerce_payment_complete', 'wpp_assign_role_after_payment_complete');
 
@@ -403,7 +456,7 @@ add_action('wp_footer', function () {
         <script type="text/javascript">
             window.location.href = "<?php echo $link; ?>";
         </script>
-<?php
+    <?php
     }
 });
 
@@ -541,6 +594,25 @@ function mpp_is_android_or_ios()
     }
 }
 
+// REDIRECT PRICING PLAN PAGE
+
+add_action('atbdp_before_plan_page_loaded', function () {
+    $active_plan = mpp_get_active_pricing_plan_from_all_orders();
+    if ($active_plan) :
+        $url = MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $active_plan;
+    ?>
+        <script type="text/javascript">
+            window.location.replace("<?php echo $url; ?>");
+        </script>
+    <?php
+    else :
+    ?>
+        <p>Please buy a Membership first to be able to submit a Biz -</p>
+        <a class="button" href="<?php echo MPP_SITE_URL; ?>/bbapp/screen/iap_products/">Membership Plans</a>
+<?php
+    endif;
+});
+
 /*
 add_action('wp_footer', function () {
     e_var_dump(date('Y-m-d H:i:s', strtotime('+1 year')));
@@ -551,3 +623,6 @@ add_action('wp_footer', function () {
     $args['type'] = 'text';
     return $args;
 }); */
+
+// add_action('wp_footer', function () {
+// });
