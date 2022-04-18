@@ -459,3 +459,30 @@
 #fm_plans_container {
   display: none !important;
 }
+
+/* Product Page Design */
+.woocommerce ul.products li.product.product {
+  flex-direction: column;
+}
+
+.woocommerce li.product a.button.add_to_cart_button {
+  width: 100%;
+}
+
+.woocommerce ul.products li.product a img {
+  padding: 20px;
+}
+
+.woocommerce li.product .woocommerce-loop-product__title {
+  font-size: 16px !important;
+}
+
+.woocommerce ul.products li.product .price {
+  font-size: 14px;
+}
+
+.woocommerce li.product a.button.add_to_cart_button {
+  max-height: 46px;
+}
+
+/* Product Page Design */

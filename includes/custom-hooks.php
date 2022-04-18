@@ -30,6 +30,8 @@ class MPP_Child_Hooks
         add_action('template_redirect', array($this, 'template_redirect'));
         // Remove All Pricing Plan from the Product List Shop Page
         add_filter('pre_get_posts', array($this, 'remove_pricing_plans_from_shop_page'));
+        // Change the price label of the sale product
+        add_filter('woocommerce_subscriptions_product_price_string', array($this, 'woocommerce_subscriptions_product_price_string'), 10, 3);
     }
 
     // Change the pricing plan url for mobile
@@ -400,6 +402,16 @@ class MPP_Child_Hooks
             $query->set('tax_query', $tax_query);
         }
         return $query;
+    }
+
+    // Change the Price of the Sale products
+    public function woocommerce_subscriptions_product_price_string($string, $product, $include)
+    {
+        $sign_up_fee = get_post_meta($product->id, '_subscription_sign_up_fee', true);
+        if ($sign_up_fee && $sign_up_fee > 0) {
+            return '<span class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>' . $product->price . '<span class="woocommerce-Price-currencySymbol">৳&nbsp;</span></bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi>' . $sign_up_fee . '<span class="woocommerce-Price-currencySymbol">৳&nbsp;</span></bdi></span></ins> <span class="subscription-details"> / year</span></span>';
+        }
+        return $string;
     }
 }
 
