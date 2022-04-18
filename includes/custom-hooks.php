@@ -409,7 +409,7 @@ class MPP_Child_Hooks
     {
         $sign_up_fee = get_post_meta($product->id, '_subscription_sign_up_fee', true);
         if ($sign_up_fee && $sign_up_fee > 0) {
-            return '<span class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>' . $product->price . '<span class="woocommerce-Price-currencySymbol">৳&nbsp;</span></bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi>' . $sign_up_fee . '<span class="woocommerce-Price-currencySymbol">৳&nbsp;</span></bdi></span></ins> <span class="subscription-details"> / year</span></span>';
+            return '<span class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $product->price . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $sign_up_fee . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></ins> <span class="subscription-details"> / year</span></span>';
         }
         return $string;
     }
