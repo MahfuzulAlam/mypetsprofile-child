@@ -598,7 +598,7 @@ function mpp_is_android_or_ios()
 
 add_action('atbdp_before_plan_page_loaded', function () {
     $active_plan = mpp_get_active_pricing_plan_from_all_orders();
-    if (!$active_plan) :
+    if ($active_plan) :
         $url = MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $active_plan;
     ?>
         <script type="text/javascript">
