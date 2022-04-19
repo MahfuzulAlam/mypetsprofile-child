@@ -613,7 +613,7 @@ add_action('atbdp_before_plan_page_loaded', function () {
             <p>Please click the following button to learn how you can become an Member.</p>
         </div>
         <a class="button" href="<?php echo MPP_SITE_URL; ?>/bbapp/screen/iap_products/">Membership Plans</a>
-<?php
+    <?php
     endif;
 });
 
@@ -682,3 +682,33 @@ function mpp_disable_customer_order_email_if_free($recipient, $order)
 //     $order->calculate_totals();
 //     $order->update_status("wc-completed", "IAP order", TRUE);
 // });
+
+
+//Lets add Open Graph Meta Info
+
+function mpp_insert_fb_in_head()
+{
+    echo '<meta name="image" property="og:image" content="https://cdn.mypetsprofile.com/wp-content/uploads/2022/04/17132155/Feature-1200x600-1.webp"/>';
+}
+add_action('wp_head', 'mpp_insert_fb_in_head', 2);
+
+
+add_action('wp_head', function () {
+    if (mpp_is_android_or_ios()) {
+    ?>
+        <style>
+            .directorist-claim-listing-wrapper {
+                display: none
+            }
+        </style>
+<?php
+    }
+});
+
+
+function my_custom_register_msg_title()
+{
+    echo '<h3>My custom text</h3>';
+}
+
+add_action('bp_before_register_account_details', 'my_custom_register_msg_title');
