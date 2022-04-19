@@ -630,3 +630,55 @@ add_action('wp_footer', function () {
 
 // add_action('wp_footer', function () {
 // });
+
+/*
+add_filter('woocommerce_email_recipient_customer_completed_order', 'mpp_disable_customer_order_email_if_free', 10, 2);
+
+function mpp_disable_customer_order_email_if_free($recipient, $order)
+{
+    $page = $_GET['page'] = isset($_GET['page']) ? $_GET['page'] : '';
+    if ('wc-settings' === $page) {
+        //return $recipient;
+    }
+
+    //if ((float) $order->get_total() === '0.00') $recipient = '';
+
+    foreach ($order->get_items() as $item_id => $item) {
+        $product_id = $item->get_product_id();
+        if (in_array($product_id, array(18053, 403))) return '';
+        if ($product_id == 403) return '';
+    }
+
+    $recipient = '';
+
+    return $recipient;
+}
+*/
+
+// add_action('wp_footer', function () {
+//     $user_id = 2;
+//     $address = array(
+//         'first_name' => get_user_meta($user_id, 'first_name', true),
+//         'last_name'  => get_user_meta($user_id, 'last_name', true),
+//         'company'    => get_user_meta($user_id, 'billing_company', true),
+//         'email'      => get_user_meta($user_id, 'billing_email', true),
+//         'phone'      => get_user_meta($user_id, 'billing_phone', true),
+//         'address_1'  => get_user_meta($user_id, 'billing_address_1', true) . get_user_meta($user_id, 'billing_address_2', true),
+//         'address_2'  => 'IAP',
+//         'city'       => get_user_meta($user_id, 'billing_city', true),
+//         'state'      => get_user_meta($user_id, 'billing_state', true),
+//         'postcode'   => get_user_meta($user_id, 'billing_postcode', true),
+//         'country'    => get_user_meta($user_id, 'billing_country', true),
+//     );
+
+//     // Now we create the order
+//     $order = wc_create_order();
+
+//     // The add_product() function below is located in /plugins/woocommerce/includes/abstracts/abstract_wc_order.php
+//     $order->add_product(get_product(403), 1);
+
+//     $order->set_address($address, 'billing');
+
+//     $order->calculate_totals();
+//     $order->update_status("wc-completed", "IAP order", TRUE);
+// });
