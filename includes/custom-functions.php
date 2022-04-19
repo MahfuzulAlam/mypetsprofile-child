@@ -703,12 +703,5 @@ add_action('wp_head', function () {
         </style>
 <?php
     }
+    if (is_page('register')) echo '<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
 });
-
-
-function my_custom_register_msg_title()
-{
-    echo '<h3>My custom text</h3>';
-}
-
-add_action('bp_before_register_account_details', 'my_custom_register_msg_title');

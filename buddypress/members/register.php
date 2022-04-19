@@ -129,6 +129,3 @@
 </div>
 
 <?php bp_nouveau_signup_hook('after', 'page'); ?>
-
-<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer>
-</script>
