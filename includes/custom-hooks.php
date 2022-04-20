@@ -408,6 +408,7 @@ class MPP_Child_Hooks
                 'operator'  => 'NOT IN'
             );
             $query->set('tax_query', $tax_query);
+            $query->set('posts_per_page', -1);
         }
         return $query;
     }

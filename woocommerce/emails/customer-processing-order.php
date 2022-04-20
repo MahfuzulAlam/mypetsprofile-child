@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Customer completed order email
+ * Customer processing order email
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/emails/customer-completed-order.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/customer-processing-order.php.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
@@ -20,7 +20,6 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-$iap_order = $order->get_billing_address_2() == 'IAP' ? true : false;
 $product_ids = array();
 
 /*
@@ -88,50 +87,43 @@ else :
 			<p>Thank you</p>
 			<p>The MyPetsProfile™️ Team</p>
 		</div>
-		<?php
-	} else {
-		if ($iap_order) {
-		?>
-			<p><?php esc_html_e('We have finished processing your order.', 'woocommerce'); ?></p>
-	<?php
-		}
+<?php
 	}
 endif;
-if (!$iap_order) :
-	?>
 
-	<p><?php esc_html_e('We have finished processing your order.', 'woocommerce'); ?></p>
+?>
+<?php /* translators: %s: Order number */ ?>
+<p><?php printf(esc_html__('Just to let you know &mdash; we\'ve received your order #%s, and it is now being processed:', 'woocommerce'), esc_html($order->get_order_number())); ?></p>
+
 <?php
 
-	/*
+/*
  * @hooked WC_Emails::order_details() Shows the order details table.
  * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
  * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
  * @since 2.5.0
  */
-	do_action('woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email);
+do_action('woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email);
 
-	/*
+/*
  * @hooked WC_Emails::order_meta() Shows order meta data.
  */
-	do_action('woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email);
+do_action('woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email);
 
-	/*
+/*
  * @hooked WC_Emails::customer_details() Shows customer details
  * @hooked WC_Emails::email_address() Shows email address
  */
-	do_action('woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email);
+do_action('woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email);
 
-	/**
-	 * Show user-defined additional content - this is set in each email's settings.
-	 */
-	if ($additional_content) {
-		echo wp_kses_post(wpautop(wptexturize($additional_content)));
-	}
+/**
+ * Show user-defined additional content - this is set in each email's settings.
+ */
+if ($additional_content) {
+	echo wp_kses_post(wpautop(wptexturize($additional_content)));
+}
 
-	/*
+/*
  * @hooked WC_Emails::email_footer() Output the email footer
  */
-	do_action('woocommerce_email_footer', $email);
-
-endif;
+do_action('woocommerce_email_footer', $email);
