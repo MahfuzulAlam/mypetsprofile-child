@@ -245,13 +245,17 @@ class MPP_Child_Hooks
         $user_id = $user['user_id'];
         $user_membership_id = $user['user_membership_id'];
 
+        /* USER EMAIL */
+        global $current_user;
+        $user_email = $current_user->user_email;
+
         if (!empty($user_id)) {
 
             $address = array(
                 'first_name' => get_user_meta($user_id, 'first_name', true),
                 'last_name'  => get_user_meta($user_id, 'last_name', true),
                 'company'    => get_user_meta($user_id, 'billing_company', true),
-                'email'      => get_user_meta($user_id, 'billing_email', true),
+                'email'      => $user_email,
                 'phone'      => get_user_meta($user_id, 'billing_phone', true),
                 'address_1'  => get_user_meta($user_id, 'billing_address_1', true) . get_user_meta($user_id, 'billing_address_2', true),
                 'address_2'  => 'IAP',
