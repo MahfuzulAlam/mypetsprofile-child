@@ -688,7 +688,7 @@ function mpp_disable_customer_order_email_if_free($recipient, $order)
 
 function mpp_insert_fb_in_head()
 {
-    echo '<meta name="image" property="og:image" content="https://cdn.mypetsprofile.com/wp-content/uploads/2022/04/17132155/Feature-1200x600-1.webp"/>';
+    echo '<meta name="image" property="og:image" content="https://cdn.mypetsprofile.com/wp-content/uploads/2022/04/16144822/featured-image1-1.png"/>';
 }
 add_action('wp_head', 'mpp_insert_fb_in_head', 2);
 
