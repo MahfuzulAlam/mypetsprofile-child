@@ -705,3 +705,25 @@ add_action('wp_head', function () {
     }
     if (is_page('register')) echo '<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
 });
+
+
+/**  Add Reff on signup Buddyboss  **/
+
+add_action('bp_core_signup_user', function ($user_id) {
+    if (isset($_COOKIE['affwp_ref']) && !empty($_COOKIE['affwp_ref'])) {
+        $campaign = isset($_COOKIE['affwp_campaign']) && !empty($_COOKIE['affwp_campaign']) ? $_COOKIE['affwp_campaign'] : '';
+        affwp_add_referral(array(
+            'affiliate_id' => $_COOKIE['affwp_ref'],
+            'type'  => 'lead',
+            'amount'    => 0,
+            'description' => 'BB User Registration - ' . $user_id,
+            'reference' => 'bb_registraiton_' . $user_id,
+            'campaign' => $campaign,
+            'status' => 'unpaid'
+        ));
+    }
+});
+
+// add_action('wp_footer', function () {
+//     e_var_dump($_COOKIE);
+// });
