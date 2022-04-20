@@ -612,7 +612,13 @@ add_action('atbdp_before_plan_page_loaded', function () {
             <p>You’ve selected an area that is exclusive to Members only.</p>
             <p>Please click the following button to learn how you can become an Member.</p>
         </div>
-        <a class="button" href="<?php echo MPP_SITE_URL; ?>/bbapp/screen/iap_products/">Membership Plans</a>
+        <?php if (mpp_is_android_or_ios()) : ?>
+            <a class="button" href="<?php echo MPP_SITE_URL; ?>/bbapp/screen/iap_products/">Membership Plans</a>
+            <a class="button" target="_self" href="<?php echo MPP_SITE_URL; ?>/add-listing/"><span class="fa fa-redo"></span></a>
+        <?php else : ?>
+            <a class="button" href="<?php echo MPP_SITE_URL; ?>/mpp-memberships/">Membership Plans</a>
+            <a href="" class="button" onclick="location.reload();"><span class="fa fa-redo"></span> Refresh</a>
+        <?php endif; ?>
     <?php
     endif;
 });
@@ -716,8 +722,8 @@ add_action('bp_core_signup_user', function ($user_id) {
             'affiliate_id' => $_COOKIE['affwp_ref'],
             'type'  => 'lead',
             'amount'    => 0,
-            'description' => 'BB User Registration - ' . $user_id,
-            'reference' => 'bb_registraiton_' . $user_id,
+            'description' => 'User Registration',
+            'reference' => 'lead_' . $user_id,
             'campaign' => $campaign,
             'status' => 'unpaid'
         ));

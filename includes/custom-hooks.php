@@ -385,8 +385,11 @@ class MPP_Child_Hooks
     public function redirect_to_add_listing_page_after_purchase()
     {
         global $wp;
-        if (is_checkout() && !empty($wp->query_vars['order-received'])) {
-            $plan_id = mpp_get_pricing_plan_from_the_order($wp->query_vars['order-received']);
+        $order_id = $wp->query_vars['order-received'];
+        if (is_checkout() && !empty($order_id)) {
+            $order = new WC_Order($order_id);
+            $order->update_status('wc-completed');
+            $plan_id = mpp_get_pricing_plan_from_the_order($order_id);
             if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans') {
                 exit(wp_redirect(MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $plan_id));
             }
