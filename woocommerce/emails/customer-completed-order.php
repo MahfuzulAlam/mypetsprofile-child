@@ -67,8 +67,11 @@ else :
 	$plan_id = mpp_get_pricing_plan_from_the_order($order->get_id());
 	$purchase_form = '';
 	if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans') {
-		$purchase_form = MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $plan_id;
-
+		if ($plan_id == 18242) {
+			$purchase_form = MPP_SITE_URL . '/add-edit-pet-friendly-event';
+		} else {
+			$purchase_form = MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $plan_id;
+		}
 	?>
 		<div>
 			<p>Thank you for purchasing a MyPetsProfile™️ Neighborhood Biz Plan, with a Biz Profile and Group.</p>

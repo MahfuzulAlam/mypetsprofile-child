@@ -218,8 +218,18 @@ class MPP_Child_Hooks
     // Create Order Create a WooMembership
     public function wc_memberships_user_membership_created($membership_plan, $data)
     {
-        if ($this->wc_user_membership_created_by_order($data['user_membership_id'])) return;
         $product_ids = get_post_meta($membership_plan->id, '_product_ids', true);
+
+        if ($product_ids && count($product_ids) > 0) {
+            foreach ($product_ids as $product) {
+                // Add/Activate Affiliate
+                $this->add_affiliate_member($product, $data['user_id']);
+                // Event Activate Order
+                $this->on_activate_event_plan($product, $data['user_id']);
+            }
+        }
+
+        if ($this->wc_user_membership_created_by_order($data['user_membership_id'])) return;
 
         if ($product_ids && count($product_ids) > 0) {
             $this->add_woocommerce_order_on_create_membership($data, $product_ids);
@@ -229,13 +239,6 @@ class MPP_Child_Hooks
             //     $user_membership = wc_memberships_get_user_membership($data['user_id'], $membership_plan->id);
             //     $user_membership->add_note('Please go to the following link and add your listing - <a href="https://communityportal.mypetsprofile.com/add-listing/">Add Biz/Event</a>', true);
             // }
-
-            foreach ($product_ids as $product) {
-                // Add/Activate Affiliate
-                $this->add_affiliate_member($product, $data['user_id']);
-                // Event Activate Order
-                $this->on_activate_event_plan($product, $data['user_id']);
-            }
         }
     }
 
@@ -387,6 +390,11 @@ class MPP_Child_Hooks
         global $wp;
         $order_id = $wp->query_vars['order-received'];
         if (is_checkout() && !empty($order_id)) {
+            // EVENT
+            if (mpp_event_id_in_the_order($order_id)) {
+                exit(wp_redirect(MPP_SITE_URL . '/add-edit-pet-friendly-event'));
+            }
+            // PLANS
             $order = new WC_Order($order_id);
             $order->update_status('wc-completed');
             $plan_id = mpp_get_pricing_plan_from_the_order($order_id);
@@ -396,9 +404,6 @@ class MPP_Child_Hooks
                 } else {
                     exit(wp_redirect(MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $plan_id));
                 }
-            }
-            if (mpp_event_id_in_the_order($order_id)) {
-                exit(wp_redirect(MPP_SITE_URL . '/add-edit-pet-friendly-event'));
             }
         }
     }
