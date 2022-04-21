@@ -322,7 +322,7 @@ function mpp_get_active_pricing_plan_from_all_orders()
         foreach ($order->get_items() as $item_key => $item) :
             $item_id = $item->get_product_id();
             $plan_id = get_post_meta($item_id, '_linked_pricing_plan', true) ? get_post_meta($item_id, '_linked_pricing_plan', true) : $item_id;
-            if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans')  return $plan_id;
+            if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans' && !in_array($plan_id, array(18059, 18242)))  return $plan_id;
         endforeach;
     endwhile;
 
