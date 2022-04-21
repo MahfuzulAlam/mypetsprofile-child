@@ -294,7 +294,7 @@ class MPP_Child_Hooks
     // ADD Affiliate Member
     public function add_affiliate_member($product_id, $user_id)
     {
-        if (function_exists("affwp_get_affiliate_id") && $product_id == 18480) {
+        if (function_exists("affwp_get_affiliate_id") && $product_id == 18053) {
             $affiliate_id = affwp_get_affiliate_id($user_id);
             if ($affiliate_id) {
                 affwp_set_affiliate_status($affiliate_id, 'active');
@@ -307,7 +307,7 @@ class MPP_Child_Hooks
     // On Activate Events
     public function on_activate_event_plan($product_id, $user_id)
     {
-        if ($product_id == 18489) {
+        if ($product_id == 18236) {
             update_user_meta($user_id, 'mec_active_plan', 8);
             update_user_meta($user_id, 'mec_event_status', 'active');
         }
