@@ -391,7 +391,14 @@ class MPP_Child_Hooks
             $order->update_status('wc-completed');
             $plan_id = mpp_get_pricing_plan_from_the_order($order_id);
             if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans') {
-                exit(wp_redirect(MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $plan_id));
+                if ($plan_id == 18059) {
+                    exit(wp_redirect(MPP_SITE_URL . '/affiliate-area'));
+                } else {
+                    exit(wp_redirect(MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $plan_id));
+                }
+            }
+            if (mpp_event_id_in_the_order($order_id)) {
+                exit(wp_redirect(MPP_SITE_URL . '/add-edit-pet-friendly-event'));
             }
         }
     }

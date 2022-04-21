@@ -274,6 +274,17 @@ function mpp_get_pricing_plan_from_the_order($order_id)
     return false;
 }
 
+// Check if Event ID
+function mpp_event_id_in_the_order($order_id)
+{
+    $order = wc_get_order($order_id);
+    foreach ($order->get_items() as $item_key => $item) :
+        $item_id = $item->get_product_id();
+        if ($item_id == 18236) return true;
+    endforeach;
+    return false;
+}
+
 // GET acive pricing plan from all orders
 function mpp_get_active_pricing_plan_from_all_orders()
 {

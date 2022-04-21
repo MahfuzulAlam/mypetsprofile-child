@@ -85,7 +85,12 @@ $active_event = get_user_meta($user_id, 'mec_event_status', true);
                     <p>If you want to create another event you need to buy an Event Membership.</p>
                     <p>Please click the following button to but an Event Membership.</p>
                 </div>
-                <?php echo sprintf('<a href=' . MPP_SITE_URL . '"/bbapp/products/8">' . esc_html__('Get Pet-friendly Event', 'mec') . '</a>'); ?>
+                <?php if (mpp_is_android_or_ios()) : ?>
+                    <a class="button" href="https://mypetsprofile.com/bbapp/screen/iap_products/">Get Pet-friendly Event</a>
+                <?php else : ?>
+                    <a class="button" href="<?php echo MPP_SITE_URL; ?>/product/subscription-plan-for-1-one-event-listing/">Get Pet-friendly Event</a>
+                <?php endif; ?>
+                <a class="button" target="_self" href="<?php echo MPP_SITE_URL; ?>/pet-friendly-events/"><span class="fa fa-redo"></span></a>
             </div>
         <?php endif; ?>
         <?php do_action('mec_fes_list'); ?>
@@ -179,7 +184,12 @@ $active_event = get_user_meta($user_id, 'mec_event_status', true);
                 <p>You’ve selected an area that is exclusive to Members only.</p>
                 <p>Please click the following button to learn how you can become an Member.</p>
             </div>
-            <div class="mec-fes-list-top-actions"><?php echo sprintf('<a href="' . MPP_SITE_URL . '/bbapp/products/8">' . esc_html__('Get (1) Pet-friendly Event', 'mec') . '</a>'); ?></div>
+            <?php if (mpp_is_android_or_ios()) : ?>
+                <a class="button" href="https://mypetsprofile.com/bbapp/screen/iap_products/">Get (1) Pet-friendly Event</a>
+            <?php else : ?>
+                <a class="button" href="<?php echo MPP_SITE_URL; ?>/product/subscription-plan-for-1-one-event-listing/">Get (1) Pet-friendly Event</a>
+            <?php endif; ?>
+            <a class="button" target="_self" href="<?php echo MPP_SITE_URL; ?>/pet-friendly-events/"><span class="fa fa-redo"></span></a>
         <?php endif; ?>
     <?php endif; ?>
 </div>
