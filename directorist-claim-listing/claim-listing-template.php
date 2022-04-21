@@ -39,6 +39,7 @@ if ($claimed_by_admin || ('claim_approved' === $claim_fee)) return;
                         <li>Give customers a pet concierge-like access</li>
                         <li>Customers get access to local pet biz' and events</li>
                     </ul>
+                    <p style="font-size: 16px"><b>Claim this business for $99./year</b></p>
                 </div>
                 <a href="#" class=" directorist-btn directorist-btn-primary directorist-btn-modal directorist-btn-modal-js" data-directorist_target="directorist-claim-listing-modal"><?php _e("$claim_now", 'directorist-claim-listing') ?></a>
             </div>
@@ -80,7 +81,7 @@ if ($claimed_by_admin || ('claim_approved' === $claim_fee)) return;
         <div class="directorist-modal__content">
             <form id="directorist-claimer__form" class="directorist-claimer__form">
                 <div class="directorist-modal__header">
-                    <h3 class="directorist-modal-title" id="directorist-claim-label"><?php _e('Claim This Listing', 'directorist-claim-listing'); ?></h3>
+                    <h3 class="directorist-modal-title" id="directorist-claim-label"><?php _e('Claim This Business', 'directorist-claim-listing'); ?></h3>
                     <a href="#" class="directorist-modal-close directorist-modal-close-js"><span aria-hidden="true">&times;</span></a>
                 </div>
                 <div class="directorist-modal__body">
@@ -91,10 +92,6 @@ if ($claimed_by_admin || ('claim_approved' === $claim_fee)) return;
                     <div class="directorist-form-group">
                         <label for="directorist-claimer__phone" class="directorist-claimer__phone"><?php _e('Phone', 'directorist-claim-listing'); ?> <span class="directorist-claimer__star-red">*</span></label>
                         <input type="tel" class="directorist-form-element" id="directorist-claimer__phone" placeholder="<?php _e('111-111-235', 'directorist-claim-listing'); ?>" required>
-                    </div>
-                    <div class="directorist-form-group">
-                        <label for="directorist-claimer__details" class="directorist-claimer__details"><?php _e('Verification Details', 'directorist-claim-listing'); ?> <span class="directorist-claimer__star-red">*</span></label>
-                        <textarea class="directorist-form-element" id="directorist-claimer__details" rows="3" placeholder="<?php _e('Details description about your business', 'directorist-claim-listing'); ?>..." required></textarea>
                     </div>
                     <div class="directorist-form-group">
                         <?php
