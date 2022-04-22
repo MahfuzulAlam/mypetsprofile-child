@@ -25,6 +25,8 @@ class MPP_Child_Shortcode
         add_shortcode('mpp-funnies-contest', array($this, 'mpp_funnies_contest'));
         // Claim Listing IAP
         add_shortcode('claim-listing-iap', array($this, 'claim_listing_iap'));
+        // Test Shortcode
+        add_shortcode('test-shortcode', array($this, 'test_shortcode'));
     }
 
     // BuddyBoss Group Link on Linsting Page
@@ -580,8 +582,20 @@ class MPP_Child_Shortcode
                 <p>Please buy a membership plan first to claim this Biz listing.</p>
                 <a href="<?php echo MPP_SITE_URL; ?>/bbapp/products/18" class="claim-listing-iap-action directorist-btn directorist-btn-primary">Membership Plans</a>
                 <a href="" class="mpp-refresh" onclick="location.reload();"><span class="fa fa-redo"></span> Refresh</a>
-<?php
+            <?php
             endif;
+        endif;
+        return ob_get_clean();
+    }
+
+    // Test Shortcode
+    public function test_shortcode()
+    {
+        ob_start();
+        if (current_user_can('administrator')) :
+            ?>
+            <a href="<?php echo MPP_SITE_URL; ?>" target="_blank">Download</a>
+<?php
         endif;
         return ob_get_clean();
     }
