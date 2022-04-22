@@ -32,6 +32,10 @@ class MPP_Child_Hooks
         add_filter('pre_get_posts', array($this, 'remove_pricing_plans_from_shop_page'));
         // Change the price label of the sale product
         add_filter('woocommerce_subscriptions_product_price_string', array($this, 'woocommerce_subscriptions_product_price_string'), 10, 3);
+        // WooCommerce Quick Action Custom Field Display
+        add_action('woocommerce_product_quick_edit_start', array($this, 'mpp_custom_field_bulk_edit_input'));
+        // WooCommerce Quick Action Custom Field Save
+        add_action('woocommerce_product_quick_edit_save', array($this, 'mpp_custom_field_bulk_edit_save'));
     }
 
     // Change the pricing plan url for mobile
@@ -175,7 +179,7 @@ class MPP_Child_Hooks
                 </p>
             </td>
         </tr>
-<?php
+    <?php
     }
 
     // Save Category App Image Meta
@@ -421,6 +425,18 @@ class MPP_Child_Hooks
             );
             $query->set('tax_query', $tax_query);
             $query->set('posts_per_page', -1);
+            $query->set('meta_query', array(
+                'relation' => 'OR',
+                'rank_position' => array(
+                    'key' => 'rank_position',
+                    'compare' => 'EXISTS',
+                ),
+                'rank_position_not' => array(
+                    'key' => 'rank_position',
+                    'compare' => 'NOT EXISTS',
+                )
+            ));
+            $query->set('orderby', array('rank_position' => 'ASC'));
         }
         return $query;
     }
@@ -433,6 +449,30 @@ class MPP_Child_Hooks
             return '<span class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $product->price . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $sign_up_fee . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></ins> <span class="subscription-details"> / year</span></span>';
         }
         return $string;
+    }
+
+    // WooCommerce Quick Action Custom Field Display
+    function mpp_custom_field_bulk_edit_input()
+    {
+    ?>
+        <label>
+            <span class="title"><?php esc_html_e('Rank', 'woocommerce'); ?></span>
+            <span class="input-text-wrap">
+                <input type="text" name="rank_position" class="text" value="">
+            </span>
+        </label>
+        <br class="clear" />
+<?php
+    }
+
+    // WooCommerce Quick Action Custom Field Save
+    function mpp_custom_field_bulk_edit_save($product)
+    {
+        $post_id = $product->get_id();
+        if (isset($_REQUEST['rank_position'])) {
+            $rank_position = $_REQUEST['rank_position'];
+            update_post_meta($post_id, 'rank_position', wc_clean($rank_position));
+        }
     }
 }
 

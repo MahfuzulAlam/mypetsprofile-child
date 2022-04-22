@@ -515,3 +515,7 @@
 .single-product div.product div.images img {
   padding: 50px;
 }
+
+.directorist-claim-listing__description li {
+  font-size: 15px;
+}

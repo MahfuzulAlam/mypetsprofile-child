@@ -85,6 +85,8 @@ $active_event = get_user_meta($user_id, 'mec_event_status', true);
                     <p>If you want to create another event you need to buy an Event Membership.</p>
                     <p>Please click the following button to but an Event Membership.</p>
                 </div>
+            </div>
+            <div class="event-buy-plan-buttons" style="text-align:center; margin-bottom:20px">
                 <?php if (mpp_is_android_or_ios()) : ?>
                     <a class="button" href="https://mypetsprofile.com/bbapp/screen/iap_products/">Get Pet-friendly Event</a>
                 <?php else : ?>
