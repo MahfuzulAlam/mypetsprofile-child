@@ -106,7 +106,7 @@ class MPP_Child_Hooks
             }
 
             $custom_avatar_fetch = $this->bp_process_group_icon($groups_template->group->id);
-            $custom_avatar = !empty($custom_avatar_fetch) ? $custom_avatar_fetch : $custom_avatar;
+            $custom_avatar = isset($custom_avatar_fetch['full']) && !empty($custom_avatar_fetch['full']) ? $custom_avatar_fetch['full'] : $custom_avatar;
 
             if ($bp->current_action == "")
                 return '<img class="avatar" src="' . $custom_avatar . '" alt="' . attribute_escape($groups_template->group->name) . '" width="' . BP_AVATAR_THUMB_WIDTH . '" height="' . BP_AVATAR_THUMB_HEIGHT . '" />';
