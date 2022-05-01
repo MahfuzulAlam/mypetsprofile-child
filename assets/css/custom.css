@@ -269,7 +269,7 @@
   }
   #directorist-add-listing-form directorist-add-listing-form,
   #directorist-add-listing-form .directorist-content-module {
-    background-color: #1c5877;
+    background-color: #6ec1e4;
   }
 
   #directorist-add-listing-form .directorist-content-module__title h4,
@@ -282,17 +282,17 @@
   #directorist-add-listing-form .directorist-switch-label,
   #directorist-add-listing-form .directorist-bh-timezone label,
   #directorist-add-listing-form .directorist-form-description {
-    color: #fff !important;
+    color: #000 !important;
   }
   #directorist-add-listing-form .directorist-bh-dayzone__single {
     min-height: unset !important;
     margin-bottom: 0px !important;
   }
   #directorist-add-listing-form .directorist-bh-dayzone__single i {
-    color: #fff;
+    color: #000;
   }
   .page-id-3911 .site-content {
-    background-color: #1c5877;
+    background-color: #6ec1e4;
     padding-right: 0;
     padding-left: 0;
     min-height: 100vh;
@@ -345,14 +345,14 @@
   .page-id-3881 #form_755,
   .page-id-3881 .bps-form-title,
   .page-id-3881 #heading_contains_wrap {
-    background-color: #225073;
+    background-color: #6ec1e4;
   }
 
   .page-id-3881 #form_755 label,
   .page-id-3881 .bps-form-title,
   .page-id-3881 #heading_contains_wrap strong,
   .page-id-3881 #heading_contains_wrap p {
-    color: #fff;
+    color: #000;
   }
 
   .page-id-3881 #form_755 input {
@@ -494,16 +494,20 @@
 /* Event Submission Page */
 @media only screen and (max-width: 600px) {
   .page-id-18353 .container {
-    margin: 0 -10px !important;
-    background-color: #1c5877;
+    margin: -10px;
+    background-color: #6ec1e4;
   }
 
   .page-id-18353 .mec-fes-form {
-    background-color: #1c5877;
+    background-color: #6ec1e4;
   }
 
   .page-id-18353 a.mec-fes-form-back-to {
     background-color: #e23636;
+  }
+
+  .bp-profile-search-widget {
+    background-color: #6ec1e4 !important;
   }
 }
 /* Event Submission Page */
@@ -518,4 +522,8 @@
 
 .directorist-claim-listing__description li {
   font-size: 15px;
+}
+
+#mpp_profile_box .bs-styled-radio:checked + label:after {
+  top: 8px !important;
 }

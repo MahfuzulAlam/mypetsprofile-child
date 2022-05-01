@@ -76,7 +76,7 @@ function mpp_custom_google_map_scripts()
 	wp_enqueue_script('bbd-custom-google', get_stylesheet_directory_uri() . '/assets/js/custom-google.js', array('directorist-google-map'), '1.0.0', true);
 	wp_localize_script('bbd-custom-google', 'directorist_options', bbd_get_option_data());
 }
-add_action('wp_enqueue_scripts', 'mpp_custom_google_map_scripts');
+add_action('wp_enqueue_scripts', 'mpp_custom_google_map_scripts', 0);
 
 /**************************** CUSTOM ADMIN ENQUEUES ****************************/
 
@@ -93,6 +93,7 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-group.php');
 	//require_once(get_stylesheet_directory() . '/includes/buddyboss/class-event.php');
+	//require_once(get_stylesheet_directory() . '/assets/fpdf/fpdf.php');
 
 	// IAP Connection to the Pricing Plan
 

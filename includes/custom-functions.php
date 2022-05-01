@@ -141,12 +141,11 @@ add_action('init', function () {
     $tools->importable_fields['social_facebook'] = "Facebook Url";
 });
 
-function bbd_inspect_scripts()
+function mpp_bbd_inspect_scripts()
 {
-    global $wp_scripts;
     wp_dequeue_script('directorist-global-script');
 }
-//add_action('wp_print_scripts', 'bbd_inspect_scripts');
+add_action('wp_print_scripts', 'mpp_bbd_inspect_scripts');
 
 function bbd_get_option_data()
 {
@@ -718,7 +717,7 @@ add_action('wp_head', function () {
                 display: none
             }
         </style>
-<?php
+        <?php
     }
     if (is_page('register')) echo '<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
 });
@@ -741,74 +740,512 @@ add_action('bp_core_signup_user', function ($user_id) {
     }
 });
 
-// add_action('wp_footer', function () {
-//     e_var_dump($_COOKIE);
-// });
 
+// Shortcode User Field
+add_shortcode('bb-user-field', function ($atts) {
+    $atts = shortcode_atts(array(
+        'group' => 'Details',
+        'title' => 'Details'
+    ), $atts);
+    ob_start();
+    $member_id = bbp_get_user_id();
+    $field_groups = bp_profile_get_field_groups();
+
+    if (isset($_POST['mpp_form_submitted']) && !empty($_POST['mpp_form_submitted'])) {
+        if (isset($_POST['mpp_profile_box']) && count($_POST['mpp_profile_box']) > 0) {
+            $profile_fields = $_POST['mpp_profile_box'];
+            foreach ($profile_fields as $field_id => $field_value) {
+                $field_options = xprofile_get_field($field_id, $member_id);
+                if ($field_options->type == 'datebox') $field_value = $field_value . ' 00:00:00';
+                xprofile_set_field_data($field_id, $member_id, $field_value);
+            }
+        }
+    }
+
+    foreach ($field_groups as $field_group) {
+        if ($field_group->name == $atts['group']) {
+        ?>
+            <form id="mpp_profile_box" method="post">
+                <?php
+                foreach ($field_group->fields as $field) {
+                    if (get_current_user_id() == $member_id) {
+                        //e_var_dump(bp_get_profile_field_data(array('user_id' => $member_id, 'field' => $field->id)));
+                        $field_value = $field->type == "telephone" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
+                ?>
+                        <h5><?php echo $field->name; ?></h5>
+                    <?php
+                        mpp_profile_field_html($field, $field_value, $member_id);
+                    } else {
+                        $field_value = bp_get_profile_field_data(array('user_id' => $member_id, 'field' => $field->id));
+                    ?>
+                        <h5><?php echo $field->name; ?></h5>
+                        <?php
+                        if ($field_value && !empty($field_value)) {
+                        ?>
+                            <p><?php echo $field_value; ?></p>
+                        <?php
+                        } else {
+                        ?>
+                            <p>-</p>
+                    <?php
+                        }
+                    }
+                }
+                if (get_current_user_id() == $member_id) {
+                    ?>
+                    <input type="submit" class="button" value="Update" name="mpp_form_submitted" />
+                <?php
+                }
+                ?>
+            </form>
+    <?php
+        }
+    }
+    ?>
+    <?php
+    return ob_get_clean();
+});
+
+function mpp_profile_field_html($field, $field_value, $member_id)
+{
+    //echo $field->type;
+    switch ($field->type) {
+        case 'selectbox':
+            $field_options = xprofile_get_field($field->id, $member_id);
+            $options = $field_options->get_children();
+    ?>
+            <p><select name="mpp_profile_box[<?php echo $field->id; ?>]" data-field="<?php echo $field->id; ?>">
+                    <?php foreach ($options as $option) : ?>
+                        <option value="<?php echo $option->name; ?>" <?php selected($field_value, $option->name, true); ?>><?php echo $option->name; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </p>
+        <?php
+            break;
+        case 'radio':
+            $field_options = xprofile_get_field($field->id, $member_id);
+            $options = $field_options->get_children();
+        ?>
+            <div class="input-options radio-button-options">
+                <?php foreach ($options as $option) : ?>
+                    <div class="bp-radio-wrap">
+                        <input type="radio" name="mpp_profile_box[<?php echo $field->id; ?>]" id="option_<?php echo $option->id; ?>" value="<?php echo $option->name; ?>" class="bs-styled-radio" <?php checked($field_value, $option->name, true); ?>>
+                        <label for="option_<?php echo $option->id; ?>" class="option-label"><?php echo $option->name; ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php
+            break;
+        case 'textbox':
+        ?>
+            <p><input type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></p>
+        <?php
+            break;
+        case 'textarea':
+        ?>
+            <p><textarea type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" data-field="<?php echo $field->id; ?>" cols="50"><?php echo $field_value; ?></textarea></p>
+        <?php
+            break;
+        case 'datebox':
+        ?>
+            <p class="mpp-field-datebox"><?php echo $field_value; ?></p>
+            <p><input type="date" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></p>
+        <?php
+            break;
+        default:
+        ?>
+            <p><input type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></p>
+        <?php
+            break;
+    }
+}
+
+add_shortcode('bb-user-field-group', function ($atts) {
+    $atts = shortcode_atts(array(
+        'group' => '1',
+        'title' => 'Details'
+    ), $atts);
+
+    $member_id = bbp_get_user_id();
+    $field_groups = bp_profile_get_field_groups();
+
+    ob_start();
+    if (get_current_user_id() == $member_id) {
+        ?>
+        <script type="text/javascript">
+            window.location.replace("<?php echo bbp_get_user_profile_url(); ?>/profile/edit/group/<?php echo $atts['group']; ?>/");
+        </script>
+        <?php
+    } else {
+        foreach ($field_groups as $field_group) {
+            if ($field_group->id == $atts['group']) {
+                foreach ($field_group->fields as $field) {
+                    $field_value = bp_get_profile_field_data(array('user_id' => $member_id, 'field' => $field->id));
+        ?>
+                    <h5><?php echo $field->name; ?></h5>
+                    <?php
+                    if ($field_value && !empty($field_value)) {
+                    ?>
+                        <p><?php echo $field_value; ?></p>
+                    <?php
+                    } else {
+                    ?>
+                        <p>-</p>
+        <?php
+                    }
+                }
+            }
+        }
+    }
+    return ob_get_clean();
+});
+
+add_action('wp_head', function () {
+    if (mpp_is_android_or_ios()) {
+        ?>
+        <style>
+            .bbp-user-page .profile-header,
+            .bbp-user-page .bp-profile-wrapper .bp-subnavs,
+            .bbp-user-page .bp-profile-wrapper .button-tabs {
+                display: none
+            }
+
+            .bbp-user-page .bp-profile-wrapper,
+            .bbp-user-page .site-content {
+                background-color: #6ec1e4
+            }
+
+            .bbp-user-page .bs-bp-container {
+                padding: 0
+            }
+
+            .bp-profile-content {
+                padding: 0
+            }
+
+            #buddypress #profile-edit-form fieldset {
+                margin-bottom: 10px;
+            }
+
+            #buddypress #profile-edit-form legend:not(.bp-screen-reader-text) {
+                text-transform: uppercase;
+                color: #000;
+            }
+
+            #buddypress #profile-edit-form input[type=text] {
+                border-radius: 5px;
+            }
+
+            .bbp-user-page .bp-profile-wrapper {
+                border: none;
+            }
+        </style>
+    <?php
+    }
+});
+
+// PET PDF UPLOAD
+
+add_shortcode('mpp_submit_pdf', function () {
+    $uploaded = false;
+    $file_type_error = false;
+    if (isset($_POST['submit_pdf'])) {
+        if (!empty($_FILES)) {
+            foreach ($_FILES as $file) {
+                if (is_array($file)) {
+                    $allowed = array('pdf', 'docx', 'doc');
+                    $filename = $file['name'];
+                    $ext = pathinfo($filename, PATHINFO_EXTENSION);
+                    if (!in_array($ext, $allowed)) {
+                        $file_type_error = true;
+                    } else {
+                        $attachment_id = mpp_upload_user_file($file);
+                        if ($attachment_id) {
+                            $first_name = xprofile_get_field_data(1, get_current_user_id());
+                            $last_name = xprofile_get_field_data(2, get_current_user_id());
+
+                            $doc = bp_document_add(
+                                array(
+                                    'attachment_id' => $attachment_id,
+                                    'group_id' => bp_get_current_group_id(),
+                                    'blog_id' => 1,
+                                    'title' => 'Pet-Profile-' . $first_name . '-' . $last_name,
+                                )
+                            );
+
+                            if ($doc) {
+                                bp_document_update_meta($doc, 'file_name', 'Pet-Profile-' . $first_name . '-' . $last_name);
+                                bp_document_update_meta($doc, 'extension', 'pdf');
+                                $uploaded = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    ob_start();
+    if ($uploaded) {
+    ?>
+        <p>Your pet profile has been updated successfully.</p>
+    <?php
+    }
+    if ($file_type_error) {
+    ?>
+        <p>Please upload allowed file type (.pdf, .doc, .docx).</p>
+    <?php
+    }
+    ?>
+    <form id="mpp_submit_pdf" method="post" enctype="multipart/form-data">
+        <label for="myfile">Select a file:</label><br>
+        <input type="file" id="myfile" name="myfile">
+        <br><br>
+        <input type="submit" name="submit_pdf" value="Upload" class="button" />
+    </form>
+    <?php
+    return ob_get_clean();
+});
+
+function mpp_upload_user_file($file = array())
+{
+    require_once(ABSPATH . 'wp-admin/includes/admin.php');
+    $file_return = wp_handle_upload($file, array('test_form' => false));
+    if (isset($file_return['error']) || isset($file_return['upload_error_handler'])) {
+        return false;
+    } else {
+        $filename = $file_return['file'];
+        $attachment = array(
+            'post_mime_type' => $file_return['type'],
+            'post_title' => preg_replace('/\.[^.]+$/', '', basename($filename)),
+            'post_content' => '',
+            'post_status' => 'inherit',
+            'guid' => $file_return['url']
+        );
+        $attachment_id = wp_insert_attachment($attachment, $file_return['url']);
+        //require_once(ABSPATH . 'wp-admin/includes/image.php');
+        require_once ABSPATH . 'wp-admin' . '/includes/image.php';
+        require_once ABSPATH . 'wp-admin' . '/includes/file.php';
+        require_once ABSPATH . 'wp-admin' . '/includes/media.php';
+        $attachment_data = wp_generate_attachment_metadata($attachment_id, $filename);
+        wp_update_attachment_metadata($attachment_id, $attachment_data);
+        if (0 < intval($attachment_id)) {
+            return $attachment_id;
+        }
+    }
+    return false;
+}
+
+function mpp_remove_group_documents_tab()
+{
+    if (!groups_is_user_admin(get_current_user_id(), bp_get_current_group_id()))
+        bp_core_remove_subnav_item(bp_get_current_group_slug(), 'documents');
+}
+add_action('bp_setup_nav', 'mpp_remove_group_documents_tab', 15);
+
+// MPP QnA PDF Generator
+add_shortcode('mpp-qna-pdf-gen', function () {
+    $member_id = bbp_get_user_id();
+    $field_info = array();
+    $field_groups = bp_profile_get_field_groups();
+
+    if (isset($_POST['mpp_form_submitted']) && !empty($_POST['mpp_form_submitted'])) {
+        if (isset($_POST['mpp_profile_box']) && count($_POST['mpp_profile_box']) > 0) {
+            $profile_fields = $_POST['mpp_profile_box'];
+            foreach ($profile_fields as $field_id => $field_value) {
+                $field_options = xprofile_get_field($field_id, $member_id);
+                if ($field_options->type == 'datebox') $field_value = $field_value . ' 00:00:00';
+                xprofile_set_field_data($field_id, $member_id, $field_value);
+                $field_info[$field_id]['key'] = $field_options->description ? $field_options->description : $field_options->name;
+                $field_info[$field_id]['value'] = $field_value;
+            }
+    ?>
+            <script type="text/javascript">
+                startQnaProcessing('<?php echo json_encode($field_info); ?>', '<?php bp_loggedin_user_avatar('html=false'); ?>');
+            </script>
+        <?php
+        }
+    }
+    $field_description = array();
+    ob_start();
+    foreach ($field_groups as $field_group) {
+        if ($field_group->id == 6) {
+
+            //e_var_dump($field_group->fields);
+        ?>
+            <form id="mpp_profile_box" method="post">
+                <?php
+                foreach ($field_group->fields as $field) {
+                    $field_description['mpp_profile_box[' . $field->id . ']'] = $field->description ? $field->description : $field->name;
+                    if (get_current_user_id() == $member_id) {
+                        //e_var_dump(bp_get_profile_field_data(array('user_id' => $member_id, 'field' => $field->id)));
+                        $field_value = $field->type == "telephone" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
+                ?>
+                        <h5><?php echo $field->description ? $field->description : $field->name; ?></h5>
+                    <?php
+                        mpp_profile_field_html($field, $field_value, $member_id);
+                    } else {
+                        $field_value = bp_get_profile_field_data(array('user_id' => $member_id, 'field' => $field->id));
+                    ?>
+                        <h5><?php echo $field->name; ?></h5>
+                        <?php
+                        if ($field_value && !empty($field_value)) {
+                        ?>
+                            <p><?php echo $field_value; ?></p>
+                        <?php
+                        } else {
+                        ?>
+                            <p>-</p>
+                    <?php
+                        }
+                    }
+                }
+                if (get_current_user_id() == $member_id) {
+                    ?>
+                    <input type="submit" class="button" value="Update" name="mpp_form_submitted" id="mpp_form_submitted" data-description='<?php echo json_encode($field_description); ?>' data-avatar="<?php bp_loggedin_user_avatar('html=false'); ?>" />
+                <?php
+                }
+                ?>
+            </form>
+    <?php
+        }
+    }
+    return ob_get_clean();
+});
 
 add_action('wp_footer', function () {
-    if (!is_page('test-shortcode') && !is_page(19392)) return;
-    $multiple_recipients = array(
-        'recipient1@example.com',
-        'recipient2@foo.example.com'
-    );
-    $subj = 'The email subject';
-    $body = 'This is the body of the email';
+    ?>
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
 
-    require(get_stylesheet_directory() . '/assets/fpdf/fpdf.php');
-    $pdf = new FPDF('P', 'pt', array(500, 233));
-    // $pdf->AddFont('Georgiai', '', 'georgiai.php');
-    $pdf->AddPage();
-    //$pdf->Image(get_stylesheet_directory() . '/assets/fpdf/image.jpg', 0, 0, 500);
-    //$pdf->SetFont('georgiai', '', 16);
-    $pdf->SetFont('Arial', 'B', 16);
-    $pdf->Cell(40, 10, 'Hello World!');
+            $("#mpp_form_submitted").on('click', function(e) {
+                e.preventDefault();
+                var field_description = $(this).attr('data-description');
+                var avatar_image = $(this).attr('data-avatar');
+                var fieldset = {};
+                field_description = JSON.parse(field_description);
+                var formdata = $('#mpp_profile_box').serializeArray().reduce(function(obj, item) {
+                    obj[item.name] = item.value;
+                    return obj;
+                }, {});
+                $.each(formdata, function(key, value) {
+                    fieldset[key] = {
+                        label: field_description[key],
+                        data: value
+                    };
+                });
+                createQnaPdfNew(fieldset, avatar_image);
+            });
 
-    // email stuff (change data below)
-    $to = "a_mahfuzul@yahoo.com";
-    $from = "a_mahfuzul@yahoo.com";
-    $subject = "send email with pdf attachment";
-    $message = "<p>Please see the attachment.</p>";
+            async function createQnaPdfNew(info, pp) {
+                // Create a new PDFDocument
+                const pdfDoc = await PDFDocument.create();
 
-    // a random hash will be necessary to send mixed content
-    $separator = md5(time());
+                // Embed the Times Roman font
+                const timesRomanFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    // carriage return type (we use a PHP end of line constant)
-    $eol = PHP_EOL;
+                // Add a blank page to the document
+                const page = pdfDoc.addPage();
+                const page2 = pdfDoc.addPage();
+                //const page2 = pdfDoc.addPage();
 
-    // attachment name
-    $filename = "test.pdf";
+                // Get the width and height of the page
+                const {
+                    width,
+                    height
+                } = page.getSize();
 
-    // encode data (puts attachment in proper format)
-    $pdfdoc = $pdf->Output("", "S");
-    $attachment = chunk_split(base64_encode($pdfdoc));
+                // Image Handling
+                //https://communityportal.mypetsprofile.com/wp-content/uploads/2020/06/MPP-Transparent-logo.png
+                const emblemUrl =
+                    "https://mypetsprofile.com/wp-content/uploads/2020/06/MPP-Transparent-logo.png";
+                const emblemImageBytes = await fetch(emblemUrl).then((res) =>
+                    res.arrayBuffer()
+                );
+                const emblemImage = await pdfDoc.embedPng(emblemImageBytes);
+                const pngDims = emblemImage.scale(0.5);
+                // Draw the PNG image near the lower right corner of the JPG image
+                page.drawImage(emblemImage, {
+                    x: page.getWidth() / 2 - 50,
+                    y: height - 70,
+                    width: 100,
+                    height: (pngDims.height / pngDims.width) * 100,
+                });
 
-    // main header
-    $headers  = "From: " . $from . $eol;
-    $headers .= "MIME-Version: 1.0" . $eol;
-    $headers .= "Content-Type: multipart/mixed; boundary=\"" . $separator . "\"";
+                // USER AVATAR
+                const avatarUrl = pp.replace('cdn.', '');
+                console.log(avatarUrl);
+                const avatarImageBytes = await fetch(avatarUrl).then((res) =>
+                    res.arrayBuffer()
+                );
+                const avatarImage = await pdfDoc.embedJpg(avatarImageBytes);
+                // Draw the PNG image near the lower right corner of the JPG image
+                page.drawImage(avatarImage, {
+                    x: page.getWidth() - 150,
+                    y: height - 200,
+                    width: 100,
+                    height: 100,
+                });
 
-    // no more headers after this, we start the body! //
+                // Draw a string of text toward the top of the page
+                const fontSize = 12;
 
-    $body = "--" . $separator . $eol;
-    $body .= "Content-Transfer-Encoding: 7bit" . $eol . $eol;
-    $body .= "This is a MIME encoded message." . $eol;
+                page.drawText("Pet Community Q and A", {
+                    x: 50,
+                    y: height - 120,
+                    size: 14,
+                    font: timesRomanFont,
+                    color: rgb(0, 0.53, 0.71),
+                });
 
-    // message
-    $body .= "--" . $separator . $eol;
-    $body .= "Content-Type: text/html; charset=\"iso-8859-1\"" . $eol;
-    $body .= "Content-Transfer-Encoding: 8bit" . $eol . $eol;
-    $body .= $message . $eol;
+                var field_height = 150;
+                var text_length = 0;
+                var cpage = page;
 
-    // attachment
-    $body .= "--" . $separator . $eol;
-    $body .= "Content-Type: application/octet-stream; name=\"" . $filename . "\"" . $eol;
-    $body .= "Content-Transfer-Encoding: base64" . $eol;
-    $body .= "Content-Disposition: attachment" . $eol . $eol;
-    $body .= $attachment . $eol;
-    $body .= "--" . $separator . "--";
+                for (const prop in info) {
+                    var field = info[prop];
+                    //console.log(field.key);
+                    //console.log(field.value);
+                    if (field_height > 700) {
+                        field_height = 100;
+                        cpage = page2;
+                    }
+                    cpage.drawText(field.label, {
+                        x: 50,
+                        y: height - field_height,
+                        size: fontSize,
+                        font: timesRomanFont,
+                        color: rgb(0.6, 0.6, 0.6),
+                        maxWidth: width - 100,
+                        lineHeight: 14,
+                    });
 
-    // send message
-    mail($to, $subject, $body, $headers);
-    wp_mail('asayeedalam@gmail.com', $subject, $body, $headers);
+                    text_length = field.label.length;
+                    console.log(text_length / 100);
+                    field_height += 20 + Math.floor(text_length / 100) * 12;
+                    //console.log(Math.ceil(text_length / 100) * 10);
+
+                    cpage.drawText(field.data, {
+                        x: 50,
+                        y: height - field_height,
+                        size: fontSize,
+                        font: timesRomanFont,
+                        color: rgb(0, 0, 0),
+                        maxWidth: width - 100,
+                        lineHeight: 14,
+                    });
+
+                    field_height += 20;
+                }
+
+                // Serialize the PDFDocument to bytes (a Uint8Array)
+                const pdfBytes = await pdfDoc.save();
+
+                //console.log(pdfBytes);
+                // Trigger the browser to download the PDF document
+                download(pdfBytes, "pet-community-qna.pdf", "application/pdf");
+                // });
+            }
+        });
+    </script>
+<?php
 });
