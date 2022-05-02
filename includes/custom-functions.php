@@ -759,7 +759,9 @@ add_shortcode('bb-user-field-input', function ($atts) {
                 $field_options = xprofile_get_field($field_id, $member_id);
                 if ($field_options->type == 'datebox') $field_value = $field_value . ' 00:00:00';
                 xprofile_set_field_data($field_id, $member_id, $field_value);
-                xprofile_set_field_visibility_level($field_id, $member_id, 'adminsonly');
+                if (isset($_POST['mpp_visibility_' . $field_id]) && !empty($_POST['mpp_visibility_' . $field_id])) {
+                    xprofile_set_field_visibility_level($field_id, $member_id, $_POST['mpp_visibility_' . $field_id]);
+                }
             }
         }
     }
@@ -799,6 +801,7 @@ add_shortcode('bb-user-field-input', function ($atts) {
                 }
                 if (get_current_user_id() == $member_id) {
                 ?>
+                    <div class="mpp-profile-updating">Updating...</div>
                     <input type="submit" class="button mpp_form_submit_button" value="Update" name="mpp_form_submitted" />
                 <?php
                 }
@@ -923,7 +926,6 @@ add_action('wp_footer', function () {
 
 function mpp_profile_field_html($field, $field_value, $member_id)
 {
-    //echo $field->type;
     switch ($field->type) {
         case 'selectbox':
             $field_options = xprofile_get_field($field->id, $member_id);
@@ -944,7 +946,7 @@ function mpp_profile_field_html($field, $field_value, $member_id)
             <div class="input-options radio-button-options mpp-input-radio-button">
                 <?php foreach ($options as $option) : ?>
                     <div class="bp-radio-wrap">
-                        <input type="radio" name="mpp_profile_box[<?php echo $field->id; ?>]" id="option_<?php echo $option->id; ?>" value="<?php echo $option->name; ?>" class="bs-styled-radio" <?php checked($field_value, $option->name, true); ?>>
+                        <input type="radio" name="mpp_profile_box[<?php echo $field->id; ?>]" id="option_<?php echo $option->id; ?>" value="<?php echo $option->name; ?>" class="bs-styled-radio" <?php checked($field_value, $option->name, true); ?> />
                         <label for="option_<?php echo $option->id; ?>" class="option-label"><?php echo $option->name; ?></label>
                     </div>
                 <?php endforeach; ?>
@@ -965,6 +967,11 @@ function mpp_profile_field_html($field, $field_value, $member_id)
         ?>
             <div class="mpp-field-datebox"><?php echo $field_value; ?></div>
             <div><input class="mpp-profile-field-html" type="date" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></div>
+        <?php
+            break;
+        case 'telephone':
+        ?>
+            <div><input class="mpp-profile-field-html" type="tel" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" pattern="[(][0-9]{3}[)] [0-9]{3}-[0-9]{4}" placeholder="(###) ###-####" /></div>
         <?php
             break;
         default:

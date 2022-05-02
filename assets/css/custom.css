@@ -487,8 +487,10 @@
 
 /* Product Page Design */
 
-.no-access-pricing-plan p {
-  color: #fff;
+@media only screen and (max-width: 600px) {
+  .no-access-pricing-plan p {
+    color: #fff;
+  }
 }
 
 /* Event Submission Page */
@@ -525,7 +527,12 @@
 }
 
 #mpp_profile_box .bs-styled-radio:checked + label:after {
-  top: 8px !important;
+  top: 14px;
+  left: 14px;
+}
+
+.post-type-archive-product .woocommerce-notices-wrapper {
+  display: none;
 }
 
 /* MPP Profile Style */
@@ -566,6 +573,15 @@
 
 .mpp-input-radio-button .option-label {
   font-size: 16px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #444;
+}
+
+.mpp-input-radio-button .bp-radio-wrap:nth-last-child(1) .option-label {
+  border: none;
 }
 
 .mpp-change-visibility,
@@ -613,4 +629,9 @@
   font-size: 14px;
   line-height: 18px;
   margin-bottom: 15px;
+}
+
+.mpp-profile-updating {
+  margin-top: 20px;
+  display: none;
 }
