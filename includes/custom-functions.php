@@ -143,7 +143,7 @@ add_action('init', function () {
 
 function mpp_bbd_inspect_scripts()
 {
-    wp_dequeue_script('directorist-global-script');
+    if (!is_singular('at_biz_dir') && !is_admin()) wp_dequeue_script('directorist-global-script');
 }
 add_action('wp_print_scripts', 'mpp_bbd_inspect_scripts');
 
@@ -720,6 +720,7 @@ add_action('wp_head', function () {
         <?php
     }
     if (is_page('register')) echo '<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
+    echo '<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script> ';
 });
 
 
@@ -742,12 +743,12 @@ add_action('bp_core_signup_user', function ($user_id) {
 
 
 // Shortcode User Field
-add_shortcode('bb-user-field', function ($atts) {
+// adminsonly, loggedin, friends, public
+add_shortcode('bb-user-field-input', function ($atts) {
     $atts = shortcode_atts(array(
-        'group' => 'Details',
+        'group' => '1',
         'title' => 'Details'
     ), $atts);
-    ob_start();
     $member_id = bbp_get_user_id();
     $field_groups = bp_profile_get_field_groups();
 
@@ -758,42 +759,47 @@ add_shortcode('bb-user-field', function ($atts) {
                 $field_options = xprofile_get_field($field_id, $member_id);
                 if ($field_options->type == 'datebox') $field_value = $field_value . ' 00:00:00';
                 xprofile_set_field_data($field_id, $member_id, $field_value);
+                xprofile_set_field_visibility_level($field_id, $member_id, 'adminsonly');
             }
         }
     }
 
+    ob_start();
+
     foreach ($field_groups as $field_group) {
-        if ($field_group->name == $atts['group']) {
+        if ($field_group->id == $atts['group']) {
         ?>
             <form id="mpp_profile_box" method="post">
                 <?php
                 foreach ($field_group->fields as $field) {
-                    if (get_current_user_id() == $member_id) {
-                        //e_var_dump(bp_get_profile_field_data(array('user_id' => $member_id, 'field' => $field->id)));
-                        $field_value = $field->type == "telephone" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
                 ?>
-                        <h5><?php echo $field->name; ?></h5>
-                    <?php
-                        mpp_profile_field_html($field, $field_value, $member_id);
-                    } else {
-                        $field_value = bp_get_profile_field_data(array('user_id' => $member_id, 'field' => $field->id));
-                    ?>
-                        <h5><?php echo $field->name; ?></h5>
+                    <div class="mpp-profile-field">
                         <?php
-                        if ($field_value && !empty($field_value)) {
+                        $visibility_level =  xprofile_get_field_visibility_level($field->id, $member_id);
+                        $field_value = $field->type == "telephone" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
                         ?>
-                            <p><?php echo $field_value; ?></p>
-                        <?php
-                        } else {
-                        ?>
-                            <p>-</p>
-                    <?php
-                        }
-                    }
+                        <div class="mpp-profile-header">
+                            <h5><?php echo $field->name; ?></h5>
+                            <a class="mpp-change-visibility mpp-change-visibility-<?php echo $field->id; ?>" href="#" data-field="<?php echo $field->id; ?>" data_user="<?php echo $member_id; ?>" data-visibility="<?php echo $visibility_level; ?>">
+                                <span class="mpp-icon <?php echo get_mpp_visibolity_icon($visibility_level); ?>"></span>
+                            </a>
+                        </div>
+                        <div class="mpp-profile-body">
+                            <div class="mpp-profile-field-description">
+                                <?php echo $field->description; ?>
+                            </div>
+                            <?php
+                            mpp_profile_field_html($field, $field_value, $member_id);
+                            ?>
+                            <span class="mpp-profile-field-visibility"><span class="mpp-icon <?php echo get_mpp_visibolity_icon($visibility_level); ?>"></span> <?php echo mpp_profile_field_visibility_label($visibility_level); ?></span>
+                            <input type="hidden" class="mpp_visibility_input_value mpp_visibility_<?php echo $field->id; ?>" name="mpp_visibility_<?php echo $field->id; ?>" value="" />
+                        </div>
+                    </div>
+                <?php
                 }
                 if (get_current_user_id() == $member_id) {
-                    ?>
-                    <input type="submit" class="button" value="Update" name="mpp_form_submitted" />
+                ?>
+                    <input type="submit" class="button mpp_form_submit_button" value="Update" name="mpp_form_submitted" />
                 <?php
                 }
                 ?>
@@ -802,8 +808,117 @@ add_shortcode('bb-user-field', function ($atts) {
         }
     }
     ?>
-    <?php
+<?php
     return ob_get_clean();
+});
+
+function mpp_profile_field_visibility_label($visibility_level = 'public')
+{
+    $label = 'Public';
+    switch ($visibility_level) {
+        case 'adminsonly':
+            $label = 'Only Me';
+            break;
+        case 'loggedin':
+            $label = 'All Members';
+            break;
+        case 'friends':
+            $label = 'My Connections';
+            break;
+        case 'public':
+            $label = 'Public';
+            break;
+    }
+    return $label;
+}
+
+function get_mpp_visibolity_icon($visibility = 'public')
+{
+    $icon = 'bb-icon-globe';
+    switch ($visibility) {
+        case 'public':
+            $icon = 'bb-icon-globe';
+            break;
+        case 'loggedin':
+            $icon = 'bb-icon-all-members';
+            break;
+        case 'friends':
+            $icon = 'bb-icon-connections';
+            break;
+        case 'adminsonly':
+            $icon = 'bb-icon-lock';
+            break;
+    }
+    return $icon;
+}
+
+add_action('wp_footer', function () {
+?>
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+
+            $('.mpp-change-visibility').on('click', async function(e) {
+                e.preventDefault();
+                var field = $(this).data('field');
+                var visibility = $(this).data('visibility');
+                var list_html = '';
+
+                const visibility_types = {
+                    public: 'Public',
+                    loggedin: 'All Members',
+                    friends: 'My Connections',
+                    adminsonly: 'Only Me'
+                };
+
+                Object.entries(visibility_types).forEach(([key, val]) => {
+                    const mpp_icon_hide = (key == visibility) ? '' : 'mpp-icon-hide';
+                    list_html += '<li class="' + key + '" data-field="' + field + '" data-visibility="' + key + '" data-title="' + val + '"><div class="mpp-option-title"><span class="mpp-icon ' + get_mpp_visibolity_icon(key) + '"></span> <span>' + val + '</span></div><span class="bb-icon-check ' + mpp_icon_hide + '"></span></li>';
+                });
+
+                Swal.fire({
+                    title: 'Visibility',
+                    html: '<ul class="mpp_visibility_list">' + list_html + '</ul>',
+                    showConfirmButton: false
+                });
+            });
+
+            $(document).on('click', '.mpp_visibility_list li', function() {
+                var mpp_visibility_list = $(this).parents('.mpp_visibility_list');
+                var field = $(this).data('field');
+                mpp_visibility_list.find('.bb-icon-check').addClass('mpp-icon-hide');
+                $(this).find('.bb-icon-check').removeClass('mpp-icon-hide');
+                var icon = get_mpp_visibolity_icon($(this).data('visibility'));
+                //SET DATA
+                $(".mpp_visibility_" + field).val($(this).data('visibility'));
+                $(".mpp_visibility_" + field).siblings('.mpp-profile-field-visibility').html('<span class="mpp-icon ' + icon + '"></span> ' + $(this).data('title'));
+
+                $(".mpp-change-visibility-" + field).data('visibility', $(this).data('visibility'));
+                $(".mpp-change-visibility-" + field).html('<span class="mpp-icon ' + icon + '"></span>');
+                Swal.close();
+            });
+
+            function get_mpp_visibolity_icon(visibility) {
+                var icon = 'bb-icon-globe';
+                switch (visibility) {
+                    case 'public':
+                        icon = 'bb-icon-globe';
+                        break;
+                    case 'loggedin':
+                        icon = 'bb-icon-all-members';
+                        break;
+                    case 'friends':
+                        icon = 'bb-icon-connections';
+                        break;
+                    case 'adminsonly':
+                        icon = 'bb-icon-lock';
+                        break;
+                }
+                return icon;
+            }
+
+        });
+    </script>
+    <?php
 });
 
 function mpp_profile_field_html($field, $field_value, $member_id)
@@ -814,19 +929,19 @@ function mpp_profile_field_html($field, $field_value, $member_id)
             $field_options = xprofile_get_field($field->id, $member_id);
             $options = $field_options->get_children();
     ?>
-            <p><select name="mpp_profile_box[<?php echo $field->id; ?>]" data-field="<?php echo $field->id; ?>">
+            <div><select name="mpp_profile_box[<?php echo $field->id; ?>]" data-field="<?php echo $field->id; ?>" class="mpp-profile-field-html">
                     <?php foreach ($options as $option) : ?>
                         <option value="<?php echo $option->name; ?>" <?php selected($field_value, $option->name, true); ?>><?php echo $option->name; ?></option>
                     <?php endforeach; ?>
                 </select>
-            </p>
+            </div>
         <?php
             break;
         case 'radio':
             $field_options = xprofile_get_field($field->id, $member_id);
             $options = $field_options->get_children();
         ?>
-            <div class="input-options radio-button-options">
+            <div class="input-options radio-button-options mpp-input-radio-button">
                 <?php foreach ($options as $option) : ?>
                     <div class="bp-radio-wrap">
                         <input type="radio" name="mpp_profile_box[<?php echo $field->id; ?>]" id="option_<?php echo $option->id; ?>" value="<?php echo $option->name; ?>" class="bs-styled-radio" <?php checked($field_value, $option->name, true); ?>>
@@ -838,23 +953,23 @@ function mpp_profile_field_html($field, $field_value, $member_id)
             break;
         case 'textbox':
         ?>
-            <p><input type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></p>
+            <div><input class="mpp-profile-field-html" type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></div>
         <?php
             break;
         case 'textarea':
         ?>
-            <p><textarea type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" data-field="<?php echo $field->id; ?>" cols="50"><?php echo $field_value; ?></textarea></p>
+            <div><textarea class="mpp-profile-field-html" type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" data-field="<?php echo $field->id; ?>" cols="50"><?php echo $field_value; ?></textarea></div>
         <?php
             break;
         case 'datebox':
         ?>
-            <p class="mpp-field-datebox"><?php echo $field_value; ?></p>
-            <p><input type="date" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></p>
+            <div class="mpp-field-datebox"><?php echo $field_value; ?></div>
+            <div><input class="mpp-profile-field-html" type="date" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></div>
         <?php
             break;
         default:
         ?>
-            <p><input type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></p>
+            <div><input class="mpp-profile-field-html" type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></div>
         <?php
             break;
     }
@@ -871,9 +986,10 @@ add_shortcode('bb-user-field-group', function ($atts) {
 
     ob_start();
     if (get_current_user_id() == $member_id) {
+        echo do_shortcode('[bb-user-field-input group=' . $atts['group'] . ']');
         ?>
         <script type="text/javascript">
-            window.location.replace("<?php echo bbp_get_user_profile_url(); ?>/profile/edit/group/<?php echo $atts['group']; ?>/");
+            //window.location.replace("<?php echo bbp_get_user_profile_url(); ?>/profile/edit/group/<?php echo $atts['group']; ?>/");
         </script>
         <?php
     } else {
@@ -1249,3 +1365,28 @@ add_action('wp_footer', function () {
     </script>
 <?php
 });
+
+
+// Auto coupon apply
+function mpp_after_applied_a_coupon($coupon_code)
+{
+    if ('adminpromo2022' === $coupon_code) {
+        WC()->cart->apply_coupon('adminpromo2022rc');
+    }
+    //PooPrints2022
+    if ('pooprints2022' === $coupon_code) {
+        WC()->cart->apply_coupon('pooprints2022rc');
+    }
+}
+add_action('woocommerce_applied_coupon', 'mpp_after_applied_a_coupon');
+
+
+/*
+add_action('init', function(){
+	$listing_id = 20067;
+	$group_id = 12369;
+	update_post_meta($listing_id, '_bb_group_id', $group_id);
+    groups_update_groupmeta($group_id, 'directorist_listings_enabled', 1);
+    groups_update_groupmeta($group_id, 'directorist_listings_ids', array($listing_id));
+});
+*/

@@ -527,3 +527,90 @@
 #mpp_profile_box .bs-styled-radio:checked + label:after {
   top: 8px !important;
 }
+
+/* MPP Profile Style */
+.mpp-profile-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 10px 0;
+  margin-top: 10px;
+}
+
+.mpp-profile-header h5 {
+  font-size: 18px;
+  text-transform: capitalize;
+  margin: 0px !important;
+}
+
+.mpp-profile-header .mpp-icon {
+  font-size: 20px;
+}
+
+.mpp-profile-field-html {
+  margin: 0 !important;
+  width: 100%;
+}
+
+.mpp-profile-field-visibility {
+  font-size: 12px;
+}
+
+.mpp-field-datebox {
+  font-size: 12px;
+}
+
+.mpp_form_submit_button {
+  margin: 20px 0;
+}
+
+.mpp-input-radio-button .option-label {
+  font-size: 16px;
+}
+
+.mpp-change-visibility,
+.mpp-change-visibility:active,
+.mpp-change-visibility:focus {
+  color: #4d5c6d;
+}
+
+.mpp_visibility_list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.mpp_visibility_list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mpp-option-title {
+  display: flex;
+  align-items: center;
+}
+
+.mpp-option-title span.mpp-icon {
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+.mpp-icon-hide {
+  display: none;
+}
+
+.mpp_visibility_list .bb-icon-check {
+  color: green;
+  font-size: 20px;
+}
+
+.mpp-profile-field-description {
+  font-size: 14px;
+  line-height: 18px;
+  margin-bottom: 15px;
+}

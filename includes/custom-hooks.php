@@ -392,21 +392,23 @@ class MPP_Child_Hooks
     public function redirect_to_add_listing_page_after_purchase()
     {
         global $wp;
-        $order_id = $wp->query_vars['order-received'];
-        if (is_checkout() && !empty($order_id)) {
-            // EVENT
-            if (mpp_event_id_in_the_order($order_id)) {
-                exit(wp_redirect(MPP_SITE_URL . '/add-edit-pet-friendly-event'));
-            }
-            // PLANS
-            $order = new WC_Order($order_id);
-            $order->update_status('wc-completed');
-            $plan_id = mpp_get_pricing_plan_from_the_order($order_id);
-            if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans') {
-                if ($plan_id == 18059) {
-                    exit(wp_redirect(MPP_SITE_URL . '/affiliate-area'));
-                } else {
-                    exit(wp_redirect(MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $plan_id));
+        if (is_checkout()) {
+            if (isset($wp->query_vars['order-received']) && !empty($wp->query_vars['order-received'])) {
+                $order_id = $wp->query_vars['order-received'];
+                // EVENT
+                if (mpp_event_id_in_the_order($order_id)) {
+                    exit(wp_redirect(MPP_SITE_URL . '/add-edit-pet-friendly-event'));
+                }
+                // PLANS
+                $order = new WC_Order($order_id);
+                $order->update_status('wc-completed');
+                $plan_id = mpp_get_pricing_plan_from_the_order($order_id);
+                if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans') {
+                    if ($plan_id == 18059) {
+                        exit(wp_redirect(MPP_SITE_URL . '/affiliate-area'));
+                    } else {
+                        exit(wp_redirect(MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $plan_id));
+                    }
                 }
             }
         }
@@ -444,9 +446,9 @@ class MPP_Child_Hooks
     // Change the Price of the Sale products
     public function woocommerce_subscriptions_product_price_string($string, $product, $include)
     {
-        $sign_up_fee = get_post_meta($product->id, '_subscription_sign_up_fee', true);
+        $sign_up_fee = get_post_meta($product->get_id(), '_subscription_sign_up_fee', true);
         if ($sign_up_fee && $sign_up_fee > 0) {
-            return '<span class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $product->price . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $sign_up_fee . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></ins> <span class="subscription-details"> / year</span></span>';
+            return '<span class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $product->get_price() . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $sign_up_fee . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></ins> <span class="subscription-details"> / year</span></span>';
         }
         return $string;
     }
