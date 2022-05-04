@@ -531,6 +531,11 @@
   left: 14px;
 }
 
+#mpp_profile_box .bs-styled-checkbox:checked + label:after {
+  top: 13px;
+  left: 13px;
+}
+
 .post-type-archive-product .woocommerce-notices-wrapper {
   display: none;
 }
@@ -634,4 +639,10 @@
 .mpp-profile-updating {
   margin-top: 20px;
   display: none;
+}
+
+.mpp_social_label {
+  text-transform: capitalize;
+  font-size: 14px;
+  margin-bottom: 10px;
 }

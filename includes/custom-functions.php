@@ -774,14 +774,15 @@ add_shortcode('bb-user-field-input', function ($atts) {
             <form id="mpp_profile_box" method="post">
                 <?php
                 foreach ($field_group->fields as $field) {
+                    if ($field->alternate_name == 'Telephone #:') $field->type = 'telephone';
                 ?>
                     <div class="mpp-profile-field">
                         <?php
                         $visibility_level =  xprofile_get_field_visibility_level($field->id, $member_id);
-                        $field_value = $field->type == "telephone" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
+                        $field_value = $field->type == "telephone" || $field->type == "url" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
                         ?>
                         <div class="mpp-profile-header">
-                            <h5><?php echo $field->name; ?></h5>
+                            <h5><?php echo $field->alternate_name ? $field->alternate_name : $field->name; ?></h5>
                             <a class="mpp-change-visibility mpp-change-visibility-<?php echo $field->id; ?>" href="#" data-field="<?php echo $field->id; ?>" data_user="<?php echo $member_id; ?>" data-visibility="<?php echo $visibility_level; ?>">
                                 <span class="mpp-icon <?php echo get_mpp_visibolity_icon($visibility_level); ?>"></span>
                             </a>
@@ -855,6 +856,8 @@ function get_mpp_visibolity_icon($visibility = 'public')
     return $icon;
 }
 
+// JAVASCRIPT
+
 add_action('wp_footer', function () {
 ?>
     <script type="text/javascript">
@@ -926,12 +929,25 @@ add_action('wp_footer', function () {
 
 function mpp_profile_field_html($field, $field_value, $member_id)
 {
+    $required = $field->is_required ? 'required' : '';
     switch ($field->type) {
         case 'selectbox':
             $field_options = xprofile_get_field($field->id, $member_id);
             $options = $field_options->get_children();
     ?>
-            <div><select name="mpp_profile_box[<?php echo $field->id; ?>]" data-field="<?php echo $field->id; ?>" class="mpp-profile-field-html">
+            <div><select name="mpp_profile_box[<?php echo $field->id; ?>]" data-field="<?php echo $field->id; ?>" class="mpp-profile-field-html" <?php echo $required; ?>>
+                    <?php foreach ($options as $option) : ?>
+                        <option value="<?php echo $option->name; ?>" <?php selected($field_value, $option->name, true); ?>><?php echo $option->name; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        <?php
+            break;
+        case 'gender':
+            $field_options = xprofile_get_field($field->id, $member_id);
+            $options = $field_options->get_children();
+        ?>
+            <div><select name="mpp_profile_box[<?php echo $field->id; ?>]" data-field="<?php echo $field->id; ?>" class="mpp-profile-field-html" <?php echo $required; ?>>
                     <?php foreach ($options as $option) : ?>
                         <option value="<?php echo $option->name; ?>" <?php selected($field_value, $option->name, true); ?>><?php echo $option->name; ?></option>
                     <?php endforeach; ?>
@@ -953,30 +969,70 @@ function mpp_profile_field_html($field, $field_value, $member_id)
             </div>
         <?php
             break;
+        case 'checkbox':
+            $field_options = xprofile_get_field($field->id, $member_id);
+            $options = $field_options->get_children();
+        ?>
+            <div class="input-options radio-button-options mpp-input-radio-button">
+                <?php foreach ($options as $option) : ?>
+                    <?php
+                    $checked = '';
+                    if (in_array($option->name, $field_value)) $checked = 'checked="checked"';
+                    ?>
+                    <div class="bp-radio-wrap">
+                        <input type="checkbox" name="mpp_profile_box[<?php echo $field->id; ?>][]" id="option_<?php echo $option->id; ?>" value="<?php echo $option->name; ?>" class="bs-styled-checkbox" <?php echo $checked; ?> <?php echo $required; ?> />
+                        <label for="option_<?php echo $option->id; ?>" class="option-label"><?php echo $option->name; ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php
+            break;
         case 'textbox':
         ?>
-            <div><input class="mpp-profile-field-html" type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></div>
+            <div><input class="mpp-profile-field-html" type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" <?php echo $required; ?> /></div>
         <?php
             break;
         case 'textarea':
         ?>
-            <div><textarea class="mpp-profile-field-html" type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" data-field="<?php echo $field->id; ?>" cols="50"><?php echo $field_value; ?></textarea></div>
+            <div><textarea class="mpp-profile-field-html" type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" data-field="<?php echo $field->id; ?>" cols="50" <?php echo $required; ?>><?php echo $field_value; ?></textarea></div>
         <?php
             break;
         case 'datebox':
         ?>
             <div class="mpp-field-datebox"><?php echo $field_value; ?></div>
-            <div><input class="mpp-profile-field-html" type="date" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></div>
+            <div><input class="mpp-profile-field-html" type="date" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" <?php echo $required; ?> /></div>
         <?php
             break;
         case 'telephone':
         ?>
-            <div><input class="mpp-profile-field-html" type="tel" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" pattern="[(][0-9]{3}[)] [0-9]{3}-[0-9]{4}" placeholder="(###) ###-####" /></div>
+            <div><input class="mpp-profile-field-html" type="tel" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" pattern="[(][0-9]{3}[)] [0-9]{3}-[0-9]{4}" placeholder="(###) ###-####" <?php echo $required; ?> /></div>
         <?php
             break;
-        default:
+        case 'url':
         ?>
-            <div><input class="mpp-profile-field-html" type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" /></div>
+            <div><input class="mpp-profile-field-html" type="url" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" <?php echo $required; ?> /></div>
+        <?php
+            break;
+        case 'number':
+        ?>
+            <div><input class="mpp-profile-field-html" type="number" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" <?php echo $required; ?> /></div>
+            <?php
+            break;
+        case 'socialnetworks':
+            $field_options = xprofile_get_field($field->id, $member_id);
+            $options = $field_options->get_children();
+            if (count($options) > 0) {
+                foreach ($options as $key => $option) {
+            ?>
+                    <label class="mpp_social_label"><?php echo $option->name; ?></label>
+                    <div><input class="mpp-profile-field-html" type="text" name="mpp_profile_box[<?php echo $field->id; ?>][<?php echo $option->name; ?>]" value="<?php echo $field_value[$key]; ?>" data-field="<?php echo $field->id; ?>" /></div>
+            <?php
+                }
+            }
+            break;
+        default:
+            ?>
+            <div><input class="mpp-profile-field-html" type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" <?php echo $required; ?> /></div>
         <?php
             break;
     }
@@ -1022,6 +1078,8 @@ add_shortcode('bb-user-field-group', function ($atts) {
     }
     return ob_get_clean();
 });
+
+// STYLE FOR IOS AND ANDROID
 
 add_action('wp_head', function () {
     if (mpp_is_android_or_ios()) {
@@ -1370,7 +1428,7 @@ add_action('wp_footer', function () {
             }
         });
     </script>
-<?php
+    <?php
 });
 
 
@@ -1397,3 +1455,179 @@ add_action('init', function(){
     groups_update_groupmeta($group_id, 'directorist_listings_ids', array($listing_id));
 });
 */
+
+
+add_action('wp_head', function () {
+    if (bp_is_user()) :
+    ?>
+        <style>
+            .single-product div.product div.images img {
+                padding: 50px;
+            }
+
+            .directorist-claim-listing__description li {
+                font-size: 15px;
+            }
+
+            #mpp_profile_box .bs-styled-radio:checked+label:after {
+                top: 14px !important;
+                left: 14px;
+            }
+
+            #mpp_profile_box .bs-styled-checkbox:checked+label:after {
+                top: 13px;
+                left: 13px;
+            }
+
+            .post-type-archive-product .woocommerce-notices-wrapper {
+                display: none;
+            }
+
+            /* MPP Profile Style */
+            .mpp-profile-header {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 10px 0;
+                margin-top: 10px;
+            }
+
+            .mpp-profile-header h5 {
+                font-size: 18px;
+                text-transform: capitalize;
+                margin: 0px !important;
+            }
+
+            .mpp-profile-header .mpp-icon {
+                font-size: 20px;
+            }
+
+            .mpp-profile-field-html {
+                margin: 0 !important;
+                width: 100%;
+            }
+
+            .mpp-profile-field-visibility {
+                font-size: 12px;
+            }
+
+            .mpp-field-datebox {
+                font-size: 12px;
+            }
+
+            .mpp_form_submit_button {
+                margin: 20px 0;
+            }
+
+            .mpp-input-radio-button .option-label {
+                font-size: 16px;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 10px;
+                border-bottom: 1px solid #444;
+            }
+
+            .mpp-input-radio-button .bp-radio-wrap:nth-last-child(1) .option-label {
+                border: none;
+            }
+
+            .mpp-change-visibility,
+            .mpp-change-visibility:active,
+            .mpp-change-visibility:focus {
+                color: #4d5c6d;
+            }
+
+            .mpp_visibility_list {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+                text-align: left;
+            }
+
+            .mpp_visibility_list li {
+                padding: 10px 0;
+                border-bottom: 1px solid #eee;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .mpp-option-title {
+                display: flex;
+                align-items: center;
+            }
+
+            .mpp-option-title span.mpp-icon {
+                font-size: 16px;
+                margin-right: 10px;
+            }
+
+            .mpp-icon-hide {
+                display: none;
+            }
+
+            .mpp_visibility_list .bb-icon-check {
+                color: green;
+                font-size: 20px;
+            }
+
+            .mpp-profile-field-description {
+                font-size: 14px;
+                line-height: 18px;
+                margin-bottom: 15px;
+            }
+
+            .mpp-profile-updating {
+                margin-top: 20px;
+                display: none;
+            }
+
+            .mpp_social_label {
+                text-transform: capitalize;
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+        </style>
+    <?php
+    endif;
+});
+
+// POPUP SETTINGS STARTS
+add_action('wp_footer', function () {
+    if (!is_user_logged_in()) :
+    ?>
+        <div id="contact-us-float-button">
+            <a href="#" id="contact-form-open">
+                <span class="bb-icon-envelope mpp-contact-icon"></span>
+            </a>
+        </div>
+    <?php
+    endif;
+});
+
+add_action('wp_head', function () {
+    ?>
+    <style>
+        #contact-us-float-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #e75126;
+            border-radius: 50%;
+        }
+
+        #contact-us-float-button a {
+            padding: 10px;
+        }
+
+        #contact-us-float-button .mpp-contact-icon {
+            font-size: 2rem;
+            color: #fff;
+            line-height: 3.25rem;
+        }
+    </style>
+<?php
+});
+// POPUP SETTINGS ENDS
