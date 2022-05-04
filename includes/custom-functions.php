@@ -997,6 +997,11 @@ function mpp_profile_field_html($field, $field_value, $member_id)
             <div><textarea class="mpp-profile-field-html" type="text" name="mpp_profile_box[<?php echo $field->id; ?>]" data-field="<?php echo $field->id; ?>" cols="50" <?php echo $required; ?>><?php echo $field_value; ?></textarea></div>
         <?php
             break;
+        case 'email':
+        ?>
+            <div><input class="mpp-profile-field-html" type="email" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" <?php echo $required; ?> /></div>
+        <?php
+            break;
         case 'datebox':
         ?>
             <div class="mpp-field-datebox"><?php echo $field_value; ?></div>
