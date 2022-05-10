@@ -310,6 +310,10 @@ function mpp_get_active_pricing_plan_from_all_orders()
                     'value'   => '',
                     'compare' => '=',
                 ],
+                [
+                    'key'     => '_listing_id',
+                    'compare' => 'NOT EXISTS',
+                ],
             ],
         ],
     ];
@@ -320,6 +324,9 @@ function mpp_get_active_pricing_plan_from_all_orders()
         $order = wc_get_order(get_the_ID());
         foreach ($order->get_items() as $item_key => $item) :
             $item_id = $item->get_product_id();
+            // Exceptions
+            if ($item_id == 20139) return 20140;
+
             $plan_id = get_post_meta($item_id, '_linked_pricing_plan', true) ? get_post_meta($item_id, '_linked_pricing_plan', true) : $item_id;
             if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans' && !in_array($plan_id, array(18059, 18242)))  return $plan_id;
         endforeach;
@@ -609,7 +616,8 @@ function mpp_is_android_or_ios()
 add_action('atbdp_before_plan_page_loaded', function () {
     $active_plan = mpp_get_active_pricing_plan_from_all_orders();
     if ($active_plan) :
-        $url = MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $active_plan;
+        $directory_type = get_post_meta($active_plan, '_assign_to_directory', true) ? get_post_meta($active_plan, '_assign_to_directory', true) : default_directory_type();
+        $url = MPP_SITE_URL . '/add-listing/?directory_type=' . $directory_type . '&plan=' . $active_plan;
     ?>
         <script type="text/javascript">
             window.location.replace("<?php echo $url; ?>");
@@ -1003,6 +1011,8 @@ function mpp_profile_field_html($field, $field_value, $member_id)
         <?php
             break;
         case 'datebox':
+            $datetime = strtotime($field_value);
+            $field_value = date('Y-m-d', $datetime);
         ?>
             <div class="mpp-field-datebox"><?php echo $field_value; ?></div>
             <div><input class="mpp-profile-field-html" type="date" name="mpp_profile_box[<?php echo $field->id; ?>]" value="<?php echo $field_value; ?>" data-field="<?php echo $field->id; ?>" <?php echo $required; ?> /></div>
@@ -1594,6 +1604,14 @@ add_action('wp_head', function () {
                 font-size: 14px;
                 margin-bottom: 10px;
             }
+
+            .mpp-address-field {
+                margin-bottom: 10px
+            }
+
+            .mpp_dna_form_submitted {
+                margin-top: 20px;
+            }
         </style>
     <?php
     endif;
@@ -1636,3 +1654,281 @@ add_action('wp_head', function () {
 <?php
 });
 // POPUP SETTINGS ENDS
+
+// DNA FORM EXPORT
+add_shortcode('dna-form-export', function () {
+
+    ob_start();
+    $member_id = bbp_get_user_id();
+    //$field_group = [1, 2, 3, 4, 12];
+    $field_group = [1, 2, 3, 1312, 1311, 355, 356, 251, 384, 388, 392, 204, 205];
+
+?>
+    <form id="mpp_profile_box" method="post">
+        <?php
+        if (get_current_user_id() == $member_id) {
+            foreach ($field_group as $field_id) {
+                $field = xprofile_get_field($field_id, $member_id);
+                $field_value = $field->type == "telephone" || $field->type == "url" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
+        ?>
+                <div class="mpp-profile-field">
+                    <?php
+                    $visibility_level =  xprofile_get_field_visibility_level($field->id, $member_id);
+                    $field_value = $field->type == "telephone" || $field->type == "url" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
+                    ?>
+                    <div class="mpp-profile-header">
+                        <h5><?php echo $field->alternate_name ? $field->alternate_name : $field->name; ?></h5>
+                        <a class="mpp-change-visibility mpp-change-visibility-<?php echo $field->id; ?>" href="#" data-field="<?php echo $field->id; ?>" data_user="<?php echo $member_id; ?>" data-visibility="<?php echo $visibility_level; ?>">
+                            <span class="mpp-icon <?php echo get_mpp_visibolity_icon($visibility_level); ?>"></span>
+                        </a>
+                    </div>
+                    <div class="mpp-profile-body">
+                        <div class="mpp-profile-field-description">
+                            <?php echo $field->description; ?>
+                        </div>
+                        <?php
+                        mpp_profile_field_html($field, $field_value, $member_id);
+                        ?>
+                        <span class="mpp-profile-field-visibility"><span class="mpp-icon <?php echo get_mpp_visibolity_icon($visibility_level); ?>"></span> <?php echo mpp_profile_field_visibility_label($visibility_level); ?></span>
+                        <input type="hidden" class="mpp_visibility_input_value mpp_visibility_<?php echo $field->id; ?>" name="mpp_visibility_<?php echo $field->id; ?>" value="" />
+                    </div>
+                </div>
+            <?php } ?>
+            <?php
+            $billing_address = get_user_meta($member_id, 'billing_address_1', true);
+            $billing_city = get_user_meta($member_id, 'billing_city', true);
+            $billing_zip = get_user_meta($member_id, 'billing_postcode', true);
+            $billing_unit = get_user_meta($member_id, 'billing_unit', true);
+            $billing_state = get_user_meta($member_id, 'billing_state', true);
+            $billing_country = get_user_meta($member_id, 'billing_country', true);
+            $visibility_level_address = get_user_meta($member_id, 'billing_address_visibility', true);
+
+            $billing_country = !empty($billing_country) ? $billing_country : 'CA';
+            $billing_state = !empty($billing_state) ? $billing_state : 'ON';
+            ?>
+            <div class="mpp-profile-field mpp-address-field">
+                <div class="mpp-profile-header">
+                    <h5>Address</h5>
+                    <a class="mpp-change-visibility mpp-change-visibility-address" href="#" data-field="address" data_user="<?php echo $member_id; ?>" data-visibility="<?php echo $visibility_level_address; ?>">
+                        <span class="mpp-icon <?php echo get_mpp_visibolity_icon($visibility_level); ?>"></span>
+                    </a>
+                </div>
+                <div class="mpp-profile-body">
+                    <span class="mpp-profile-field-visibility">Address Line</span>
+                    <div><input class="mpp-profile-field-html" type="text" name="mpp_address_box[address]" value="<?php echo $billing_address; ?>" placeholder="Address Line" /></div>
+                    <input type="hidden" class="mpp_visibility_input_value mpp_visibility_address" name="mpp_visibility_address" value="" />
+                </div>
+            </div>
+            <div class="mpp-profile-field mpp-address-field">
+                <div class="mpp-profile-body">
+                    <span class="mpp-profile-field-visibility">City</span>
+                    <div><input class="mpp-profile-field-html" type="text" name="mpp_address_box[city]" value="<?php echo $billing_city; ?>" placeholder="City" /></div>
+                </div>
+            </div>
+            <div class="mpp-profile-field mpp-address-field">
+                <div class="mpp-profile-body">
+                    <span class="mpp-profile-field-visibility">Zip</span>
+                    <div><input class="mpp-profile-field-html" type="text" name="mpp_address_box[zip]" value="<?php echo $billing_zip; ?>" placeholder="Zip" /></div>
+                </div>
+            </div>
+            <div class="mpp-profile-field mpp-address-field">
+                <div class="mpp-profile-body">
+                    <span class="mpp-profile-field-visibility">Unit</span>
+                    <div><input class="mpp-profile-field-html" type="text" name="mpp_address_box[unit]" value="<?php echo $billing_unit; ?>" placeholder="Unit" /></div>
+                </div>
+            </div>
+            <div class="mpp-profile-field mpp-address-field">
+                <div class="mpp-profile-body">
+                    <span class="mpp-profile-field-visibility">State</span>
+                    <div>
+                        <select class="mpp-profile-field-html" id="mpp_state_field" name="mpp_address_box[state]">
+                            <option value="0">Select a State</option>
+                            <?php if ($billing_country) : ?>
+                                <?php foreach (WC()->countries->states[$billing_country] as $id => $state) : ?>
+                                    <option value="<?php echo $id; ?>" <?php selected($billing_state, $id, true); ?>><?php echo $state; ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="mpp-profile-field mpp-address-field">
+                <div class="mpp-profile-body">
+                    <span class="mpp-profile-field-visibility">Country</span>
+                    <div>
+                        <select class="mpp-profile-field-html" id="mpp_country_field" name="mpp_address_box[country]">
+                            <option value="0">Select a Country</option>
+                            <?php foreach (WC()->countries->countries as $id => $country) : ?>
+                                <option value="<?php echo $id; ?>" <?php selected($billing_country, $id, true); ?>><?php echo $country; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <input type="hidden" id="wc_states" value='<?php echo json_encode(WC()->countries->states); ?>' />
+                </div>
+            </div>
+            <input type="submit" class="button mpp_dna_form_submitted" value="Download CSV" name="mpp_dna_form_submitted" />
+        <?php
+        }
+        ?>
+    </form>
+    <?php
+    return ob_get_clean();
+});
+
+
+// EXPORT DNA CSV FUNCTION
+function mpp_export_dna_csv($exported_fields)
+{
+    $header_row = $exported_fields['header'];
+    ob_start();
+    $filename = 'profile_info.csv';
+    $fh = @fopen('php://output', 'w');
+    fprintf($fh, chr(0xEF) . chr(0xBB) . chr(0xBF));
+    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+    header('Content-Description: File Transfer');
+    header('Content-type: text/csv');
+    header("Content-Disposition: attachment; filename={$filename}");
+    header('Expires: 0');
+    header('Pragma: public');
+
+    fputcsv($fh, $header_row);
+    fputcsv($fh, $exported_fields['data']);
+
+    fclose($fh);
+
+    ob_end_flush();
+    die();
+}
+
+
+add_action('init', function () {
+    if (bp_is_user()) {
+        if (isset($_POST['mpp_dna_form_submitted']) && !empty($_POST['mpp_dna_form_submitted'])) {
+            $member_id = bbp_get_user_id();
+            $exported_fields = array();
+            if (isset($_POST['mpp_profile_box']) && count($_POST['mpp_profile_box']) > 0) {
+                $profile_fields = $_POST['mpp_profile_box'];
+                foreach ($profile_fields as $field_id => $field_value) {
+                    $field_options = xprofile_get_field($field_id, $member_id);
+                    $exported_fields['header'][] = $field_options->name;
+                    $exported_fields['data'][] = $field_value;
+                    if ($field_options->type == 'datebox') $field_value = $field_value . ' 00:00:00';
+                    xprofile_set_field_data($field_id, $member_id, $field_value);
+                    if (isset($_POST['mpp_visibility_' . $field_id]) && !empty($_POST['mpp_visibility_' . $field_id])) {
+                        xprofile_set_field_visibility_level($field_id, $member_id, $_POST['mpp_visibility_' . $field_id]);
+                    }
+                }
+            }
+            if (isset($_POST['mpp_address_box']) && count($_POST['mpp_address_box']) > 0) {
+                if (isset($_POST['mpp_address_box']) && count($_POST['mpp_address_box']) > 0) {
+                    $address_fields = $_POST['mpp_address_box'];
+                    foreach ($address_fields as $field_id => $field_value) {
+                        $exported_fields['header'][] = ucfirst($field_id);
+                        $exported_fields['data'][] = $field_value;
+                        // Save Address Later
+                    }
+                }
+            }
+            //Export CSV
+            if (count($exported_fields) > 0) mpp_export_dna_csv($exported_fields);
+        }
+    }
+});
+
+// Change State with Country
+add_action('wp_footer', function () {
+    if (bp_is_user()) :
+    ?>
+        <script type="text/javascript">
+            jQuery(document).ready(function($) {
+                var $el = $("#mpp_state_field");
+                var states = <?php echo json_encode(WC()->countries->states); ?>;
+                $('#mpp_country_field').on('change', function() {
+                    $el.empty(); // remove old options
+                    var country = $(this).val();
+                    if (states[country] != undefined && Object.keys(states[country]).length > 0) {
+                        $.each(states[country], function(key, value) {
+                            $el.append($("<option></option>")
+                                .attr("value", key).text(value));
+                        });
+                    }
+                });
+            });
+        </script>
+<?php
+    endif;
+});
+
+
+// WC ORDER PROCESSING
+add_action('atbdp_after_created_listing', function ($listing_id = 0) {
+    $args = [
+        'post_type'   => 'shop_order',
+        'post_status' => ["wc-completed"],
+        'numberposts' => -1,
+        'meta_query'  => [
+            'relation' => 'AND',
+            [
+                'key'     => '_customer_user',
+                'value'   => get_current_user_id(),
+                'compare' => '=',
+            ],
+            [
+                'relation' => 'OR',
+                [
+                    'key'     => '_listing_id',
+                    'value'   => '0',
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => '_listing_id',
+                    'value'   => '',
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => '_listing_id',
+                    'compare' => 'NOT EXISTS',
+                ],
+            ],
+        ],
+    ];
+
+    $active_orders = new WP_Query($args);
+
+    while ($active_orders->have_posts()) : $active_orders->the_post();
+        $order = wc_get_order(get_the_ID());
+        foreach ($order->get_items() as $item_key => $item) :
+            $item_id = $item->get_product_id();
+            // Exceptions
+            if ($item_id == 20139) {
+                update_post_meta(get_the_ID(), '_listing_id', $listing_id);
+            }
+        endforeach;
+    endwhile;
+
+    return false;
+});
+
+// Contact Form Email Confirmation
+function mpp_dev_process_entry_save($fields, $entry, $form_id, $form_data)
+{
+
+    $user_name = $fields[1]['value'];
+    $user_email = $fields[2]['value'];
+
+    $html = '';
+    $html .= '<p>Hello ' . $user_name . '</p>';
+    $html .= '<p>Thank you for your MyPetsProfle™️ inquiry. We’ll have a representative reach out to you shortly.</p>';
+    $html .= '<p>Best Regards</p>';
+    $html .= '<p>MyPetsProfile™️ Team</br>';
+    $html .= 'Hello@MyPetsProfile.com</p>';
+
+    // SEND EMAIL
+    $to = $user_email;
+    $subject = 'MyPetsProfile - Inquiry Received';
+    $body = $html;
+    $headers = array('Content-Type: text/html; charset=UTF-8');
+
+    wp_mail($to, $subject, $body, $headers);
+}
+add_action('wpforms_process_entry_save', 'mpp_dev_process_entry_save', 10, 4);

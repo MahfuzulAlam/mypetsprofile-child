@@ -407,7 +407,8 @@ class MPP_Child_Hooks
                     if ($plan_id == 18059) {
                         exit(wp_redirect(MPP_SITE_URL . '/affiliate-area'));
                     } else {
-                        exit(wp_redirect(MPP_SITE_URL . '/add-listing/?directory_type=' . default_directory_type() . '&plan=' . $plan_id));
+                        $directory_type = get_post_meta($plan_id, '_assign_to_directory', true) ? get_post_meta($plan_id, '_assign_to_directory', true) : default_directory_type();
+                        exit(wp_redirect(MPP_SITE_URL . '/add-listing/?directory_type=' . $directory_type . '&plan=' . $plan_id));
                     }
                 }
             }
