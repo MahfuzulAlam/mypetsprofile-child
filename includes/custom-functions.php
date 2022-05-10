@@ -647,10 +647,10 @@ add_action('wp_footer', function () {
 });
 */
 
-/* add_filter('directorist_custom_field_meta_key_field_args', function ($args) {
+add_filter('directorist_custom_field_meta_key_field_args', function ($args) {
     $args['type'] = 'text';
     return $args;
-}); */
+});
 
 // add_action('wp_footer', function () {
 // });
