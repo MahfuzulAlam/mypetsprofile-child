@@ -1658,6 +1658,10 @@ add_action('wp_head', function () {
 // DNA FORM EXPORT
 add_shortcode('dna-form-export', function () {
 
+    // Export PDF From DNA PROFILE
+    mpp_export_dna_pdf();
+    // Export PDF From DNA PROFILE
+
     ob_start();
     $member_id = bbp_get_user_id();
     //$field_group = [1, 2, 3, 4, 12];
@@ -1666,7 +1670,7 @@ add_shortcode('dna-form-export', function () {
 ?>
     <form id="mpp_profile_box" method="post">
         <?php
-        if (get_current_user_id() == $member_id) {
+        if (get_current_user_id() == $member_id || current_user_can('administrator')) {
             foreach ($field_group as $field_id) {
                 $field = xprofile_get_field($field_id, $member_id);
                 $field_value = $field->type == "telephone" || $field->type == "url" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
@@ -1767,6 +1771,7 @@ add_shortcode('dna-form-export', function () {
                 </div>
             </div>
             <input type="submit" class="button mpp_dna_form_submitted" value="Download CSV" name="mpp_dna_form_submitted" />
+            <input type="submit" class="button mpp_dna_form_submitted" value="Download PDF" name="mpp_dna_form_submitted_pdf" />
         <?php
         }
         ?>
@@ -1800,9 +1805,51 @@ function mpp_export_dna_csv($exported_fields)
     die();
 }
 
+// EXPORT DNA PDF FUNCTION
+function mpp_export_dna_pdf()
+{
+    // Export PDF From DNA PROFILE
+    if (isset($_POST['mpp_dna_form_submitted_pdf']) && !empty($_POST['mpp_dna_form_submitted_pdf'])) {
+        $member_id = bbp_get_user_id();
+        $field_info = array();
+        if (isset($_POST['mpp_profile_box']) && count($_POST['mpp_profile_box']) > 0) {
+            // Profile
+            $profile_fields = $_POST['mpp_profile_box'];
+            foreach ($profile_fields as $field_id => $field_value) {
+                $field_options = xprofile_get_field($field_id, $member_id);
+                if ($field_options->type == 'datebox') $field_value = $field_value . ' 00:00:00';
+                xprofile_set_field_data($field_id, $member_id, $field_value);
+                $field_info[$field_id]['key'] = $field_options->description ? $field_options->description : $field_options->name;
+                $field_info[$field_id]['value'] = $field_value;
+            }
+            // Address
+            if (isset($_POST['mpp_address_box']) && count($_POST['mpp_address_box']) > 0) {
+                $address_fields = $_POST['mpp_address_box'];
+                foreach ($address_fields as $field_id => $field_value) {
+                    $field_info[$field_id]['key'] = ucfirst($field_id);
+                    if ($field_id == 'country') {
+                        $field_info[$field_id]['value'] = WC()->countries->countries[$field_value];
+                    } else if ($field_id == 'state') {
+                        if (isset($address_fields['country']) && !empty($address_fields['country']))
+                            $field_info[$field_id]['value'] = WC()->countries->states[$address_fields['country']][$field_value];
+                    } else {
+                        $field_info[$field_id]['value'] = $field_value;
+                    }
+                    // Save Address Later
+                }
+            }
+    ?>
+            <script type="text/javascript">
+                startDnaProcessing('<?php echo json_encode($field_info); ?>', '<?php bp_loggedin_user_avatar('html=false'); ?>');
+            </script>
+        <?php
+        }
+    }
+}
 
 add_action('init', function () {
     if (bp_is_user()) {
+        // Export CSV From DNA PROFILE
         if (isset($_POST['mpp_dna_form_submitted']) && !empty($_POST['mpp_dna_form_submitted'])) {
             $member_id = bbp_get_user_id();
             $exported_fields = array();
@@ -1824,7 +1871,14 @@ add_action('init', function () {
                     $address_fields = $_POST['mpp_address_box'];
                     foreach ($address_fields as $field_id => $field_value) {
                         $exported_fields['header'][] = ucfirst($field_id);
-                        $exported_fields['data'][] = $field_value;
+                        if ($field_id == 'country') {
+                            $exported_fields['data'][] = WC()->countries->countries[$field_value];
+                        } else if ($field_id == 'state') {
+                            if (isset($address_fields['country']) && !empty($address_fields['country']))
+                                $exported_fields['data'][] = WC()->countries->states[$address_fields['country']][$field_value];
+                        } else {
+                            $exported_fields['data'][] = $field_value;
+                        }
                         // Save Address Later
                     }
                 }
@@ -1838,7 +1892,7 @@ add_action('init', function () {
 // Change State with Country
 add_action('wp_footer', function () {
     if (bp_is_user()) :
-    ?>
+        ?>
         <script type="text/javascript">
             jQuery(document).ready(function($) {
                 var $el = $("#mpp_state_field");
