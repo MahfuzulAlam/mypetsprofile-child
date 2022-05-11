@@ -1673,13 +1673,10 @@ add_shortcode('dna-form-export', function () {
         if (get_current_user_id() == $member_id || current_user_can('administrator')) {
             foreach ($field_group as $field_id) {
                 $field = xprofile_get_field($field_id, $member_id);
-                $field_value = $field->type == "telephone" || $field->type == "url" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
+                $field_value = in_array($field->type, array("telephone", "url", "email")) ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
+                $visibility_level =  xprofile_get_field_visibility_level($field->id, $member_id);
         ?>
                 <div class="mpp-profile-field">
-                    <?php
-                    $visibility_level =  xprofile_get_field_visibility_level($field->id, $member_id);
-                    $field_value = $field->type == "telephone" || $field->type == "url" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
-                    ?>
                     <div class="mpp-profile-header">
                         <h5><?php echo $field->alternate_name ? $field->alternate_name : $field->name; ?></h5>
                         <a class="mpp-change-visibility mpp-change-visibility-<?php echo $field->id; ?>" href="#" data-field="<?php echo $field->id; ?>" data_user="<?php echo $member_id; ?>" data-visibility="<?php echo $visibility_level; ?>">
