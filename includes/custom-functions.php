@@ -787,7 +787,7 @@ add_shortcode('bb-user-field-input', function ($atts) {
                     <div class="mpp-profile-field">
                         <?php
                         $visibility_level =  xprofile_get_field_visibility_level($field->id, $member_id);
-                        $field_value = $field->type == "telephone" || $field->type == "url" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
+                        $field_value = in_array($field->type, array("telephone", "url", "email")) ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
                         ?>
                         <div class="mpp-profile-header">
                             <h5><?php echo $field->alternate_name ? $field->alternate_name : $field->name; ?></h5>
@@ -1273,8 +1273,7 @@ add_shortcode('mpp-qna-pdf-gen', function () {
                 foreach ($field_group->fields as $field) {
                     $field_description['mpp_profile_box[' . $field->id . ']'] = $field->description ? $field->description : $field->name;
                     if (get_current_user_id() == $member_id) {
-                        //e_var_dump(bp_get_profile_field_data(array('user_id' => $member_id, 'field' => $field->id)));
-                        $field_value = $field->type == "telephone" ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
+                        $field_value = in_array($field->type, array("telephone", "url", "email")) ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
                 ?>
                         <h5><?php echo $field->description ? $field->description : $field->name; ?></h5>
                     <?php
@@ -1679,9 +1678,11 @@ add_shortcode('dna-form-export', function () {
                 <div class="mpp-profile-field">
                     <div class="mpp-profile-header">
                         <h5><?php echo $field->alternate_name ? $field->alternate_name : $field->name; ?></h5>
-                        <a class="mpp-change-visibility mpp-change-visibility-<?php echo $field->id; ?>" href="#" data-field="<?php echo $field->id; ?>" data_user="<?php echo $member_id; ?>" data-visibility="<?php echo $visibility_level; ?>">
-                            <span class="mpp-icon <?php echo get_mpp_visibolity_icon($visibility_level); ?>"></span>
-                        </a>
+                        <?php if ($field_id !== 1) : ?>
+                            <a class="mpp-change-visibility mpp-change-visibility-<?php echo $field->id; ?>" href="#" data-field="<?php echo $field->id; ?>" data_user="<?php echo $member_id; ?>" data-visibility="<?php echo $visibility_level; ?>">
+                                <span class="mpp-icon <?php echo get_mpp_visibolity_icon($visibility_level); ?>"></span>
+                            </a>
+                        <?php endif; ?>
                     </div>
                     <div class="mpp-profile-body">
                         <div class="mpp-profile-field-description">
@@ -1815,9 +1816,16 @@ function mpp_export_dna_pdf()
             foreach ($profile_fields as $field_id => $field_value) {
                 $field_options = xprofile_get_field($field_id, $member_id);
                 if ($field_options->type == 'datebox') $field_value = $field_value . ' 00:00:00';
-                xprofile_set_field_data($field_id, $member_id, $field_value);
                 $field_info[$field_id]['key'] = $field_options->description ? $field_options->description : $field_options->name;
                 $field_info[$field_id]['value'] = $field_value;
+
+                //Save User Data
+                if (get_current_user_id() == $member_id) {
+                    xprofile_set_field_data($field_id, $member_id, $field_value);
+                    if (isset($_POST['mpp_visibility_' . $field_id]) && !empty($_POST['mpp_visibility_' . $field_id])) {
+                        xprofile_set_field_visibility_level($field_id, $member_id, $_POST['mpp_visibility_' . $field_id]);
+                    }
+                }
             }
             // Address
             if (isset($_POST['mpp_address_box']) && count($_POST['mpp_address_box']) > 0) {
@@ -1857,9 +1865,13 @@ add_action('init', function () {
                     $exported_fields['header'][] = $field_options->name;
                     $exported_fields['data'][] = $field_value;
                     if ($field_options->type == 'datebox') $field_value = $field_value . ' 00:00:00';
-                    xprofile_set_field_data($field_id, $member_id, $field_value);
-                    if (isset($_POST['mpp_visibility_' . $field_id]) && !empty($_POST['mpp_visibility_' . $field_id])) {
-                        xprofile_set_field_visibility_level($field_id, $member_id, $_POST['mpp_visibility_' . $field_id]);
+
+                    // Save User Data
+                    if (get_current_user_id() == $member_id) {
+                        xprofile_set_field_data($field_id, $member_id, $field_value);
+                        if (isset($_POST['mpp_visibility_' . $field_id]) && !empty($_POST['mpp_visibility_' . $field_id])) {
+                            xprofile_set_field_visibility_level($field_id, $member_id, $_POST['mpp_visibility_' . $field_id]);
+                        }
                     }
                 }
             }
