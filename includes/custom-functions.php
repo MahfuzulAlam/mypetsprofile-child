@@ -710,11 +710,28 @@ function mpp_disable_customer_order_email_if_free($recipient, $order)
 
 //Lets add Open Graph Meta Info
 
-function mpp_insert_fb_in_head()
+add_filter("rank_math/opengraph/facebook/image", "mpp_custom_og_image");
+add_filter("rank_math/opengraph/twitter/image", "mpp_custom_og_image");
+
+function mpp_custom_og_image($attachment_url)
 {
-    echo '<meta name="image" property="og:image" content="https://cdn.mypetsprofile.com/wp-content/uploads/2022/04/16144822/featured-image1-1.png"/>';
+    // SINGLE PRODUCT PAGE
+    if (is_singular('product')) :
+        $og_image = get_post_meta(get_the_ID(), 'og_image', true);
+        if ($og_image) :
+            $image = wp_get_attachment_image_src($og_image, 'full');
+            if ($image) :
+                return $image[0];
+            endif;
+        endif;
+    endif;
+    // HOME PAGE
+    if (is_front_page() && is_home()) :
+        $image = wp_get_attachment_image_src(18850, 'full');
+        return $image[0];
+    endif;
+    return $attachment_url;
 }
-add_action('wp_head', 'mpp_insert_fb_in_head', 2);
 
 
 add_action('wp_head', function () {
