@@ -5,6 +5,7 @@ function startPdfProcessing(info, pp) {
   //console.log(pp);
   //console.log(info);
   info = JSON.parse(info);
+  if (pp != "") pp = pp.replace("cdn.", "");
   //console.log(info);
 
   createPdf(info, pp);
@@ -12,11 +13,13 @@ function startPdfProcessing(info, pp) {
 
 function startQnaProcessing(info, pp) {
   info = JSON.parse(info);
+  if (pp != "") pp = pp.replace("cdn.", "");
   createQnaPdf(info, pp);
 }
 
 function startDnaProcessing(info, pp) {
   info = JSON.parse(info);
+  if (pp != "") pp = pp.replace("cdn.", "");
   createDnaPdf(info, pp);
 }
 
@@ -39,7 +42,7 @@ async function createPdf(info, pp) {
   // Image Handling
   //https://communityportal.mypetsprofile.com/wp-content/uploads/2020/06/MPP-Transparent-logo.png
   const emblemUrl =
-    "http://mpp.local/wp-content/uploads/2022/04/MPP-Transparent-logo-1024x485-1.png";
+    "https://mypetsprofile.com/wp-content/uploads/2020/06/MPP-Transparent-logo.png";
   const emblemImageBytes = await fetch(emblemUrl).then((res) =>
     res.arrayBuffer()
   );
@@ -167,7 +170,7 @@ async function createQnaPdf(info, pp) {
   // Image Handling
   //https://communityportal.mypetsprofile.com/wp-content/uploads/2020/06/MPP-Transparent-logo.png
   const emblemUrl =
-    "http://mpp.local/wp-content/uploads/2022/04/MPP-Transparent-logo-1024x485-1.png";
+    "https://mypetsprofile.com/wp-content/uploads/2020/06/MPP-Transparent-logo.png";
   const emblemImageBytes = await fetch(emblemUrl).then((res) =>
     res.arrayBuffer()
   );
