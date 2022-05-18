@@ -109,9 +109,9 @@ class MPP_Child_Hooks
             $custom_avatar = isset($custom_avatar_fetch['full']) && !empty($custom_avatar_fetch['full']) ? $custom_avatar_fetch['full'] : $custom_avatar;
 
             if ($bp->current_action == "")
-                return '<img class="avatar" src="' . $custom_avatar . '" alt="' . attribute_escape($groups_template->group->name) . '" width="' . BP_AVATAR_THUMB_WIDTH . '" height="' . BP_AVATAR_THUMB_HEIGHT . '" />';
+                return '<img class="avatar" src="' . $custom_avatar . '" alt="' . esc_attr($groups_template->group->name) . '" width="' . BP_AVATAR_THUMB_WIDTH . '" height="' . BP_AVATAR_THUMB_HEIGHT . '" />';
             else
-                return '<img class="avatar" src="' . $custom_avatar . '" alt="' . attribute_escape($groups_template->group->name) . '" width="' . BP_AVATAR_FULL_WIDTH . '" height="' . BP_AVATAR_FULL_HEIGHT . '" />';
+                return '<img class="avatar" src="' . $custom_avatar . '" alt="' . esc_attr($groups_template->group->name) . '" width="' . BP_AVATAR_FULL_WIDTH . '" height="' . BP_AVATAR_FULL_HEIGHT . '" />';
         }
     }
 

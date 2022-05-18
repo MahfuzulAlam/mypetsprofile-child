@@ -53,7 +53,7 @@ function buddyboss_theme_child_scripts_styles()
 	 **/
 
 	// Styles
-	wp_enqueue_style('buddyboss-child-css', get_stylesheet_directory_uri() . '/assets/css/custom.css', '', '1.0.0');
+	wp_enqueue_style('buddyboss-child-css', get_stylesheet_directory_uri() . '/assets/css/custom.css', '', '1.0.1');
 	wp_enqueue_style('buddyboss-child-map-css', get_stylesheet_directory_uri() . '/assets/css/map.css', '', '1.0.0');
 
 	// Javascript
@@ -111,5 +111,6 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 	require_once(get_stylesheet_directory() . '/includes/custom-functions.php');
 	require_once(get_stylesheet_directory() . '/includes/custom-hooks.php');
 	require_once(get_stylesheet_directory() . '/includes/custom-shortcodes.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-adoption.php');
 
 endif;
