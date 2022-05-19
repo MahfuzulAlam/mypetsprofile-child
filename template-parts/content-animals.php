@@ -26,11 +26,10 @@ $animals = $args['animals'];
             if (isset($metas['animal_age_group']) && !empty($metas['animal_age_group'][0])) $animal_meta[] = $metas['animal_age_group'][0];
             if (isset($metas['animal_main_breed']) && !empty($metas['animal_main_breed'][0])) $animal_meta[] = $metas['animal_main_breed'][0];
             ?>
-            <div class="animal-holder" data-metas='<?php echo json_encode($metas); ?>' data-title="<?php echo get_the_title(); ?>" data-img="<?php echo $image_url; ?>">
-                <div class="animal-image" style="background-image:url(<?php echo $image_url; ?>)">
-                </div>
+            <div class="animal-holder animal_holder_<?php echo get_the_ID(); ?>" data-metas='<?php echo json_encode($metas); ?>' data-title="<?php echo get_the_title(); ?>" data-img="<?php echo $image_url; ?>" data-admin="<?php echo mpp_is_group_admin(); ?>" data-group_url="<?php echo bp_get_group_permalink(groups_get_current_group()); ?>" data-animal="<?php echo get_the_ID(); ?>">
+                <div class="animal-image" style="background-image:url(<?php echo $image_url; ?>)"></div>
                 <div class="animal-info">
-                    <div class="animal-name"><?php the_title(); ?></div>
+                    <div class="animal-name"><?php echo get_the_title(); ?></div>
                     <div class="animal-meta">
                         <?php echo count($animal_meta) > 0 ? implode(" • ", $animal_meta) : ''; ?>
                     </div>

@@ -24,6 +24,8 @@ class Pet_Adoption
         add_shortcode('adoption-search-form', array($this, 'adoption_search_form'));
         // ADOPTION SEARCH RESULTS
         add_shortcode('adoption-search-results', array($this, 'adoption_search_results'));
+        // DELETE ANIMAL AJAX CALL
+        add_action('wp_ajax_mpp_delete_animal', array($this, 'mpp_delete_animal'));
     }
 
     public function custom_post_type_animal()
@@ -88,9 +90,37 @@ class Pet_Adoption
     {
         ob_start();
         if (isset($_POST['animal_submit'])) $this->add_new_animal_process();
-        $args = array('name' => 'Animal');
+        $args = $this->edit_animal_information();
         get_template_part('template-parts/content', 'add_new_animal', $args);
         return ob_get_clean();
+    }
+
+    // EDIT ANIMAL INFO
+    public function edit_animal_information()
+    {
+        $args = array();
+        $animal = isset($_GET['animal']) && !empty($_GET['animal']) ? $_GET['animal'] : 0;
+        if ($animal) {
+            $animal_info = get_post($animal, 'ARRAY_A');
+            $args = array(
+                'animal_id' => $animal,
+                'animal_name' => $animal_info['post_title'],
+                'animal_description' => $animal_info['post_content']
+            );
+            $animal_metas = get_post_meta($animal);
+            if (isset($animal_metas['animal_gender']) && !empty($animal_metas['animal_gender'][0])) $args['animal_gender'] = $animal_metas['animal_gender'][0];
+            if (isset($animal_metas['animal_type']) && !empty($animal_metas['animal_type'][0])) $args['animal_type'] = $animal_metas['animal_type'][0];
+            if (isset($animal_metas['animal_age_group']) && !empty($animal_metas['animal_age_group'][0])) $args['animal_age_group'] = $animal_metas['animal_age_group'][0];
+            if (isset($animal_metas['spayed_neutered']) && !empty($animal_metas['spayed_neutered'][0])) $args['spayed_neutered'] = $animal_metas['spayed_neutered'][0];
+            if (isset($animal_metas['animal_weight']) && !empty($animal_metas['animal_weight'][0])) $args['animal_weight'] = $animal_metas['animal_weight'][0];
+            if (isset($animal_metas['animal_main_breed']) && !empty($animal_metas['animal_main_breed'][0])) $args['animal_main_breed'] = $animal_metas['animal_main_breed'][0];
+            if (isset($animal_metas['animal_breed_2']) && !empty($animal_metas['animal_breed_2'][0])) $args['animal_breed_2'] = $animal_metas['animal_breed_2'][0];
+            if (isset($animal_metas['animal_main_color']) && !empty($animal_metas['animal_main_color'][0])) $args['animal_main_color'] = $animal_metas['animal_main_color'][0];
+            if (isset($animal_metas['animal_color_2']) && !empty($animal_metas['animal_color_2'][0])) $args['animal_color_2'] = $animal_metas['animal_color_2'][0];
+            if (isset($animal_metas['animal_adoption_status']) && !empty($animal_metas['animal_adoption_status'][0])) $args['animal_adoption_status'] = $animal_metas['animal_adoption_status'][0];
+            //if (isset($animal_metas['_thumbnail_id']) && !empty($animal_metas['_thumbnail_id'][0])) $args['thumbnail_id'] = $animal_metas['_thumbnail_id'][0];
+        }
+        return $args;
     }
 
     // ADD NEW ANIMAL PROCESS
@@ -109,17 +139,25 @@ class Pet_Adoption
             if (isset($_POST['animal_breed_2']) && !empty($_POST['animal_breed_2'])) $meta_input['animal_breed_2'] = trim($_POST['animal_breed_2']);
             if (isset($_POST['animal_main_color']) && !empty($_POST['animal_main_color'])) $meta_input['animal_main_color'] = trim($_POST['animal_main_color']);
             if (isset($_POST['animal_color_2']) && !empty($_POST['animal_color_2'])) $meta_input['animal_color_2'] = trim($_POST['animal_color_2']);
-            if (isset($_POST['animal_collar']) && !empty($_POST['animal_collar'])) $meta_input['animal_collar'] = trim($_POST['animal_collar']);
             if (isset($_POST['animal_adoption_status']) && !empty($_POST['animal_adoption_status'])) $meta_input['animal_adoption_status'] = trim($_POST['animal_adoption_status']);
             // Meta Input
 
-            $animal = wp_insert_post(array(
+            $animal_args = array(
+                "post_author"   =>  get_current_user_id(),
                 "post_title"    =>  $_POST['animal_name'],
                 "post_content"  =>  isset($_POST['animal_description']) && !empty($_POST['animal_description']) ? $_POST['animal_description'] : "",
                 "post_status"   =>  "publish",
                 "post_type"     =>  "animal",
                 "meta_input"    =>  $meta_input
-            ));
+            );
+
+            if (isset($_GET['action']) && $_GET['action'] == 'edit') {
+                if (isset($_GET['animal']) && !empty($_GET['animal'])) {
+                    $animal_args["ID"] = $_GET['animal'];
+                }
+            }
+
+            $animal = wp_insert_post($animal_args);
 
             if ($animal) {
                 if (!empty($_FILES)) {
@@ -128,7 +166,7 @@ class Pet_Adoption
                             $allowed = array('jpg', 'png', 'jpeg');
                             $filename = $file['name'];
                             $ext = pathinfo($filename, PATHINFO_EXTENSION);
-                            if (!in_array($ext, $allowed)) {
+                            if ($ext && !in_array($ext, $allowed)) {
                                 echo "<P>Wrong file type!</p>";
                             } else {
                                 $attachment_id = $this->mpp_upload_user_file($file);
@@ -139,7 +177,11 @@ class Pet_Adoption
                         }
                     }
                 }
-                echo "<P>New Animal has been inserted successfully!</p>";
+                if (isset($_GET['action']) && $_GET['action'] == 'edit') {
+                    echo "<P>Animal has been updated successfully!</p>";
+                } else {
+                    echo "<P>New Animal has been inserted successfully!</p>";
+                }
             }
         }
     }
@@ -199,6 +241,7 @@ class Pet_Adoption
         get_template_part('template-parts/content', 'search_form');
         return ob_get_clean();
     }
+
     // Adomtion Search Results
     public function adoption_search_results()
     {
@@ -242,6 +285,21 @@ class Pet_Adoption
         ob_start();
         get_template_part('template-parts/content', 'animals', $args);
         return ob_get_clean();
+    }
+
+    // Animal Delete Ajax Call
+    public function mpp_delete_animal()
+    {
+        $result = array('type' => false);
+        $animal = isset($_REQUEST['animal']) && !empty($_REQUEST['animal']) ? $_REQUEST['animal'] : false;
+        if ($animal) {
+            $trash = wp_trash_post($animal);
+            if ($trash) {
+                $result['type'] = true;
+            }
+        }
+        echo json_encode($result);
+        die();
     }
 }
 

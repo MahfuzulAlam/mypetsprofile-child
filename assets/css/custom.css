@@ -668,6 +668,7 @@
   border-radius: 5px;
   overflow: hidden;
   border: 1px solid var(--bb-content-border-color);
+  cursor: pointer;
 }
 
 .mpp-animals .animal-info {
@@ -690,8 +691,7 @@
 }
 
 .add-animal .animal-submit,
-.search-animal .animal-submit
-{
+.search-animal .animal-submit {
   margin-top: 20px;
 }
 
@@ -715,4 +715,13 @@
 
 .animal-info-modal .animal-info-value {
   font-size: 15px;
+}
+
+.add-animal .bs-styled-radio:checked + label:after,
+.search-animal .bs-styled-radio:checked + label:after {
+  top: 8px;
+}
+
+.animal-display-image {
+  margin-top: 10px;
 }

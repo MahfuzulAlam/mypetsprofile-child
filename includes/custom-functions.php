@@ -2012,3 +2012,15 @@ function mpp_dev_process_entry_save($fields, $entry, $form_id, $form_data)
     wp_mail($to, $subject, $body, $headers);
 }
 add_action('wpforms_process_entry_save', 'mpp_dev_process_entry_save', 10, 4);
+
+
+// CHECK IF THE USER IS ADMIN
+function mpp_is_group_admin()
+{
+    $membership = groups_is_user_admin(get_current_user_id(), bp_get_current_group_id());
+    if ($membership) {
+        return 'admin';
+    } else {
+        return 'non-admin';
+    }
+}

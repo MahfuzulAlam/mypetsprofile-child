@@ -20,7 +20,10 @@ jQuery(document).ready(function ($) {
     var metas = $(this).data("metas");
     var title = $(this).data("title");
     var image = $(this).data("img");
-    console.log(metas);
+    var admin = $(this).data("admin");
+    var groupUrl = $(this).data("group_url");
+    var animal = $(this).data("animal");
+
     var animal_description = '<div class="animal-description">';
 
     // Image
@@ -66,7 +69,7 @@ jQuery(document).ready(function ($) {
     if (metas.animal_weight != undefined && metas.animal_weight[0] != "") {
       animal_description +=
         `<div class="animal-info-modal">
-        <div class="animal-info-label">Weight</div>
+        <div class="animal-info-label">Weight (Lbs)</div>
         <div class="animal-info-value">` +
         metas.animal_weight[0] +
         `</div></div>`;
@@ -141,12 +144,53 @@ jQuery(document).ready(function ($) {
         `</div></div>`;
     }
 
+    if (admin == "admin") {
+      animal_description +=
+        `<a href="#" class="button delete_animal" data-animal="` +
+        animal +
+        `">Delete</a>
+      <a href="` +
+        groupUrl +
+        `/pet-adoption/add-new-animal/?action=edit&animal=` +
+        animal +
+        `" class="button">Edit</a>`;
+    }
+
     animal_description += "</div>";
     Swal.fire({
       title: title,
       html: animal_description,
       showConfirmButton: false,
       showCloseButton: true,
+    });
+  });
+
+  // Delete Animal
+  $(document).on("click", ".delete_animal", function (e) {
+    e.preventDefault();
+    var $animal = $(this).data("animal");
+    Swal.fire({
+      title: "Do you want to delete this animal?",
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+    }).then((result) => {
+      /* Read more about isConfirmed, isDenied below */
+      if (result.isConfirmed) {
+        // AJAX CALL
+        $.ajax({
+          type: "post",
+          dataType: "json",
+          url: bbpCommonJsData.ajax_url,
+          data: { action: "mpp_delete_animal", animal: $animal },
+          success: function (response) {
+            if (response.type == true) {
+              Swal.fire("Deleted!", "", "success");
+              $(".animal_holder_" + $animal).hide();
+            }
+          },
+        });
+        // AJAX CALL
+      }
     });
   });
 });
