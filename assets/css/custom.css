@@ -689,7 +689,9 @@
   background-size: cover;
 }
 
-.add-animal .animal-submit {
+.add-animal .animal-submit,
+.search-animal .animal-submit
+{
   margin-top: 20px;
 }
 

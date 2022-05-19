@@ -55,11 +55,11 @@ if (!defined('ABSPATH')) exit;
         <div class="mpp-profile-header"><label>Spayed Or Neutered</label></div>
         <div class="mpp-profile-body">
             <div class="bp-radio-wrap">
-                <input type="radio" name="spayed_neutered" id="spayed_neutered_yes" value="Yes" class="bs-styled-radio" checked="checked">
+                <input type="radio" name="spayed_neutered" id="spayed_neutered_yes" value="Yes" class="bs-styled-radio">
                 <label for="spayed_neutered_yes" class="option-label">Yes</label>
             </div>
             <div class="bp-radio-wrap">
-                <input type="radio" name="spayed_neutered" id="spayed_neutered_no" value="No" class="bs-styled-radio" checked="checked">
+                <input type="radio" name="spayed_neutered" id="spayed_neutered_no" value="No" class="bs-styled-radio">
                 <label for="spayed_neutered_no" class="option-label">No</label>
             </div>
         </div>
