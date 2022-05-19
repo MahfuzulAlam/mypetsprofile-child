@@ -146,6 +146,7 @@ jQuery(document).ready(function ($) {
       title: title,
       html: animal_description,
       showConfirmButton: false,
+      showCloseButton: true,
     });
   });
 });

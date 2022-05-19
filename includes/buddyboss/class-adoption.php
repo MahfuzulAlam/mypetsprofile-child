@@ -20,6 +20,10 @@ class Pet_Adoption
         add_shortcode('add-new-animal', array($this, 'add_new_animal'));
         // ADOPTION PET LIST
         add_shortcode('adoption-pet-list', array($this, 'adoption_pet_list'));
+        // ADOPTION SEARCH FORM
+        add_shortcode('adoption-search-form', array($this, 'adoption_search_form'));
+        // ADOPTION SEARCH RESULTS
+        add_shortcode('adoption-search-results', array($this, 'adoption_search_results'));
     }
 
     public function custom_post_type_animal()
@@ -182,6 +186,58 @@ class Pet_Adoption
                 'meta_value'    => bp_get_current_group_id()
             )
         );
+        $args = array('animals' => $animals);
+        ob_start();
+        get_template_part('template-parts/content', 'animals', $args);
+        return ob_get_clean();
+    }
+
+    // Adoption Search Form
+    public function adoption_search_form()
+    {
+        ob_start();
+        get_template_part('template-parts/content', 'search_form');
+        return ob_get_clean();
+    }
+    // Adomtion Search Results
+    public function adoption_search_results()
+    {
+        $query_args = array(
+            'post_type' => 'animal',
+            'posts_per_page' => -1,
+            'post_status'   => 'publish',
+        );
+        if (isset($_GET['animal_name']) && !empty($_GET['animal_name'])) $query_args['s'] = trim($_GET['animal_name']);
+        // Meta Query
+        $meta_query = array();
+        $metas = array(
+            'animal_type',
+            'animal_gender',
+            'animal_age_group',
+            'spayed_neutered',
+            'animal_weight',
+            'animal_main_breed',
+            'animal_breed_2',
+            'animal_main_color',
+            'animal_adoption_status'
+        );
+
+        foreach ($metas as $meta_key) {
+            if (isset($_GET[$meta_key]) && !empty($_GET[$meta_key])) {
+                $meta_query[$meta_key] = array(
+                    'key'   => $meta_key,
+                    'value' => trim($_GET[$meta_key])
+                );
+            }
+        }
+
+        if (count($meta_query) > 0) {
+            $meta_query['relation'] = 'AND';
+            $query_args['meta_query'] = $meta_query;
+        }
+        // Meta Query
+
+        $animals = new WP_Query($query_args);
         $args = array('animals' => $animals);
         ob_start();
         get_template_part('template-parts/content', 'animals', $args);
