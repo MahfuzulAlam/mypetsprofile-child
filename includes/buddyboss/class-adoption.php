@@ -274,6 +274,20 @@ class Pet_Adoption
             }
         }
 
+        if (
+            (isset($_REQUEST['cityLat']) && !empty($_REQUEST['cityLat'])) &&
+            (isset($_REQUEST['cityLng']) && !empty($_REQUEST['cityLat']))
+        ) {
+            $query_args['atbdp_geo_query'] = array(
+                'lat_field' => 'manual_lat',
+                'lng_field' => 'manual_lng',
+                'latitude'  => sanitize_text_field($_REQUEST['cityLat']),
+                'longitude' => sanitize_text_field($_REQUEST['cityLng']),
+                'distance'  => '5',
+                'units'     => 'miles'
+            );
+        }
+
         if (count($meta_query) > 0) {
             $meta_query['relation'] = 'AND';
             $query_args['meta_query'] = $meta_query;
