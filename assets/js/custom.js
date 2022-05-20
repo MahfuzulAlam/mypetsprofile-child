@@ -195,17 +195,20 @@ jQuery(document).ready(function ($) {
   });
 
   // GOOGLE ADDRESS AUTOCOMPLETE
-  function initialize() {
-    var input = document.getElementById('searchAnimalMap');
-    new google.maps.places.Autocomplete(input);
-    google.maps.event.addListener(autocomplete, 'place_changed', function () {
-      var place = autocomplete.getPlace();
+  function google_ac_initialize() {
+    var input = document.getElementById("searchAnimalMap");
+    var mpp_ac = new google.maps.places.Autocomplete(input, {
+      types: ["geocode"],
+    });
+    mpp_ac.addListener("place_changed", function () {
+      var place = mpp_ac.getPlace();
+      console.log("okay");
+      console.log(place);
       //document.getElementById('city2').value = place.name;
-      document.getElementById('cityLat').value = place.geometry.location.lat();
-      document.getElementById('cityLng').value = place.geometry.location.lng();
-  });
+      document.getElementById("cityLat").value = place.geometry.location.lat();
+      document.getElementById("cityLng").value = place.geometry.location.lng();
+    });
   }
-  
-  google.maps.event.addDomListener(window, 'load', initialize);
-
+  google_ac_initialize();
+  // GOOGLE ADDRESS AUTOCOMPLETE
 });

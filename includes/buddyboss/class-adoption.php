@@ -118,8 +118,17 @@ class Pet_Adoption
             if (isset($animal_metas['animal_main_color']) && !empty($animal_metas['animal_main_color'][0])) $args['animal_main_color'] = $animal_metas['animal_main_color'][0];
             if (isset($animal_metas['animal_color_2']) && !empty($animal_metas['animal_color_2'][0])) $args['animal_color_2'] = $animal_metas['animal_color_2'][0];
             if (isset($animal_metas['animal_adoption_status']) && !empty($animal_metas['animal_adoption_status'][0])) $args['animal_adoption_status'] = $animal_metas['animal_adoption_status'][0];
-            //if (isset($animal_metas['_thumbnail_id']) && !empty($animal_metas['_thumbnail_id'][0])) $args['thumbnail_id'] = $animal_metas['_thumbnail_id'][0];
         }
+
+        // MAP INFO
+        $listings = groups_get_groupmeta(bp_get_current_group_id(), 'directorist_listings_ids', true);
+        if ($listings && count($listings)) {
+            $listing = $listings[0];
+            $args['animal_address'] = get_post_meta($listing, '_address', true) ? get_post_meta($listing, '_address', true) : '';
+            $args['cityLat'] = get_post_meta($listing, '_manual_lat', true) ? get_post_meta($listing, '_manual_lat', true) : '';
+            $args['cityLng'] = get_post_meta($listing, '_manual_lng', true) ? get_post_meta($listing, '_manual_lng', true) : '';
+        }
+
         return $args;
     }
 
@@ -140,6 +149,9 @@ class Pet_Adoption
             if (isset($_POST['animal_main_color']) && !empty($_POST['animal_main_color'])) $meta_input['animal_main_color'] = trim($_POST['animal_main_color']);
             if (isset($_POST['animal_color_2']) && !empty($_POST['animal_color_2'])) $meta_input['animal_color_2'] = trim($_POST['animal_color_2']);
             if (isset($_POST['animal_adoption_status']) && !empty($_POST['animal_adoption_status'])) $meta_input['animal_adoption_status'] = trim($_POST['animal_adoption_status']);
+            if (isset($_POST['animal_address']) && !empty($_POST['animal_address'])) $meta_input['animal_address'] = trim($_POST['animal_address']);
+            if (isset($_POST['cityLat']) && !empty($_POST['cityLat'])) $meta_input['cityLat'] = trim($_POST['cityLat']);
+            if (isset($_POST['cityLng']) && !empty($_POST['cityLng'])) $meta_input['cityLng'] = trim($_POST['cityLng']);
             // Meta Input
 
             $animal_args = array(
@@ -283,7 +295,7 @@ class Pet_Adoption
                 'lng_field' => 'manual_lng',
                 'latitude'  => sanitize_text_field($_REQUEST['cityLat']),
                 'longitude' => sanitize_text_field($_REQUEST['cityLng']),
-                'distance'  => '5',
+                'distance'  => '10',
                 'units'     => 'miles'
             );
         }

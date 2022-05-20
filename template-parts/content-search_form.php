@@ -108,8 +108,8 @@ if (!defined('ABSPATH')) exit;
         <div class="mpp-profile-header"><label for="animal_color_2">Search with Location</label></div>
         <div class="mpp-profile-body">
             <input type="text" id="searchAnimalMap" name="address" class="mpp-profile-field-html" />
-            <input type="hidden" id="cityLat" name="cityLat" value="23.7077037" />
-            <input type="hidden" id="cityLng" name="cityLng" value="90.4462874" />
+            <input type="hidden" id="cityLat" name="cityLat" value="" />
+            <input type="hidden" id="cityLng" name="cityLng" value="" />
         </div>
     </div>
     <div class="mpp-profile-field animal-submit">

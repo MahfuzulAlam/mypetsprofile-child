@@ -108,6 +108,14 @@ if (!defined('ABSPATH')) exit;
         </div>
     </div>
     <div class="mpp-profile-field">
+        <div class="mpp-profile-header"><label for="animal_address">Address</label></div>
+        <div class="mpp-profile-body">
+            <input type="text" id="searchAnimalMap" name="animal_address" class="mpp-profile-field-html" value="<?php echo isset($args['animal_address']) ? $args['animal_address'] : ''; ?>" />
+            <input type="hidden" id="cityLat" name="cityLat" class="mpp-profile-field-html" value="<?php echo isset($args['cityLat']) ? $args['cityLat'] : ''; ?>" />
+            <input type="hidden" id="cityLng" name="cityLng" class="mpp-profile-field-html" value="<?php echo isset($args['cityLng']) ? $args['cityLng'] : ''; ?>" />
+        </div>
+    </div>
+    <div class="mpp-profile-field">
         <div class="mpp-profile-header"><label for="animal_description">Description</label></div>
         <div class="mpp-profile-body">
             <textarea id="animal_description" name="animal_description" class="mpp-profile-field-html"><?php echo isset($args['animal_description']) ? $args['animal_description'] : ''; ?></textarea>

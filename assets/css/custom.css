@@ -653,13 +653,19 @@
 @media only screen and (min-width: 600px) {
   .mpp-animals {
     display: flex;
+    flex-wrap: wrap;
   }
 
   .mpp-animals .animal-holder {
     display: flex;
     flex-direction: column;
-    width: 33%;
+    width: 30%;
     margin-right: 20px;
+  }
+}
+@media only screen and (max-width: 599px) {
+  .mpp-animals {
+    margin-top: 30px;
   }
 }
 
