@@ -262,7 +262,7 @@ class Pet_Adoption
             'posts_per_page' => -1,
             'post_status'   => 'publish',
         );
-        if (isset($_GET['animal_name']) && !empty($_GET['animal_name'])) $query_args['s'] = trim($_GET['animal_name']);
+        if (isset($_REQUEST['animal_name']) && !empty($_REQUEST['animal_name'])) $query_args['s'] = trim($_REQUEST['animal_name']);
         // Meta Query
         $meta_query = array();
         $metas = array(
@@ -278,10 +278,10 @@ class Pet_Adoption
         );
 
         foreach ($metas as $meta_key) {
-            if (isset($_GET[$meta_key]) && !empty($_GET[$meta_key])) {
+            if (isset($_REQUEST[$meta_key]) && !empty($_REQUEST[$meta_key])) {
                 $meta_query[$meta_key] = array(
                     'key'   => $meta_key,
-                    'value' => trim($_GET[$meta_key])
+                    'value' => trim($_REQUEST[$meta_key])
                 );
             }
         }
@@ -291,8 +291,8 @@ class Pet_Adoption
             (isset($_REQUEST['cityLng']) && !empty($_REQUEST['cityLat']))
         ) {
             $query_args['atbdp_geo_query'] = array(
-                'lat_field' => 'manual_lat',
-                'lng_field' => 'manual_lng',
+                'lat_field' => 'cityLat',
+                'lng_field' => 'cityLng',
                 'latitude'  => sanitize_text_field($_REQUEST['cityLat']),
                 'longitude' => sanitize_text_field($_REQUEST['cityLng']),
                 'distance'  => '10',
