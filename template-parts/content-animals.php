@@ -19,14 +19,18 @@ $animals = $args['animals'];
 
         <!-- the loop -->
         <?php while ($animals->have_posts()) : $animals->the_post(); ?>
-            <?php $image_url = get_the_post_thumbnail_url(); ?>
             <?php
-            $metas = get_post_meta(get_the_ID());
+            $animal_id = get_the_ID();
+            $image_url = get_the_post_thumbnail_url();
+            $metas = get_post_meta($animal_id);
             $animal_meta = array();
             if (isset($metas['animal_age_group']) && !empty($metas['animal_age_group'][0])) $animal_meta[] = $metas['animal_age_group'][0];
             if (isset($metas['animal_main_breed']) && !empty($metas['animal_main_breed'][0])) $animal_meta[] = $metas['animal_main_breed'][0];
+            $bb_group = get_post_meta($animal_id, 'bb_group', true);
+            $bb_group_url = $bb_group && !empty($bb_group) ? bp_get_group_permalink(groups_get_group($bb_group)) : '';
+            //bp_is_group() ? bp_get_group_permalink(groups_get_current_group())
             ?>
-            <div class="animal-holder animal_holder_<?php echo get_the_ID(); ?>" data-metas='<?php echo json_encode($metas); ?>' data-title="<?php echo get_the_title(); ?>" data-img="<?php echo $image_url; ?>" data-admin="<?php echo bp_is_group() ? mpp_is_group_admin() : 'user'; ?>" data-group_url="<?php echo bp_is_group() ? bp_get_group_permalink(groups_get_current_group()) : ''; ?>" data-animal="<?php echo get_the_ID(); ?>">
+            <div class="animal-holder animal_holder_<?php echo $animal_id; ?>" data-metas='<?php echo json_encode($metas); ?>' data-title="<?php echo get_the_title(); ?>" data-img="<?php echo $image_url; ?>" data-admin="<?php echo bp_is_group() ? mpp_is_group_admin() : 'user'; ?>" data-group_url="<?php echo $bb_group_url; ?>" data-animal="<?php echo $animal_id; ?>">
                 <div class="animal-image" style="background-image:url(<?php echo $image_url; ?>)"></div>
                 <div class="animal-info">
                     <div class="animal-name"><?php echo get_the_title(); ?></div>

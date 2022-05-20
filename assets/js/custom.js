@@ -144,6 +144,9 @@ jQuery(document).ready(function ($) {
         `</div></div>`;
     }
 
+    animal_description +=
+      `<a href="` + groupUrl + `" class="button">Contact</a> `;
+
     if (admin == "admin") {
       animal_description +=
         `<a href="#" class="button delete_animal" data-animal="` +
