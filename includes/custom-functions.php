@@ -2065,7 +2065,8 @@ function mpp_send_pet_alert_emails($messages)
 {
     //$field_id = 100;
     $field_id = 1073;
-    $user_emails = array();
+    $user_emails = array('hello@mypetsprofile.com');
+    //$user_emails = array('asayeedalam@gmail.com');
     $user_city = BP_XProfile_ProfileData::get_value_byid($field_id, get_current_user_id());
     if ($user_city && !empty($user_city)) {
         $user_query = new BP_User_Query(
@@ -2090,6 +2091,7 @@ function mpp_send_pet_alert_emails($messages)
         }
     }
     if (count($user_emails)) {
+        $user_emails = array_unique($user_emails);
         $to = $user_emails;
         $subject = 'MyPetsAlert';
         $body = mpp_generate_petsalert_message($messages, get_current_user_id());
@@ -2105,11 +2107,15 @@ function mpp_send_pet_alert_emails($messages)
 function mpp_generate_petsalert_message($messages, $user_id)
 {
     $user_fields = mpp_get_petsalert_fields($user_id);
+    $pet_name = bp_core_get_username($user_id);
+    $pet_link = bbp_get_user_profile_url($user_id);
     ob_start();
 ?>
     <div style="margin:100px; border: 2px solid gray; padding: 20px">
         <div style="text-align: center">
-            <h1>PetsAlert</h1>
+            <h1>PetAlert</h1>
+            <h4>"<?php echo $pet_name; ?>" has gone missing near you! Please keep a watchful eye.</h4>
+            <img src="<?php bp_loggedin_user_avatar('html=false'); ?>" height="200" />
             <p>"<?php echo $messages; ?>"</p>
         </div>
         <?php if (count($user_fields) > 0) : ?>
@@ -2121,6 +2127,10 @@ function mpp_generate_petsalert_message($messages, $user_id)
                 </p>
             <?php endforeach; ?>
         <?php endif; ?>
+        <p>
+            <span style="color: #000">Profile Link</span>:
+            <span style="color: gray"><a href="<?php echo $pet_link; ?>"><?php echo $pet_link; ?></a></span>
+        </p>
     </div>
 <?php
     return ob_get_clean();
@@ -2131,6 +2141,7 @@ function mpp_get_petsalert_fields($user_id)
     $mpp_fields = array();
     $field_groups = bp_profile_get_field_groups();
     foreach ($field_groups as $field_group) {
+        //if ($field_group->id == 1 || $field_group->id == 4) {
         if ($field_group->id == 6 || $field_group->id == 24) {
             foreach ($field_group->fields as $field) {
                 $field_value = BP_XProfile_ProfileData::get_value_byid($field->id, $user_id);
