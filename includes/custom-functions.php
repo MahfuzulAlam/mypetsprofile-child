@@ -2056,7 +2056,7 @@ add_shortcode('my-pet-alert', function () {
 function mpp_send_pet_alert_message($messages)
 {
     mpp_send_pet_alert_emails($messages);
-    do_action('mpp_pet_missing', get_current_user_id(), array());
+    //do_action('mpp_pet_missing', get_current_user_id(), array());
 }
 
 
@@ -2092,9 +2092,51 @@ function mpp_send_pet_alert_emails($messages)
     if (count($user_emails)) {
         $to = $user_emails;
         $subject = 'MyPetsAlert';
-        $body = $messages;
-        $headers = array('Content-Type: text/html; charset=UTF-8', 'From: MyPetsProfile <example@mypetsprofile.com>');
+        $body = mpp_generate_petsalert_message($messages, get_current_user_id());
+        //$body = $messages;
+        $headers = array('Content-Type: text/html; charset=UTF-8', 'From: MyPetsProfile <hello@mypetsprofile.com>');
 
-        wp_mail($to, $subject, $body, $headers);
+        $email_sent = wp_mail($to, $subject, $body, $headers);
+        if ($email_sent) echo "<p>MyPetsAlert sent successfully!</p>";
     }
+}
+
+
+function mpp_generate_petsalert_message($messages, $user_id)
+{
+    $user_fields = mpp_get_petsalert_fields($user_id);
+    ob_start();
+?>
+    <div style="margin:100px; border: 2px solid gray; padding: 20px">
+        <div style="text-align: center">
+            <h1>PetsAlert</h1>
+            <p>"<?php echo $messages; ?>"</p>
+        </div>
+        <?php if (count($user_fields) > 0) : ?>
+            <h2>PetsProfile</h2>
+            <?php foreach ($user_fields as $key => $field) : ?>
+                <p>
+                    <span style="color: #000"><?php echo $key; ?></span>:
+                    <span style="color: gray"><?php echo $field; ?></span>
+                </p>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+<?php
+    return ob_get_clean();
+}
+
+function mpp_get_petsalert_fields($user_id)
+{
+    $mpp_fields = array();
+    $field_groups = bp_profile_get_field_groups();
+    foreach ($field_groups as $field_group) {
+        if ($field_group->id == 6 || $field_group->id == 24) {
+            foreach ($field_group->fields as $field) {
+                $field_value = BP_XProfile_ProfileData::get_value_byid($field->id, $user_id);
+                if (!empty($field_value)) $mpp_fields[$field->name] = $field_value;
+            }
+        }
+    }
+    return $mpp_fields;
 }

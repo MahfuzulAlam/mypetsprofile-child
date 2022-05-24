@@ -116,7 +116,7 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 			BuddyBossApp\Custom\PetAlertNotification::instance();
 		}
 	}
-	add_action('plugins_loaded', 'mpp_bbapp_custom_work_init');
+	//add_action('plugins_loaded', 'mpp_bbapp_custom_work_init');
 
 	/****************************** CUSTOM FUNCTIONS ******************************/
 

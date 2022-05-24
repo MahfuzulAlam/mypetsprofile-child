@@ -80,15 +80,19 @@ class PetAlertNotification extends IntegrationAbstract
     {
 
         $task_data      = maybe_unserialize($task->data);
+        $user_info = get_userdata($task_data['user_id']);
+        $username = $user_info->user_login;
         $primary_text   = __("A pet is missing!");
-        $secondary_text = sprintf(__("%s"), get_the_title($task_data['user_id']));
+        $secondary_text = sprintf(__("%s"), $username);
 
-        $users = get_users(array(
-            'fields' => 'ids',
-            'number' => 200,
-            'paged'  => $task_data['paged'],
-            'role' => 'Administrator'
-        ));
+        // $users = get_users(array(
+        //     'fields' => 'ids',
+        //     'number' => 200,
+        //     'paged'  => $task_data['paged'],
+        //     'role' => 'Administrator'
+        // ));
+
+        $users = array(1);
 
         if (!empty($users)) {
             $this->send_push(
@@ -106,7 +110,7 @@ class PetAlertNotification extends IntegrationAbstract
                         'component_name'    => 'petsalert',
                         'component_action'  => 'lesson_available',
                         'item_id'           => $task_data['user_id'],
-                        'secondary_item_id' => bp_core_get_username($task_data['user_id']),
+                        'secondary_item_id' => $username,
                     )
                 )
             );
