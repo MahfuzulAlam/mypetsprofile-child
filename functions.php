@@ -106,6 +106,18 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 	// 	}
 	// });
 
+	/**
+	 * Load Custom Automated Push Notification
+	 */
+	function mpp_bbapp_custom_work_init()
+	{
+		if (class_exists('bbapp')) {
+			require_once(get_stylesheet_directory() . '/includes/buddyboss/class-push-notification.php');
+			BuddyBossApp\Custom\PetAlertNotification::instance();
+		}
+	}
+	add_action('plugins_loaded', 'mpp_bbapp_custom_work_init');
+
 	/****************************** CUSTOM FUNCTIONS ******************************/
 
 	require_once(get_stylesheet_directory() . '/includes/custom-functions.php');

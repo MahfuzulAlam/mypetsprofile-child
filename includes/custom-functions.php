@@ -2056,6 +2056,7 @@ add_shortcode('my-pet-alert', function () {
 function mpp_send_pet_alert_message($messages)
 {
     mpp_send_pet_alert_emails($messages);
+    do_action('mpp_pet_missing', get_current_user_id(), array());
 }
 
 
@@ -2092,7 +2093,7 @@ function mpp_send_pet_alert_emails($messages)
         $to = $user_emails;
         $subject = 'MyPetsAlert';
         $body = $messages;
-        $headers = array('Content-Type: text/html; charset=UTF-8', 'From: MyPetsProfile <hello@mypetsprofile.com>');
+        $headers = array('Content-Type: text/html; charset=UTF-8', 'From: MyPetsProfile <example@mypetsprofile.com>');
 
         wp_mail($to, $subject, $body, $headers);
     }
