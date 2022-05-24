@@ -1935,7 +1935,7 @@ add_action('wp_footer', function () {
                 });
             });
         </script>
-<?php
+    <?php
     endif;
 });
 
@@ -2022,5 +2022,78 @@ function mpp_is_group_admin()
         return 'admin';
     } else {
         return 'non-admin';
+    }
+}
+
+// Custom API
+
+// MyPetsAlert
+
+add_shortcode('my-pet-alert', function () {
+
+    if (isset($_POST['alert_message']) && !empty($_POST['alert_message'])) {
+        $alert_message = $_POST['alert_message'];
+        mpp_send_pet_alert_message($alert_message);
+    }
+
+    ob_start();
+    ?>
+    <form method="post">
+        <div class="mpp-profile-field mpp-address-field">
+            <div class="mpp-profile-body">
+                <span class="label">Message</span>
+                <textarea class="mpp-profile-field-html" name="alert_message"></textarea>
+            </div>
+        </div>
+        <input type="submit" class="button" value="Send Alert" name="mpp_pets_alert_submitted" />
+    </form>
+<?php
+    return ob_get_clean();
+});
+
+// MPP SEND PET ALERT MESSAGES
+
+function mpp_send_pet_alert_message($messages)
+{
+    mpp_send_pet_alert_emails($messages);
+}
+
+
+// MPP SEND EMAILS TO THE USER - PET ALERT MESSAGE
+function mpp_send_pet_alert_emails($messages)
+{
+    //$field_id = 100;
+    $field_id = 1073;
+    $user_emails = array();
+    $user_city = BP_XProfile_ProfileData::get_value_byid($field_id, get_current_user_id());
+    if ($user_city && !empty($user_city)) {
+        $user_query = new BP_User_Query(
+            array(
+                'per_page' => 0,
+                'xprofile_query' => array(
+                    'relation' => 'AND',
+                    array(
+                        'field_id' => $field_id,
+                        'value' => $user_city,
+                        'compare' => 'LIKE',
+                    ),
+                ),
+            )
+        );
+
+        if ($user_query && $user_query->total_users) {
+            $users = $user_query->results;
+            foreach ($users as $user) {
+                $user_emails[] = $user->user_email;
+            }
+        }
+    }
+    if (count($user_emails)) {
+        $to = $user_emails;
+        $subject = 'MyPetsAlert';
+        $body = $messages;
+        $headers = array('Content-Type: text/html; charset=UTF-8', 'From: MyPetsProfile <hello@mypetsprofile.com>');
+
+        wp_mail($to, $subject, $body, $headers);
     }
 }
