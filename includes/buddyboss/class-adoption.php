@@ -26,6 +26,8 @@ class Pet_Adoption
         add_shortcode('adoption-search-results', array($this, 'adoption_search_results'));
         // DELETE ANIMAL AJAX CALL
         add_action('wp_ajax_mpp_delete_animal', array($this, 'mpp_delete_animal'));
+        // ADOPION CSV IMPORT
+        add_shortcode('adoption-csv-import', array($this, 'adoption_csv_import'));
     }
 
     public function custom_post_type_animal()
@@ -295,7 +297,7 @@ class Pet_Adoption
                 'lng_field' => 'cityLng',
                 'latitude'  => sanitize_text_field($_REQUEST['cityLat']),
                 'longitude' => sanitize_text_field($_REQUEST['cityLng']),
-                'distance'  => '10',
+                'distance'  => '100',
                 'units'     => 'miles'
             );
         }
@@ -326,6 +328,149 @@ class Pet_Adoption
         }
         echo json_encode($result);
         die();
+    }
+
+    // Adoption CSV Import
+    public function adoption_csv_import()
+    {
+        $this->process_adoption_csv_file();
+        ob_start();
+?>
+        <form name="adoption_import" method="post" enctype='multipart/form-data'>
+            <p><input type="file" name="csv_import" id="csv_import" accept=".csv"></p>
+            <p><input type="submit" class="btn button" name="csv_submit"></p>
+        </form>
+<?php
+        return ob_get_clean();
+    }
+
+    // Process Adoption CSV File
+    public function process_adoption_csv_file()
+    {
+
+        if (isset($_POST["csv_submit"])) {
+            $animal_import = false;
+            $extension = pathinfo($_FILES['csv_import']['name'], PATHINFO_EXTENSION);
+
+            if (!empty($_FILES['csv_import']['name']) && $extension == 'csv') {
+
+                //if there was an error uploading the file
+                if ($_FILES["csv_import"]["error"] > 0) {
+                    echo "Return Code: " . $_FILES["csv_import"]["error"] . "<br />";
+                } else {
+                    $csvFile = fopen($_FILES['csv_import']['tmp_name'], 'r');
+                    $x = 0;
+                    $label = array();
+                    while (($data = fgetcsv($csvFile)) !== FALSE) {
+                        if (!empty($data) && count($data) > 0) {
+                            if ($x == 0) {
+                                $label = $data;
+                            } else {
+                                $tax_data = array();
+                                foreach ($data as $key => $value) {
+                                    $tax_data[$label[$key]] = $value;
+                                }
+                                // Import Proccess
+                                $animal = $this->insert_animal_from_csv_row($tax_data);
+                                if ($animal) {
+                                    $animal_import = true;
+                                } else {
+                                    $animal_import = false;
+                                }
+                            }
+                        }
+                        $x++;
+                    }
+                }
+            } else {
+                echo "No file selected <br />";
+            }
+            if ($animal_import) echo "<p>CSV inserted Successfully!</p>";
+        }
+    }
+
+    // Insert Animal From CSV
+    public function insert_animal_from_csv_row($data)
+    {
+        $meta_input = array();
+        $image_url = '';
+        if (bp_get_current_group_id())  $meta_input['bb_group'] = bp_get_current_group_id();
+        if (isset($data['animal_gender']) && !empty($data['animal_gender'])) $meta_input['animal_gender'] = trim($data['animal_gender']);
+        if (isset($data['animal_type']) && !empty($data['animal_type'])) $meta_input['animal_type'] = trim($data['animal_type']);
+        if (isset($data['animal_age_group']) && !empty($data['animal_age_group'])) $meta_input['animal_age_group'] = trim($data['animal_age_group']);
+        if (isset($data['spayed_neutered']) && !empty($data['spayed_neutered'])) $meta_input['spayed_neutered'] = trim($data['spayed_neutered']);
+        if (isset($data['animal_weight']) && !empty($data['animal_weight'])) $meta_input['animal_weight'] = trim($data['animal_weight']);
+        if (isset($data['animal_main_breed']) && !empty($data['animal_main_breed'])) $meta_input['animal_main_breed'] = trim($data['animal_main_breed']);
+        if (isset($data['animal_breed_2']) && !empty($data['animal_breed_2'])) $meta_input['animal_breed_2'] = trim($data['animal_breed_2']);
+        if (isset($data['animal_main_color']) && !empty($data['animal_main_color'])) $meta_input['animal_main_color'] = trim($data['animal_main_color']);
+        if (isset($data['animal_color_2']) && !empty($data['animal_color_2'])) $meta_input['animal_color_2'] = trim($data['animal_color_2']);
+        if (isset($data['animal_adoption_status']) && !empty($data['animal_adoption_status'])) $meta_input['animal_adoption_status'] = trim($data['animal_adoption_status']);
+        if (isset($data['animal_address']) && !empty($data['animal_address'])) $meta_input['animal_address'] = trim($data['animal_address']);
+        if (isset($data['cityLat']) && !empty($data['cityLat'])) $meta_input['cityLat'] = trim($data['cityLat']);
+        if (isset($data['cityLng']) && !empty($data['cityLng'])) $meta_input['cityLng'] = trim($data['cityLng']);
+        if (isset($data['image_url']) && !empty($data['image_url'])) $image_url = trim($data['image_url']);
+        // Meta Input
+
+        $animal_args = array(
+            "post_author"   =>  get_current_user_id(),
+            "post_title"    =>  $data['animal_name'],
+            "post_content"  =>  isset($data['animal_description']) && !empty($data['animal_description']) ? $data['animal_description'] : "",
+            "post_status"   =>  "publish",
+            "post_type"     =>  "animal",
+            "meta_input"    =>  $meta_input
+        );
+
+        $animal = wp_insert_post($animal_args);
+        if ($animal && !empty($image_url)) {
+            $attachment_id = $this->mpp_insert_attachment_from_url($image_url, $animal);
+            set_post_thumbnail($animal, $attachment_id);
+        }
+        return $animal;
+    }
+
+    // IMPORT IMAGE FROM URL
+    public function mpp_insert_attachment_from_url($file_url)
+    {
+        if (!filter_var($file_url, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+        $contents = $this->url_get_contents($file_url);
+
+        if ($contents === false) {
+            return false;
+        }
+        $upload = wp_upload_bits(basename($file_url), null, $contents);
+        if (isset($upload['error']) && $upload['error']) {
+            return false;
+        }
+        $type = '';
+        if (!empty($upload['type'])) {
+            $type = $upload['type'];
+        } else {
+            $mime = wp_check_filetype($upload['file']);
+            if ($mime) {
+                $type = $mime['type'];
+            }
+        }
+        require_once ABSPATH . 'wp-admin' . '/includes/image.php';
+        $attachment = array('post_title' => basename($upload['file']), 'post_content' => '', 'post_type' => 'attachment', 'post_mime_type' => $type, 'guid' => $upload['url']);
+        $id = wp_insert_attachment($attachment, $upload['file']);
+        wp_update_attachment_metadata($id, wp_generate_attachment_metadata($id, $upload['file']));
+        return $id;
+    }
+
+    // URL GET CONTENT
+    function url_get_contents($Url)
+    {
+        if (!function_exists('curl_init')) {
+            die('CURL is not installed!');
+        }
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $Url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $output = curl_exec($ch);
+        curl_close($ch);
+        return $output;
     }
 }
 

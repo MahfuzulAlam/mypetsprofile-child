@@ -2066,7 +2066,7 @@ function mpp_send_pet_alert_emails($messages)
     //$field_id = 100;
     $field_id = 1073;
     $user_emails = array('hello@mypetsprofile.com');
-    //$user_emails = array('asayeedalam@gmail.com');
+    //$user_emails = array('a_mahfuzul@icloud.com');
     $user_city = BP_XProfile_ProfileData::get_value_byid($field_id, get_current_user_id());
     if ($user_city && !empty($user_city)) {
         $user_query = new BP_User_Query(
@@ -2111,11 +2111,11 @@ function mpp_generate_petsalert_message($messages, $user_id)
     $pet_link = bbp_get_user_profile_url($user_id);
     ob_start();
 ?>
-    <div style="margin:100px; border: 2px solid gray; padding: 20px">
+    <div style="margin:0px; border: 2px solid gray; padding: 20px">
         <div style="text-align: center">
             <h1>PetAlert</h1>
             <h4>"<?php echo $pet_name; ?>" has gone missing near you! Please keep a watchful eye.</h4>
-            <img src="<?php bp_loggedin_user_avatar('html=false'); ?>" height="200" />
+            <img src="<?php bp_loggedin_user_avatar('html=false'); ?>" style="height:150px" />
             <p>"<?php echo $messages; ?>"</p>
         </div>
         <?php if (count($user_fields) > 0) : ?>
