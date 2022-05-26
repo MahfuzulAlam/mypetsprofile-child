@@ -217,7 +217,7 @@ class Pet_Adoption
                 'guid' => $file_return['url']
             );
             $attachment_id = wp_insert_attachment($attachment, $file_return['url']);
-            //require_once(ABSPATH . 'wp-admin/includes/image.php');
+            // Include Image, File, Media
             require_once ABSPATH . 'wp-admin' . '/includes/image.php';
             require_once ABSPATH . 'wp-admin' . '/includes/file.php';
             require_once ABSPATH . 'wp-admin' . '/includes/media.php';
@@ -337,6 +337,7 @@ class Pet_Adoption
         ob_start();
 ?>
         <form name="adoption_import" method="post" enctype='multipart/form-data'>
+            <p><a href="<?php echo get_stylesheet_directory_uri() . '/assets/file/csv_import_adoption.csv'; ?>">Download Sample CSV</a></p>
             <p><input type="file" name="csv_import" id="csv_import" accept=".csv"></p>
             <p><input type="submit" class="btn button" name="csv_submit"></p>
         </form>
@@ -394,6 +395,19 @@ class Pet_Adoption
     {
         $meta_input = array();
         $image_url = '';
+
+        // Handling Location
+        if (bp_get_current_group_id()) {
+            $listings = groups_get_groupmeta(bp_get_current_group_id(), 'directorist_listings_ids', true);
+            if ($listings && count($listings)) {
+                $listing = $listings[0];
+                $meta_input['animal_address'] = get_post_meta($listing, '_address', true) ? get_post_meta($listing, '_address', true) : '';
+                $meta_input['cityLat'] = get_post_meta($listing, '_manual_lat', true) ? get_post_meta($listing, '_manual_lat', true) : '';
+                $meta_input['cityLng'] = get_post_meta($listing, '_manual_lng', true) ? get_post_meta($listing, '_manual_lng', true) : '';
+            }
+        }
+        // Handling Location
+
         if (bp_get_current_group_id())  $meta_input['bb_group'] = bp_get_current_group_id();
         if (isset($data['animal_gender']) && !empty($data['animal_gender'])) $meta_input['animal_gender'] = trim($data['animal_gender']);
         if (isset($data['animal_type']) && !empty($data['animal_type'])) $meta_input['animal_type'] = trim($data['animal_type']);
