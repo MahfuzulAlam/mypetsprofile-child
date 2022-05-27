@@ -1102,12 +1102,20 @@ add_shortcode('bb-user-field-group', function ($atts) {
                     } else {
                     ?>
                         <p>-</p>
-        <?php
+    <?php
                     }
                 }
             }
         }
     }
+    ?>
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            console.log(10);
+            $('body').addClass('mpp-custom-profile-fields');
+        });
+    </script>
+    <?php
     return ob_get_clean();
 });
 
@@ -1115,7 +1123,7 @@ add_shortcode('bb-user-field-group', function ($atts) {
 
 add_action('wp_head', function () {
     if (mpp_is_android_or_ios()) {
-        ?>
+    ?>
         <style>
             .bbp-user-page .profile-header,
             .bbp-user-page .bp-profile-wrapper .bp-subnavs,
@@ -1123,8 +1131,8 @@ add_action('wp_head', function () {
                 display: none
             }
 
-            .bbp-user-page .bp-profile-wrapper,
-            .bbp-user-page .site-content {
+            .mpp-custom-profile-fields.bbp-user-page .bp-profile-wrapper,
+            .mpp-custom-profile-fields.bbp-user-page .site-content {
                 background-color: #6ec1e4
             }
 
@@ -2151,3 +2159,16 @@ function mpp_get_petsalert_fields($user_id)
     }
     return $mpp_fields;
 }
+
+// CUSTOM LISTING QUERIES
+
+add_filter('atbdp_search_listings_meta_queries', 'mpp_directorist_remove_directory_type');
+add_filter('atbdp_all_listings_meta_queries', 'mpp_directorist_remove_directory_type');
+
+function mpp_directorist_remove_directory_type($args)
+{
+    if (isset($args['directory_type'])) unset($args['directory_type']);
+    return $args;
+}
+
+// CUSTOM LISTING QUERIES
