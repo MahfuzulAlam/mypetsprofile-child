@@ -337,9 +337,11 @@ class Pet_Adoption
         ob_start();
 ?>
         <form name="adoption_import" method="post" enctype='multipart/form-data'>
-            <p><a href="<?php echo get_stylesheet_directory_uri() . '/assets/file/csv_import_adoption.csv'; ?>">Download Sample CSV</a></p>
             <p><input type="file" name="csv_import" id="csv_import" accept=".csv"></p>
             <p><input type="submit" class="btn button" name="csv_submit"></p>
+            <p style="font-size: 14px;line-height: 18px;">For your convenience we’ve provided a sample CSV that you can download as an example of the Information to provide for multiple pet adoption uploads.<br>
+                Thank you for using MyPetsProfile™️</p>
+            <p style="font-size: 16px;"><a style="padding: 20px 0;" href="<?php echo get_stylesheet_directory_uri() . '/assets/file/csv_import_adoption.csv'; ?>">Download Sample CSV</a></p>
         </form>
 <?php
         return ob_get_clean();

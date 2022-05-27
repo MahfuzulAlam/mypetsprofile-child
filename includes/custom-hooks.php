@@ -121,7 +121,7 @@ class MPP_Child_Hooks
         $custom_avatars = $this->bp_process_group_icon($item->id, 'app_image');
         if (!empty($custom_avatars)) {
             $response->data['avatar_urls']['thumb'] = $custom_avatars['full'];
-            $response->data['avatar_urls']['full'] = $custom_avatars['thumb'];
+            $response->data['avatar_urls']['full'] = $custom_avatars['full'];
             $response->data['avatar_urls']['is_default'] = false;
         }
 
