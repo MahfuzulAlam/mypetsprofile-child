@@ -2140,7 +2140,7 @@ function mpp_generate_petsalert_message($messages, $user_id)
             <span style="color: gray"><a href="<?php echo $pet_link; ?>"><?php echo $pet_link; ?></a></span>
         </p>
     </div>
-<?php
+    <?php
     return ob_get_clean();
 }
 
@@ -2167,8 +2167,200 @@ add_filter('atbdp_all_listings_meta_queries', 'mpp_directorist_remove_directory_
 
 function mpp_directorist_remove_directory_type($args)
 {
-    if (isset($args['directory_type'])) unset($args['directory_type']);
+    //if (isset($args['directory_type'])) unset($args['directory_type']);
+    if (isset($args['directory_type'])) {
+        $args['directory_type'] = array(
+            'key' => '_directory_type',
+            'value' => array(200, 1414),
+            'compare' => 'IN'
+        );
+    }
     return $args;
 }
 
 // CUSTOM LISTING QUERIES
+
+// BOOKING
+
+add_action('wp_footer', function () {
+    if (is_singular('at_biz_dir')) :
+    ?>
+        <script type="text/javascript">
+            jQuery('.booking-content').prepend("<p>Welcome, please fill-out a convenient date and time you’re available, and click Request a Booking. Or send us an email directly.</p>");
+        </script>
+    <?php
+    endif;
+});
+
+add_action('wp_footer', function () {
+    ?>
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+
+            $('body').on('click', 'a.directorist-book-now', function(e) {
+                e.preventDefault();
+                if ($(this).hasClass('loading')) return;
+                var listing_id = $('#listing_id').val();
+                if (!listing_id) return;
+                var listing_name = $('.directorist-listing-details__listing-title').text();
+                const startDate = moment(
+                    $("#date-picker").data("daterangepicker").startDate,
+                    ["MM/DD/YYYY"]
+                ).format("YYYY-MM-DD");
+                if (!startDate || startDate == '') return;
+                const slot = $("input#slot").val();
+                if (!slot || slot == '') return;
+                const adults = $(".adults").text();
+
+                const booking_data = {
+                    listing_id: listing_id,
+                    listing_name: listing_name,
+                    start_date: startDate,
+                    slot: slot,
+                    adults: adults
+                };
+
+                var slotText = '';
+                if (slot != '') {
+                    slotText = JSON.parse(slot);
+                }
+
+                var book_html = '';
+                book_html += '<div class="mpp-booking-details">';
+                if (listing_name != '') book_html += '<b>' + listing_name + '</b></br>';
+                if (startDate != '') book_html += startDate + '</br>';
+                if (slotText != '') book_html += slotText[0] + '</br>';
+                if (adults != '' && adults != 'Guest') book_html += adults + '</br>';
+                book_html += '</div>';
+                book_html += '<h4>Personal Detail</h4>';
+                book_html += '<div class="booking-form-popup">';
+                book_html += "<div class='booking-field'><input type='hidden' value='" + JSON.stringify(booking_data) + "' id='booking_data'/></div>";
+                book_html += '<div class="booking-field"><label>Full Name*</label><input type="text" value="" id="booking_name"/></div>';
+                book_html += '<div class="booking-field"><label>Email Address*</label><input type="email" value="" id="booking_email"/></div>';
+                book_html += '<div class="booking-field"><label>Phone</label><input type="tel" value="" id="booking_phone"/></div>';
+                book_html += '<div class="booking-field"><label>Message</label><textarea id="booking_message"></textarea></div>';
+                book_html += '<div class="booking-field"><a href="#" class="button" id="booking-form-submit">Submit</a></div>';
+                book_html += '</div>';
+
+                Swal.fire({
+                    title: 'Booking',
+                    html: '<div class="mpp_booking_confirmation">' + book_html + '</div>',
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                });
+            });
+
+            $('body').on('click', 'a#booking-form-submit', function(e) {
+                e.preventDefault();
+                if ($(this).hasClass('loading')) return;
+
+                var $this = $(this);
+                var ajax_data = {};
+                ajax_data.booking_data = $('.booking-form-popup #booking_data').val();
+                ajax_data.booking_name = $('.booking-form-popup #booking_name').val();
+                ajax_data.booking_email = $('.booking-form-popup #booking_email').val();
+                ajax_data.booking_phone = $('.booking-form-popup #booking_phone').val();
+                ajax_data.booking_message = $('.booking-form-popup #booking_message').val();
+
+                if (!ajax_data.booking_name || ajax_data.booking_name == '') return;
+                if (!ajax_data.booking_email || ajax_data.booking_email == '') return;
+                if (!mppValidateEmail(ajax_data.booking_email)) return;
+
+                $(this).addClass('loading');
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: bdb_booking.ajax_url,
+                    data: {
+                        action: "guest_booking_mpp",
+                        booking_data: ajax_data,
+                    },
+                    success(data) {
+                        if (data.booking) {
+                            Swal.fire({
+                                icon: 'success',
+                                text: 'Your booking request has been submitted successfully!'
+                            });
+                        } else {
+                            console.log("failed!");
+                        }
+                    },
+                    complete() {
+                        $this.removeClass('loading');
+                    }
+                });
+            });
+
+            //Email Validation
+            const mppValidateEmail = (email) => {
+                return email.match(
+                    /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                );
+            };
+        });
+    </script>
+<?php
+});
+
+// AJAX CALL
+add_action("wp_ajax_guest_booking_mpp", "guest_booking_mpp");
+add_action("wp_ajax_nopriv_guest_booking_mppe", "guest_booking_mpp");
+
+function guest_booking_mpp()
+{
+    $result = array();
+    $form_data = isset($_REQUEST['booking_data']) ? $_REQUEST['booking_data'] : array();
+    $booking_data = json_decode(wp_unslash($form_data['booking_data']));
+
+    // PROCCESSING
+
+    // SLOTS
+    $slot = json_decode($booking_data->slot);
+    $hours = explode('-', $slot[0]);
+    $hour_start = date("H:i:s", strtotime($hours[0]));
+    $hour_end = date("H:i:s", strtotime($hours[1]));
+    $start_date = $booking_data->start_data;
+
+    $price = Directorist_Booking_Database::calculate_price($booking_data->listing_id, $start_date, $start_date);
+
+    // INSERT INTO DB
+    $booking_id = Directorist_Booking_Database::insert_booking(
+        array(
+            'owner_id' => get_current_user_id(),
+            'listing_id' => $booking_data->listing_id,
+            'date_start' => $start_date . ' ' . $hour_start,
+            'date_end' => $start_date . ' ' . $hour_end,
+            'comment' => json_encode(array(
+                'first_name' => $form_data['booking_name'],
+                //'last_name' => $_POST['lastname'],
+                'email' => $form_data['booking_email'],
+                'phone' => $form_data['booking_phone'],
+                //'childrens' => $data['childrens'],
+                'adults' => !empty($booking_data->adults) ? $booking_data->adults : 0,
+                'message' => $form_data['booking_message'],
+                //'service' => $comment_services,
+            )),
+            'type' => 'reservation',
+            'price' => $price,
+        )
+    );
+
+
+    $status = apply_filters('bdb_service_slots_default_status', 'waiting');
+    if (!empty($instant_booking)) {
+        $status = 'confirmed';
+    }
+
+    $changed_status = Directorist_Booking_Database::set_booking_status($booking_id, $status);
+    // INSERT INTO DB
+
+    // PROCCESSING
+    $result['booking'] = array($booking_id);
+
+    echo json_encode($result);
+    die();
+}
+// AJAX CALL
+
+// BOOKING

@@ -731,3 +731,29 @@
 .animal-display-image {
   margin-top: 10px;
 }
+
+.booking-form-popup {
+  text-align: left;
+}
+
+.booking-form-popup .booking-field {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mpp-booking-details {
+  margin-bottom: 10px;
+}
+
+@media only screen and (max-width: 600px) {
+  .daterangepicker {
+    width: 95% !important;
+    left: 10px !important;
+  }
+
+  .daterangepicker.opensleft::before,
+  .daterangepicker.opensleft::after {
+    right: 30% !important;
+  }
+}
