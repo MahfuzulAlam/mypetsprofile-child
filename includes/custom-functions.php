@@ -2384,3 +2384,5 @@ add_shortcode('mpp-biz-listings', function () {
     endif;
     return ob_get_clean();
 });
+
+// MPP LISTINGS SHORTCODE
