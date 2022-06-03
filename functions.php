@@ -53,7 +53,7 @@ function buddyboss_theme_child_scripts_styles()
 	 **/
 
 	// Styles
-	wp_enqueue_style('buddyboss-child-css', get_stylesheet_directory_uri() . '/assets/css/custom.css', '', '1.0.3');
+	wp_enqueue_style('buddyboss-child-css', get_stylesheet_directory_uri() . '/assets/css/custom.css', '', '1.0.5');
 	wp_enqueue_style('buddyboss-child-map-css', get_stylesheet_directory_uri() . '/assets/css/map.css', '', '1.0.0');
 
 	// Javascript
