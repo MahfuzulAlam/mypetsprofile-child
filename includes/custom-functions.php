@@ -2167,7 +2167,8 @@ add_filter('atbdp_all_listings_meta_queries', 'mpp_directorist_remove_directory_
 
 function mpp_directorist_remove_directory_type($args)
 {
-    //if (isset($args['directory_type'])) unset($args['directory_type']);
+    if (isset($args['directory_type'])) unset($args['directory_type']);
+    /*
     if (isset($args['directory_type'])) {
         $args['directory_type'] = array(
             'key' => '_directory_type',
@@ -2175,6 +2176,14 @@ function mpp_directorist_remove_directory_type($args)
             'compare' => 'IN'
         );
     }
+    */
+    if (bp_get_current_group_id()) :
+        $args['bb_group'] = array(
+			'key' => '_bb_group_id',
+			'value' => bp_get_current_group_id(),
+			'compare' => '='
+		);
+    endif;
     return $args;
 }
 
@@ -2364,3 +2373,14 @@ function guest_booking_mpp()
 // AJAX CALL
 
 // BOOKING
+
+// MPP LISTINGS SHORTCODE
+
+add_shortcode('mpp-biz-listings', function () {
+    ob_start();
+    if (bp_get_current_group_id()) :
+        $listings_ids = dbb_get_group_connected_listings_ids(bp_get_current_group_id());
+        echo do_shortcode('[directorist_all_listing advanced_filter="no"]');
+    endif;
+    return ob_get_clean();
+});
