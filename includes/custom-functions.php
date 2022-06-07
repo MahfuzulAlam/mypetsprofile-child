@@ -2384,28 +2384,3 @@ add_shortcode('mpp-biz-listings', function () {
     endif;
     return ob_get_clean();
 });
-
-// MPP LISTINGS SHORTCODE
-
-// Profile QR CODE
-
-add_shortcode('mpp-user-profile-qrcode', function () {
-    ob_start();
-    $user_id = bbp_get_user_id();
-    echo do_shortcode('[kaya_qrcode content="' . $user_id . '" size="300"]');
-    return ob_get_clean();
-});
-
-// Profile QR CODE
-
-// GROUP QR CODE
-
-add_shortcode('mpp-group-qrcode', function () {
-    ob_start();
-    if (bp_get_current_group_id()) :
-        echo do_shortcode('[kaya_qrcode content="' . bp_get_current_group_id() . '" size="300"]');
-    endif;
-    return ob_get_clean();
-});
-
-// GROUP QR CODE

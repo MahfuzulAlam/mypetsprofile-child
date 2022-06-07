@@ -124,5 +124,6 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 	require_once(get_stylesheet_directory() . '/includes/custom-hooks.php');
 	require_once(get_stylesheet_directory() . '/includes/custom-shortcodes.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-adoption.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-qrcode.php');
 
 endif;
