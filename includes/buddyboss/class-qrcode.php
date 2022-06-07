@@ -18,6 +18,8 @@ class MPP_QRCode
         add_shortcode('mpp-group-qrcode', array($this, 'mpp_group_qrcode'));
         //QR CODE READ AND PROCESS
         add_shortcode('mpp-process-qrcode', array($this, 'mpp_process_qrcode'));
+        //QR CODE DISPLAY ON LISTINGS
+        add_shortcode('mpp-listing-qrcode', array($this, 'mpp_listing_qrcode'));
         //GAMIPRESS ADD ACTIVITY TRIGGER
         add_filter('gamipress_activity_triggers', array($this, 'mypetsprofile_custom_activity_triggers'));
         //The listener should be hooked to the desired action through the WordPress function add_action()
@@ -43,6 +45,22 @@ class MPP_QRCode
             if (bp_get_current_group_id()) :
                 $link = $user_url . '/scan-qr-code/?type=biz&id=' . bp_get_current_group_id();
                 echo do_shortcode('[kaya_qrcode title="' . bp_get_group_name() . '" content="' . $link . '" align="aligncenter" title_align="aligncenter" size="400"]');
+            endif;
+        endif;
+        return ob_get_clean();
+    }
+
+    //LISTINGS QR CODE DISPLAY
+    public function mpp_listing_qrcode()
+    {
+        global $post;
+        ob_start();
+        $bb_group_id = get_post_meta($post->ID, '_bb_group_id', true);
+        if ($bb_group_id && !empty($bb_group_id)) :
+            if (is_user_logged_in() && groups_is_user_admin(get_current_user_id(), $bb_group_id)) :
+                $user_url = bbp_get_user_profile_url(get_current_user_id());
+                $link = $user_url . '/scan-qr-code/?type=biz&id=' . $bb_group_id;
+                echo do_shortcode('[kaya_qrcode content="' . $link . '" align="aligncenter" size="400"]');
             endif;
         endif;
         return ob_get_clean();

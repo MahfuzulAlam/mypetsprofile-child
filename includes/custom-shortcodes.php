@@ -33,6 +33,7 @@ class MPP_Child_Shortcode
     public function buddyboss_group_link_on_listing_page()
     {
         global $post;
+        ob_start();
         $bb_group_id = get_post_meta($post->ID, '_bb_group_id', true);
         if ($bb_group_id && !empty($bb_group_id)) {
             $group = groups_get_group(array('group_id' => $bb_group_id));
@@ -41,6 +42,7 @@ class MPP_Child_Shortcode
                 echo '<a class="directorist-btn directorist-btn-primary" href="' . $group_link . '">' . $post->post_title . '</a>';
             }
         }
+        return ob_get_clean();
     }
 
     // Affiliate WP Link through SMS
