@@ -42,7 +42,7 @@ class MPP_QRCode
             $user_url = bbp_get_user_profile_url(get_current_user_id());
             if (bp_get_current_group_id()) :
                 $link = $user_url . '/scan-qr-code/?type=biz&id=' . bp_get_current_group_id();
-                echo do_shortcode('[kaya_qrcode content="' . $link . '" align="aligncenter" size="400"]');
+                echo do_shortcode('[kaya_qrcode title="' . bp_get_group_name() . '" content="' . $link . '" align="aligncenter" title_align="aligncenter" size="400"]');
             endif;
         endif;
         return ob_get_clean();
@@ -72,6 +72,7 @@ class MPP_QRCode
 
     function mypetsprofile_custom_event_listener($args)
     {
+        //$args = ['id' => bp_get_current_group_id(), 'type' => 'biz'];
         // Get Current User
         $user_id = get_current_user_id();
         $activity_exists = false;
@@ -94,7 +95,7 @@ class MPP_QRCode
                 'prop_id' => $args['id'],
             ));
             if ($event) {
-                // INSERT INFO
+                // INSERT INFO TO THE USER
                 $visit_info = array(
                     'qr_type' => $args['type'],
                     'prop_id' => $args['id'],
@@ -103,6 +104,19 @@ class MPP_QRCode
                 );
                 array_push($mpp_biz_visit, $visit_info);
                 update_user_meta($user_id, 'mpp_biz_visit', $mpp_biz_visit);
+                // INSERT INFO TO THE GROUP
+                if ($args['type'] == 'biz') {
+                    $group_biz_visit = groups_get_groupmeta($args['id'], 'mpp_biz_visit', true);
+                    $group_biz_visit = $group_biz_visit && !empty($group_biz_visit) ? $group_biz_visit : array();
+
+                    $group_visit_info = array(
+                        'user_id' => $user_id,
+                        'date' => date('Y-m-d'),
+                        'time' => date('H:i:s'),
+                    );
+                    array_push($group_biz_visit, $group_visit_info);
+                    groups_update_groupmeta($args['id'], 'mpp_biz_visit', $group_biz_visit);
+                }
             }
         endif;
     }
