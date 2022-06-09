@@ -2127,7 +2127,8 @@ function mpp_generate_petsalert_message($messages, $user_id)
             <p>"<?php echo $messages; ?>"</p>
         </div>
         <?php if (count($user_fields) > 0) : ?>
-            <h2>PetsProfile</h2>
+            <h2>MyPetsProfile™️</h2>
+            <!-- Put the Pet type to the top -->
             <?php foreach ($user_fields as $key => $field) : ?>
                 <p>
                     <span style="color: #000"><?php echo $key; ?></span>:
@@ -2384,3 +2385,42 @@ add_shortcode('mpp-biz-listings', function () {
     endif;
     return ob_get_clean();
 });
+
+// Co Author Plugin
+add_filter('coauthors_edit_author_cap', function ($cap) {
+    return 'read';
+});
+
+
+// ALLOW USER TO EDIT FORM TEMP
+/*
+add_action('wp_head', function () {
+    if (atbdp_is_page('add_listing')) {
+        //to add capability to user
+        $user = new WP_User(get_current_user_id());
+        // Listing ID
+        $url = $_SERVER['REQUEST_URI'];
+        $pattern = "/edit\/(\d+)/i";
+        $listing_id = preg_match($pattern, $url, $matches) ? (int) $matches[1] : '';
+
+        // Check Co Authors
+        $author_list = array();
+        if (is_plugin_active('co-authors-plus/co-authors-plus.php')) {
+            $coauthors = get_coauthors($listing_id);
+            foreach ($coauthors as $authorInfo) {
+                $author_list[] = $authorInfo->ID;
+            }
+        } else {
+            $author_list[] = $listing->author_id;
+        }
+        if (!current_user_can('administrator')) {
+            if (in_array(get_current_user_id(), $author_list)) {
+                $user->add_cap('edit_others_at_biz_dirs');
+            } else {
+                $user->remove_cap('edit_others_at_biz_dirs');
+            }
+        }
+    }
+});
+*/
+// ALLOW USER TO EDIT FORM TEMP
