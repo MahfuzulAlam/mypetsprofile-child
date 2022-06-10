@@ -205,8 +205,8 @@ jQuery(document).ready(function ($) {
     });
     mpp_ac.addListener("place_changed", function () {
       var place = mpp_ac.getPlace();
-      console.log("okay");
-      console.log(place);
+      //console.log("okay");
+      //console.log(place);
       //document.getElementById('city2').value = place.name;
       document.getElementById("cityLat").value = place.geometry.location.lat();
       document.getElementById("cityLng").value = place.geometry.location.lng();
@@ -214,4 +214,47 @@ jQuery(document).ready(function ($) {
   }
   google_ac_initialize();
   // GOOGLE ADDRESS AUTOCOMPLETE
+
+  // MyPetsAlert
+
+  $('#mpp_pets_alert').on('submit', function(e){
+    e.preventDefault();
+
+    console.log('clicked');
+
+    var message = $('#mpp_alert_message').val();
+
+    if(message != '' ){
+      $('#mpp_loading').show();
+      $('#mpp_warning').text('');
+    }else{
+      $('#mpp_warning').text('Please Enter Message.');
+      return;
+    }
+
+    $('#mpp_pets_alert_submitted').prop('disabled', true);
+
+    var nonce = $('#mpp_alert_nonce').val();
+
+    // AJAX CALL
+    $.ajax({
+      type: "post",
+      dataType: "json",
+      url: mppChild.ajaxurl,
+      data: { action: "send_mpp_pets_alert", message: message, nonce: nonce },
+      success: function (response) {
+        if (response.success == true) {
+          Swal.fire("MPP Pet Alert Sent!", "", "success");
+          
+        }
+      },
+      complete: function(){
+        $('#mpp_loading').hide();
+        $('#mpp_pets_alert_submitted').prop('disabled', false);
+      }
+    });
+    // AJAX CALL
+  });
+
+  // MyPetsAlert
 });
