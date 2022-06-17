@@ -9,7 +9,7 @@
 if (!defined('ABSPATH')) exit;
 ?>
 
-<div class="directorist-form-group directorist-custom-field-text">
+<div class="directorist-form-group directorist-custom-field-text custom_text_<?php echo $data['field_key']; ?>">
 
     <?php $listing_form->field_label_template($data); ?>
     <?php if (isset($data['field_key']) && strpos($data['field_key'], 'phone') !== false) : ?>

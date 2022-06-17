@@ -24,15 +24,21 @@ class MPP_QRCode
         add_filter('gamipress_activity_triggers', array($this, 'mypetsprofile_custom_activity_triggers'));
         //The listener should be hooked to the desired action through the WordPress function add_action()
         //add_action('init', array($this, 'mypetsprofile_custom_event_listener'));
-        add_action('mpp_after_scan_qr_code', array($this, 'mypetsprofile_custom_event_listener'));
+        add_action('mpp_after_scan_biz_qr_code', array($this, 'mypetsprofile_custom_event_listener'));
+        add_action('mpp_after_scan_user_qr_code', array($this, 'mypetsprofile_custom_event_listener'));
     }
 
     //PROFILE QR CODE
     public function mpp_user_profile_qrcode()
     {
         ob_start();
-        $user_id = bbp_get_user_id();
-        echo do_shortcode('[kaya_qrcode content="' . $user_id . '" size="400" align="aligncenter"]');
+        if (is_user_logged_in()) :
+            $site_url = get_site_url();
+            if ($site_url) :
+                $link = get_permalink(20859) . '/?type=user&id=' . get_current_user_id();
+                echo do_shortcode('[kaya_qrcode content="' . $link . '" align="aligncenter" title_align="aligncenter" size="400"]');
+            endif;
+        endif;
         return ob_get_clean();
     }
 
@@ -43,7 +49,7 @@ class MPP_QRCode
         if (is_user_logged_in()) :
             $user_url = bbp_get_user_profile_url(get_current_user_id());
             if (bp_get_current_group_id()) :
-                $link = $user_url . '/scan-qr-code/?type=biz&id=' . bp_get_current_group_id();
+                $link = get_permalink(20859) . '/?type=biz&id=' . bp_get_current_group_id();
                 echo do_shortcode('[kaya_qrcode title="' . bp_get_group_name() . '" content="' . $link . '" align="aligncenter" title_align="aligncenter" size="400"]');
             endif;
         endif;
@@ -72,8 +78,10 @@ class MPP_QRCode
         ob_start();
         $type = isset($_REQUEST['type']) && !empty($_REQUEST['type']) ? $_REQUEST['type'] : '';
         $id = isset($_REQUEST['id']) && !empty($_REQUEST['id']) ? $_REQUEST['id'] : '';
+        $biz = isset($_REQUEST['biz']) && !empty($_REQUEST['biz']) ? $_REQUEST['biz'] : '';
         if (!empty($type) && !empty($id)) {
-            do_action('mpp_after_scan_qr_code', array('type' => $type, 'id' => $id));
+            if ($type == 'biz') do_action('mpp_after_scan_biz_qr_code', array('type' => $type, 'id' => $id));
+            if ($type == 'user') do_action('mpp_after_scan_user_qr_code', array('type' => $type, 'id' => $id));
         }
         return ob_get_clean();
     }
@@ -84,6 +92,7 @@ class MPP_QRCode
         // The array key will be the group label
         $triggers['MyPetsProfile Events'] = array(
             'mpp_scan_biz_qr_code' => __('Scan a Biz QR Code', 'gamipress'),
+            'mpp_scan_user_qr_code' => __('Scan a User QR Code', 'gamipress'),
         );
         return $triggers;
     }
@@ -92,7 +101,15 @@ class MPP_QRCode
     {
         //$args = ['id' => bp_get_current_group_id(), 'type' => 'biz'];
         // Get Current User
-        $user_id = get_current_user_id();
+        $this->mpp_add_points_to_user($args);
+        //$this->mpp_add_points_to_biz_admin($args);
+    }
+
+    function mpp_add_points_to_user($args)
+    {
+        $type = isset($args['type']) && !empty($args['type']) ? $args['type'] : '';
+        $prop_id = isset($args['id']) && !empty($args['id']) ? $args['id'] : '';
+        $user_id = $type == 'user' ? $prop_id : get_current_user_id();
         $activity_exists = false;
         // Get User Information
         $mpp_biz_visit = get_user_meta($user_id, 'mpp_biz_visit', true);
@@ -110,9 +127,10 @@ class MPP_QRCode
                 'event' => 'mpp_scan_biz_qr_code',
                 'user_id' => $user_id,
                 'qr_type' => $args['type'],
-                'prop_id' => $args['id'],
+                'prop_id' => $type == 'user' ? get_current_user_id() : $prop_id,
             ));
             if ($event) {
+
                 // INSERT INFO TO THE USER
                 $visit_info = array(
                     'qr_type' => $args['type'],
@@ -122,6 +140,7 @@ class MPP_QRCode
                 );
                 array_push($mpp_biz_visit, $visit_info);
                 update_user_meta($user_id, 'mpp_biz_visit', $mpp_biz_visit);
+
                 // INSERT INFO TO THE GROUP
                 if ($args['type'] == 'biz') {
                     $group_biz_visit = groups_get_groupmeta($args['id'], 'mpp_biz_visit', true);
@@ -135,8 +154,32 @@ class MPP_QRCode
                     array_push($group_biz_visit, $group_visit_info);
                     groups_update_groupmeta($args['id'], 'mpp_biz_visit', $group_biz_visit);
                 }
+
+                // ADD POINTS TO THE BIZ OWNER
+                $owner_id = false;
+                if ($type == 'biz') {
+                    $group_owners = groups_get_group_admins($args['id']);
+                    if ($group_owners && count($group_owners) > 0) {
+                        $owner_id = $group_owners[0]->user_id;
+                    }
+                } else {
+                    $owner_id = get_current_user_id();
+                }
+                if ($owner_id) $this->mpp_add_points_to_biz_admin($owner_id, $prop_id, $type);
             }
         endif;
+    }
+
+    // ADD POINTS TO BIZ ADMIN
+    function mpp_add_points_to_biz_admin($user_id, $prop_id, $prop_type)
+    {
+        gamipress_trigger_event(array(
+            // Mandatory data, the event triggered and the user ID to be awarded
+            'event' => 'mpp_scan_user_qr_code',
+            'user_id' => $user_id,
+            'qr_type' => $prop_type,
+            'prop_id' => $prop_id,
+        ));
     }
 
     // SEARCH IN A ARRAY

@@ -152,7 +152,7 @@ class MPP_Pet_Alert
     public function send_mpp_pets_alert()
     {
         // Nonce Check
-        if (!wp_verify_nonce($_REQUEST['nonce'], "mpp_alert_nonce")) {
+        if (!mpp_is_android_or_ios() && !wp_verify_nonce($_REQUEST['nonce'], "mpp_alert_nonce")) {
             exit("Sorry, cant' access!!!");
         }
 

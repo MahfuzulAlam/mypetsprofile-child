@@ -1481,6 +1481,10 @@ function mpp_after_applied_a_coupon($coupon_code)
     if ('pooprints2022' === $coupon_code) {
         WC()->cart->apply_coupon('pooprints2022rc');
     }
+    //90daysfreetrial
+    if ('90dayfreetrial' === $coupon_code) {
+        WC()->cart->apply_coupon('90dayfreetrialrc');
+    }
 }
 add_action('woocommerce_applied_coupon', 'mpp_after_applied_a_coupon');
 
@@ -2000,6 +2004,7 @@ add_action('atbdp_after_created_listing', function ($listing_id = 0) {
 // Contact Form Email Confirmation
 function mpp_dev_process_entry_save($fields, $entry, $form_id, $form_data)
 {
+    if ($form_id != 20106) return;
 
     $user_name = $fields[1]['value'];
     $user_email = $fields[2]['value'];
@@ -2306,3 +2311,225 @@ add_action('wp_head', function () {
 });
 */
 // ALLOW USER TO EDIT FORM TEMP
+
+// add_action('wp_footer', function () {
+//     $group_owners = groups_get_group_admins(174);
+//     if ($group_owners && count($group_owners) > 0) {
+//         e_var_dump($group_owners[0]->user_id);
+//     }
+// });
+
+
+// Email Mailchimp
+
+// Contact Form Email Confirmation
+function mpp_dev_process_entry_save_mailchimp($fields, $entry, $form_id, $form_data)
+{
+
+    if ($form_id != 779) return;
+    //if ($form_id != 20886) return;
+
+    // ADD EMAIL TO THE LIST
+    $option_name = 'mpp_email_list';
+    $email_list = get_option($option_name, array());
+
+    $user_email = $fields[1]['value'];
+    $email_list[] = $user_email;
+    update_option($option_name, $email_list);
+
+    // SEND EMAIL WITH CODE
+
+    $html = '';
+
+    $html .= '<p>Welcome to MyPetsProfile™️</p>';
+
+    $html .= '<p>Your unique promo code is: <b>90dayTrial</b></p>';
+
+    $html .= '<p>Where pet parents and neighbourhood pet business and services meet.</p>';
+
+    $html .= '<p>Your 90 Day Trial begins today.</p>';
+    $html .= '<p>Simple go to www.MyPetsProfile.com. Choose the category that best describes your pet business or service.</p>';
+    $html .= '<p>Click the icon and fill-out the information to open your business.</p>';
+    $html .= '<p>Apply the coupon/promotional code: <b>90dayTrial</b> and you will not be charged anything.</p>';
+    $html .= '<p>We’ll send you a notice before your 90 days is up. You may choose to continue or cancel your business portal.</p>';
+    $html .= '<p>We’re confident you’ll enjoy and value the platform experience and continue meeting new clients.</p>';
+
+    $html .= '<p>Send us an email directly if you have any questions.</p>';
+
+    $html .= '<p>Enjoy</p>';
+    $html .= '<p>The MyPetsProfile™️ Team</p>';
+    $html .= '<p>Hello@MyPetsProfile.com</p>';
+
+    // SEND EMAIL
+    $to = $user_email;
+    $subject = 'MyPetsProfile™️ - 90 Day Trial Coupon';
+    $body = $html;
+    $headers = array();
+    $headers[] = 'Content-Type: text/html; charset=UTF-8';
+    $headers[] = 'Cc: MyPetsProfile<mypetsprofileapp@gmail.com>';
+
+    wp_mail($to, $subject, $body, $headers);
+}
+add_action('wpforms_process_entry_save', 'mpp_dev_process_entry_save_mailchimp', 10, 4);
+
+// Woocommerce Remove All Items from Cart before Adding a new one
+
+add_filter('woocommerce_add_cart_item_data', 'mpp_woo_custom_add_to_cart');
+
+function mpp_woo_custom_add_to_cart($cart_item_data)
+{
+
+    global $woocommerce;
+    $woocommerce->cart->empty_cart();
+
+    // Do nothing with the data and return
+    return $cart_item_data;
+}
+
+
+// Coauthor Plus
+
+add_action('wp_head', function () {
+    if (!is_page('add-listing')) return;
+    $listing_id = get_query_var('atbdp_listing_id', false);
+    if (!$listing_id) return;
+
+    /* Get All Authors */
+    $author_list = array();
+    if (is_plugin_active('co-authors-plus/co-authors-plus.php')) {
+        $coauthors = get_coauthors($listing_id);
+        foreach ($coauthors as $authorInfo) {
+            $author_list[] = $authorInfo->ID;
+        }
+
+        $current_user = get_current_user_id();
+        $current_user_key = array_search($current_user, $author_list);
+
+        if (!$current_user_key || $current_user_key == 0) return;
+        if (count($author_list) < 2) return;
+
+        // ReSort
+
+        $temp_user = $author_list[0];
+        $author_list[0] = $current_user;
+        $author_list[$current_user_key] = $temp_user;
+
+        global $coauthors_plus;
+        $ca = $coauthors_plus->add_coauthors(
+            $listing_id,
+            $author_list,
+            false,
+            'id'
+        );
+    }
+});
+
+/**
+ * JAVASCRIPT COAUTHOR
+ */
+
+add_action('wp_footer', function () {
+?>
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+
+            // Toggle
+            $('input[name="add_admin_info[]"]').change(function() {
+                if ($(this).is(":checked")) {
+                    $('.custom_text_aai-name, .directorist-form-email-field, .directorist-form-phone-field').show();
+                } else {
+                    $('.custom_text_aai-name, .directorist-form-email-field, .directorist-form-phone-field').hide();
+                }
+            });
+            $('input[name="add_sec_admin[]"]').change(function() {
+                if ($(this).is(":checked")) {
+                    $('.custom_text_sac-email, .custom_text_sac-name, .directorist-form-phone2-field').show();
+                } else {
+                    $('.custom_text_sac-email, .custom_text_sac-name, .directorist-form-phone2-field').hide();
+                }
+            });
+            // Toggle
+
+            $('#email, #sac-email').change(function() {
+                var $field_name = $(this).attr('name');
+                console.log($field_name);
+                var email = $(this).val();
+                if (email != '') {
+                    console.log(email);
+                    $.ajax({
+                        type: 'post',
+                        url: mppChild.ajaxurl,
+                        data: {
+                            'action': 'get_author_info',
+                            'email': email
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+                            if (data.success) {
+                                if ($field_name == 'email') {
+                                    $('.custom_text_aai-name input').val(data.user.name);
+                                    $('.directorist-form-phone-field input').val(data.user.phone);
+                                } else {
+                                    $('.custom_text_sac-name input').val(data.user.name);
+                                    $('.directorist-form-phone2-field input').val(data.user.phone);
+                                }
+                            } else {
+                                if ($field_name == 'email') {
+                                    $('.custom_text_aai-name input').val('');
+                                    $('.directorist-form-phone-field input').val('');
+                                } else {
+                                    $('.custom_text_sac-name input').val('');
+                                    $('.directorist-form-phone2-field input').val('');
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+<?php
+});
+
+
+add_action('wp_ajax_nopriv_get_author_info', 'mpp_get_author_info');
+add_action('wp_ajax_get_author_info', 'mpp_get_author_info');
+
+function mpp_get_author_info()
+{
+    $success = false;
+    $user_info = array();
+    $email = $_REQUEST['email'];
+    $user = get_user_by('email', $email);
+    if ($user) {
+        $user_info['name'] = $user->display_name;
+        $user_info['phone'] = get_user_meta($user->ID, 'billing_phone', true);
+        $success = true;
+    }
+    echo json_encode(array('success' => $success, 'user' => $user_info));
+    die();
+}
+
+
+add_filter('atbdp_form_custom_widgets', function ($widgets) {
+    $widgets['checkbox']['options']['class'] = array(
+        'type'  => 'text',
+        'label' => __('Custom Class', 'directorist'),
+        'value' => 'class',
+    );
+    return $widgets;
+});
+
+
+function mpp_facility_option_list($options)
+{
+    $new_options = array();
+    if ($options && count($options) > 0) {
+        foreach ($options as $option) {
+            $new_options[$option['option_value']]['class'] = isset($option['option_class']) && !empty($option['option_class']) ? $option['option_class'] : '';
+            //$new_options[$option['option_value']]['icon'] = isset($option['option_icon']) && !empty($option['option_icon']) ? $option['option_icon'] : 'las la-check';
+            $new_options[$option['option_value']]['label'] = isset($option['option_label']) && !empty($option['option_label']) ? $option['option_label'] : '';
+        }
+    }
+    return $new_options;
+}

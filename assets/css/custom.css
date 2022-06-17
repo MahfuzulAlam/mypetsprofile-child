@@ -761,3 +761,57 @@
 #mpp_loading{
   display: none;
 }
+
+.custom_text_sac-email, .custom_text_sac-name, .directorist-form-phone2-field,
+.custom_text_aai-name, .directorist-form-email-field, .directorist-form-phone-field
+{
+  display: none;
+}
+
+/* Facilities Styles */
+
+.directorist-details-info-wrap
+.directorist-checkbox-facilities
+{
+  flex-flow: column;
+  align-items: flex-start;
+}
+
+.directorist-details-info-wrap
+.directorist-checkbox-facilities
+.directorist-single-info__value
+{
+  margin-top: 15px;
+  margin-bottom:15px;
+  width: 100%;
+}
+
+.directorist-checkbox-facilities
+.directorist-facilities-list{
+  display:flex;
+  flex-wrap: wrap;
+}
+
+.directorist-facilities-list
+.directorist-facility-single
+{
+  display:flex;
+  flex-wrap: wrap;
+  flex: 0 0 33.33%;
+  margin-bottom: 5px;
+}
+
+.directorist-facilities-list
+.directorist-facility-single
+.label-icon
+{
+  color: green;
+  margin-right: 10px;
+}
+
+.directorist-facilities-list
+.directorist-facility-single
+.label-value
+{
+  color:#7a82a6
+}
