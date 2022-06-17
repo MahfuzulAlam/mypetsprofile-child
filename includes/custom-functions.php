@@ -742,7 +742,7 @@ add_action('wp_head', function () {
                 display: none
             }
         </style>
-        <?php
+    <?php
     }
     if (is_page('register')) echo '<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
     echo '<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script> ';
@@ -774,8 +774,10 @@ add_shortcode('bb-user-field-input', function ($atts) {
         'group' => '1',
         'title' => 'Details'
     ), $atts);
-    $member_id = bbp_get_user_id();
+    //$member_id = bbp_get_user_id();
+    $member_id = get_current_user_id();
     $field_groups = bp_profile_get_field_groups();
+    $field_info = array();
 
     if (isset($_POST['mpp_form_submitted']) && !empty($_POST['mpp_form_submitted'])) {
         if (isset($_POST['mpp_profile_box']) && count($_POST['mpp_profile_box']) > 0) {
@@ -787,8 +789,16 @@ add_shortcode('bb-user-field-input', function ($atts) {
                 if (isset($_POST['mpp_visibility_' . $field_id]) && !empty($_POST['mpp_visibility_' . $field_id])) {
                     xprofile_set_field_visibility_level($field_id, $member_id, $_POST['mpp_visibility_' . $field_id]);
                 }
+                $field_info[$field_id]['key'] = $field_options->description ? $field_options->description : $field_options->name;
+                $field_info[$field_id]['value'] = $field_value;
             }
         }
+
+    ?>
+        <script type="text/javascript">
+            startQnaProcessing('<?php echo json_encode($field_info); ?>', '<?php bp_loggedin_user_avatar('html=false'); ?>');
+        </script>
+        <?php
     }
 
     ob_start();
@@ -825,10 +835,10 @@ add_shortcode('bb-user-field-input', function ($atts) {
                     </div>
                 <?php
                 }
-                if (get_current_user_id() == $member_id) {
+                if (get_current_user_id()) {
                 ?>
                     <div class="mpp-profile-updating">Updating...</div>
-                    <input type="submit" class="button mpp_form_submit_button" value="Update" name="mpp_form_submitted" />
+                    <input type="submit" class="button mpp_form_submit_button" value="Download PDF" name="mpp_form_submitted" />
                 <?php
                 }
                 ?>
@@ -1080,7 +1090,7 @@ add_shortcode('bb-user-field-group', function ($atts) {
     $field_groups = bp_profile_get_field_groups();
 
     ob_start();
-    if (get_current_user_id() == $member_id) {
+    if (get_current_user_id()) {
         echo do_shortcode('[bb-user-field-input group=' . $atts['group'] . ']');
         ?>
         <script type="text/javascript">
@@ -1482,8 +1492,8 @@ function mpp_after_applied_a_coupon($coupon_code)
         WC()->cart->apply_coupon('pooprints2022rc');
     }
     //90daysfreetrial
-    if ('90dayfreetrial' === $coupon_code) {
-        WC()->cart->apply_coupon('90dayfreetrialrc');
+    if ('90daytrial' === $coupon_code) {
+        WC()->cart->apply_coupon('90daytrialrc');
     }
 }
 add_action('woocommerce_applied_coupon', 'mpp_after_applied_a_coupon');
@@ -1691,7 +1701,8 @@ add_shortcode('dna-form-export', function () {
     // Export PDF From DNA PROFILE
 
     ob_start();
-    $member_id = bbp_get_user_id();
+    //$member_id = bbp_get_user_id();
+    $member_id = get_current_user_id();
     //$field_group = [1, 2, 3, 4, 12];
     $field_group = [1, 2, 3, 1312, 1311, 355, 356, 251, 384, 388, 392, 204, 205];
 
@@ -1837,7 +1848,8 @@ function mpp_export_dna_pdf()
 {
     // Export PDF From DNA PROFILE
     if (isset($_POST['mpp_dna_form_submitted_pdf']) && !empty($_POST['mpp_dna_form_submitted_pdf'])) {
-        $member_id = bbp_get_user_id();
+        //$member_id = bbp_get_user_id();
+        $member_id = get_current_user_id();
         $field_info = array();
         if (isset($_POST['mpp_profile_box']) && count($_POST['mpp_profile_box']) > 0) {
             // Profile
@@ -1872,6 +1884,7 @@ function mpp_export_dna_pdf()
                     // Save Address Later
                 }
             }
+            //e_var_dump($field_info);
     ?>
             <script type="text/javascript">
                 startDnaProcessing('<?php echo json_encode($field_info); ?>', '<?php bp_loggedin_user_avatar('html=false'); ?>');
@@ -1882,10 +1895,11 @@ function mpp_export_dna_pdf()
 }
 
 add_action('init', function () {
-    if (bp_is_user()) {
+    if (is_user_logged_in()) {
         // Export CSV From DNA PROFILE
         if (isset($_POST['mpp_dna_form_submitted']) && !empty($_POST['mpp_dna_form_submitted'])) {
-            $member_id = bbp_get_user_id();
+            //$member_id = bbp_get_user_id();
+            $member_id = get_current_user_id();
             $exported_fields = array();
             if (isset($_POST['mpp_profile_box']) && count($_POST['mpp_profile_box']) > 0) {
                 $profile_fields = $_POST['mpp_profile_box'];
@@ -1904,6 +1918,7 @@ add_action('init', function () {
                     }
                 }
             }
+            //e_var_dump($exported_fields);
             if (isset($_POST['mpp_address_box']) && count($_POST['mpp_address_box']) > 0) {
                 if (isset($_POST['mpp_address_box']) && count($_POST['mpp_address_box']) > 0) {
                     $address_fields = $_POST['mpp_address_box'];
@@ -2049,7 +2064,7 @@ add_filter('atbdp_all_listings_meta_queries', 'mpp_directorist_remove_directory_
 
 function mpp_directorist_remove_directory_type($args)
 {
-    if (isset($args['directory_type']) && !in_array(1420, $args['directory_type'])) {
+    if (isset($args['directory_type']) && !in_array(1418, $args['directory_type'])) {
         $args['directory_type'] = array(
             'key' => '_directory_type',
             'value' => array(200, 1414),
@@ -2312,22 +2327,11 @@ add_action('wp_head', function () {
 */
 // ALLOW USER TO EDIT FORM TEMP
 
-// add_action('wp_footer', function () {
-//     $group_owners = groups_get_group_admins(174);
-//     if ($group_owners && count($group_owners) > 0) {
-//         e_var_dump($group_owners[0]->user_id);
-//     }
-// });
-
-
-// Email Mailchimp
-
 // Contact Form Email Confirmation
 function mpp_dev_process_entry_save_mailchimp($fields, $entry, $form_id, $form_data)
 {
 
-    if ($form_id != 779) return;
-    //if ($form_id != 20886) return;
+    if ($form_id != 20886) return;
 
     // ADD EMAIL TO THE LIST
     $option_name = 'mpp_email_list';
