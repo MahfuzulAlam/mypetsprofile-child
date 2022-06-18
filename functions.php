@@ -29,6 +29,18 @@ function buddyboss_theme_child_languages()
 		define('MPP_SITE_URL', get_site_url());
 	}
 
+	if (!defined('MPP_VERSION')) {
+		define('MPP_VERSION', '1.1.0');
+	}
+
+	if (!defined('MPP_MAP_VERSION')) {
+		define('MPP_MAP_VERSION', '1.0.0');
+	}
+
+	if (!defined('MPP_ADMIN_VERSION')) {
+		define('MPP_ADMIN_VERSION', '1.0.0');
+	}
+
 	// Translate text from the CHILD theme only.
 	// Change 'buddyboss-theme' instances in all child theme files to 'buddyboss-theme-child'.
 	// load_theme_textdomain( 'buddyboss-theme-child', get_stylesheet_directory() . '/languages' );
@@ -53,8 +65,8 @@ function buddyboss_theme_child_scripts_styles()
 	 **/
 
 	// Styles
-	wp_enqueue_style('buddyboss-child-css', get_stylesheet_directory_uri() . '/assets/css/custom.css', '', '1.0.6');
-	wp_enqueue_style('buddyboss-child-map-css', get_stylesheet_directory_uri() . '/assets/css/map.css', '', '1.0.0');
+	wp_enqueue_style('buddyboss-child-css', get_stylesheet_directory_uri() . '/assets/css/custom.css', '', MPP_VERSION);
+	wp_enqueue_style('buddyboss-child-map-css', get_stylesheet_directory_uri() . '/assets/css/map.css', '', MPP_MAP_VERSION);
 
 	// Javascript
 	if ((function_exists('bp_is_user') && bp_is_user()) ||
@@ -64,7 +76,7 @@ function buddyboss_theme_child_scripts_styles()
 		wp_enqueue_script('download', get_stylesheet_directory_uri() . '/assets/js/download.js');
 		wp_enqueue_script('pdf-gen', get_stylesheet_directory_uri() . '/assets/js/pdf-gen.js', array('jquery', 'pdf-lib', 'download'), '1.0.0');
 	}
-	wp_enqueue_script('buddyboss-child-js', get_stylesheet_directory_uri() . '/assets/js/custom.js', array('jquery'), '1.0.6');
+	wp_enqueue_script('buddyboss-child-js', get_stylesheet_directory_uri() . '/assets/js/custom.js', array('jquery'), MPP_VERSION);
 	wp_localize_script('buddyboss-child-js', 'mppChild', array('ajaxurl' => admin_url('admin-ajax.php')));
 }
 add_action('wp_enqueue_scripts', 'buddyboss_theme_child_scripts_styles', 9999);
@@ -78,7 +90,7 @@ add_image_size('bb-app-group-avatar', 150, 150, true);
 function mpp_custom_google_map_scripts()
 {
 	//wp_enqueue_style('custom-css', get_stylesheet_directory_uri() . '/assets/css/custom.css');
-	wp_enqueue_script('bbd-custom-google', get_stylesheet_directory_uri() . '/assets/js/custom-google.js', array('directorist-google-map'), '1.0.0', true);
+	wp_enqueue_script('bbd-custom-google', get_stylesheet_directory_uri() . '/assets/js/custom-google.js', array('directorist-google-map'), MPP_MAP_VERSION, true);
 	wp_localize_script('bbd-custom-google', 'directorist_options', bbd_get_option_data());
 }
 add_action('wp_enqueue_scripts', 'mpp_custom_google_map_scripts', 0);
@@ -87,8 +99,8 @@ add_action('wp_enqueue_scripts', 'mpp_custom_google_map_scripts', 0);
 
 function mpp_custom_admin_enqueue_scripts()
 {
-	wp_enqueue_style('custom-css', get_stylesheet_directory_uri() . '/assets/admin/css/custom.css');
-	wp_enqueue_script('bbd-custom-google', get_stylesheet_directory_uri() . '/assets/admin/js/custom.js', array('jquery'));
+	wp_enqueue_style('custom-admin-css', get_stylesheet_directory_uri() . '/assets/admin/css/custom.css', '', MPP_ADMIN_VERSION);
+	wp_enqueue_script('custom-admin-js', get_stylesheet_directory_uri() . '/assets/admin/js/custom.js', array('jquery'), MPP_ADMIN_VERSION);
 }
 add_action('admin_enqueue_scripts', 'mpp_custom_admin_enqueue_scripts');
 
@@ -97,17 +109,6 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 	/******************************** INCLUDE FILES *******************************/
 
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-group.php');
-	//require_once(get_stylesheet_directory() . '/includes/buddyboss/class-event.php');
-	//require_once(get_stylesheet_directory() . '/assets/fpdf/fpdf.php');
-
-	// IAP Connection to the Pricing Plan
-
-	// add_action('init', function () {
-	// 	if (class_exists('bbapp')) {
-	// 		require_once(get_stylesheet_directory() . '/includes/buddyboss/class-purchase.php');
-	// 		BuddyBossApp\Custom\IAP::instance();
-	// 	}
-	// });
 
 	/**
 	 * Load Custom Automated Push Notification

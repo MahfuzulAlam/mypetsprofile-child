@@ -14,9 +14,12 @@ class Co_Authors
     {
         add_action('wp_head', array($this, 'mpp_assign_coauthors_add_listing_page'));
         add_action('wp_footer', array($this, 'mpp_coauthors_javascript'));
+
         add_action('wp_ajax_nopriv_get_author_info', array($this, 'mpp_get_author_info'));
         add_action('wp_ajax_get_author_info', array($this, 'mpp_get_author_info'));
+
         add_filter('atbdp_form_custom_widgets', array($this, 'atbdp_form_custom_widgets'));
+
         add_action('atbdp_listing_updated', array($this, 'add_update_coauthors_with_listing'));
         add_action('atbdp_after_created_listing', array($this, 'add_update_coauthors_with_listing'));
     }
