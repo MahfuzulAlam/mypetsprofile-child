@@ -815,3 +815,8 @@
 {
   color:#7a82a6
 }
+
+.directorist-checkbox input[type=checkbox] + .directorist-checkbox__label
+{
+  cursor:pointer;
+}
