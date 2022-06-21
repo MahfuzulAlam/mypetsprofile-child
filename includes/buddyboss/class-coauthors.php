@@ -22,13 +22,23 @@ class Co_Authors
 
         add_action('atbdp_listing_updated', array($this, 'add_update_coauthors_with_listing'));
         add_action('atbdp_after_created_listing', array($this, 'add_update_coauthors_with_listing'));
+
+        add_filter('wp_new_user_notification_email', array($this, 'wp_new_user_notification_email'));
     }
 
     // Coauthor Plus
     public function mpp_assign_coauthors_add_listing_page()
     {
-        if (!is_page('add-listing')) return;
-        $listing_id = get_query_var('atbdp_listing_id', false);
+        if (!is_page('add-listing') && !is_singular('at_biz_dir')) return;
+
+        $listing_id = 0;
+
+        if (is_page('add-listing')) $listing_id = get_query_var('atbdp_listing_id', false);
+
+        if (is_singular('at_biz_dir')) {
+            $listing_id = get_the_ID();
+        }
+
         if (!$listing_id) return;
 
         /* Get All Authors */
@@ -74,32 +84,32 @@ class Co_Authors
 
                     // SHOW ADMIN FIELDS
                     if ($('input[name="add_admin_info[]"]').is(":checked")) {
-                        $('.custom_text_aai-name, .directorist-form-email-field, .directorist-form-phone-field').show();
+                        $('.custom_text_aai-name, .custom_text_aai-last-name, .directorist-form-email-field, .directorist-form-phone-field').show();
                     } else {
-                        $('.custom_text_aai-name, .directorist-form-email-field, .directorist-form-phone-field').hide();
+                        $('.custom_text_aai-name, .custom_text_aai-last-name, .directorist-form-email-field, .directorist-form-phone-field').hide();
                     }
 
                     // SHOW ADMIN FIELDS
                     if ($('input[name="add_sec_admin[]"]').is(":checked")) {
-                        $('.custom_text_sac-email, .custom_text_sac-name, .directorist-form-phone2-field').show();
+                        $('.custom_text_sac-email, .custom_text_sac-name, .custom_text_sac-last-name, .directorist-form-phone2-field').show();
                     } else {
-                        $('.custom_text_sac-email, .custom_text_sac-name, .directorist-form-phone2-field').hide();
+                        $('.custom_text_sac-email, .custom_text_sac-name, .custom_text_sac-last-name, .directorist-form-phone2-field').hide();
                     }
 
 
                     // Toggle
                     $('input[name="add_admin_info[]"]').change(function() {
                         if ($(this).is(":checked")) {
-                            $('.custom_text_aai-name, .directorist-form-email-field, .directorist-form-phone-field').show();
+                            $('.custom_text_aai-name, .custom_text_aai-last-name, .directorist-form-email-field, .directorist-form-phone-field').show();
                         } else {
-                            $('.custom_text_aai-name, .directorist-form-email-field, .directorist-form-phone-field').hide();
+                            $('.custom_text_aai-name, .custom_text_aai-last-name, .directorist-form-email-field, .directorist-form-phone-field').hide();
                         }
                     });
                     $('input[name="add_sec_admin[]"]').change(function() {
                         if ($(this).is(":checked")) {
-                            $('.custom_text_sac-email, .custom_text_sac-name, .directorist-form-phone2-field').show();
+                            $('.custom_text_sac-email, .custom_text_sac-name, .custom_text_sac-last-name, .directorist-form-phone2-field').show();
                         } else {
-                            $('.custom_text_sac-email, .custom_text_sac-name, .directorist-form-phone2-field').hide();
+                            $('.custom_text_sac-email, .custom_text_sac-name, .custom_text_sac-last-name, .directorist-form-phone2-field').hide();
                         }
                     });
                     // Toggle
@@ -107,10 +117,10 @@ class Co_Authors
                     // AJAX REQUEST
                     $('#email, #sac-email').change(function() {
                         var $field_name = $(this).attr('name');
-                        console.log($field_name);
+                        //console.log($field_name);
                         var email = $(this).val();
                         if (email != '') {
-                            console.log(email);
+                            //console.log(email);
                             $.ajax({
                                 type: 'post',
                                 url: mppChild.ajaxurl,
@@ -122,10 +132,12 @@ class Co_Authors
                                 success: function(data) {
                                     if (data.success) {
                                         if ($field_name == 'email') {
-                                            $('.custom_text_aai-name input').val(data.user.name);
+                                            $('.custom_text_aai-name input').val(data.user.first_name);
+                                            $('.custom_text_aai-last-name input').val(data.user.last_name);
                                             $('.directorist-form-phone-field input').val(data.user.phone);
                                         } else {
-                                            $('.custom_text_sac-name input').val(data.user.name);
+                                            $('.custom_text_sac-name input').val(data.user.first_name);
+                                            $('.custom_text_sac-last-name input').val(data.user.last_name);
                                             $('.directorist-form-phone2-field input').val(data.user.phone);
                                         }
                                     } else {
@@ -155,7 +167,8 @@ class Co_Authors
         $email = $_REQUEST['email'];
         $user = get_user_by('email', $email);
         if ($user) {
-            $user_info['name'] = $user->display_name;
+            $user_info['first_name'] = get_user_meta($user->ID, 'first_name', true);
+            $user_info['last_name'] = get_user_meta($user->ID, 'last_name', true);
             $user_info['phone'] = get_user_meta($user->ID, 'billing_phone', true);
             $success = true;
         }
@@ -271,8 +284,8 @@ class Co_Authors
 
     public function mpp_generate_username($firstname = '', $lastname = '')
     {
-        $fullname = !empty($lastname) ? trim($firstname . '-' . $lastname) : trim($firstname);
-        $username = $this->mpp_slugify_text($fullname);
+        $fullname = !empty($lastname) ? trim($firstname . '_' . $lastname) : trim($firstname);
+        $username = $this->mpp_slugify_text($fullname, '_');
         $x = 1;
         $y = 3;
         while ($x <= $y) {
@@ -321,6 +334,17 @@ class Co_Authors
         } else {
             return false;
         }
+    }
+
+    // Overwrite Email
+    public function wp_new_user_notification_email($notification_email)
+    {
+        $new_email_message = '<p>Welcome to MyPetsProfile™️ Admin set-up.</p>';
+        $new_email_message .= '<p>Please click the link below to access your admin account and create a password. Enjoy all the benefits of communicating with residents with pets.</p>';
+        $new_email_message .= '<p>Thank you</p><p>The MyPetsProfile™️ Team</p>';
+        $new_email_message .= $notification_email['message'];
+        $notification_email['message'] = $new_email_message;
+        return $notification_email;
     }
 }
 
