@@ -2432,3 +2432,22 @@ add_action('bp_core_activated_user', function ($user_id) {
     file_put_contents(dirname(__FILE__) . '/file.json', json_encode(array($user)));
 });
 */
+
+// Login Redirect
+
+function mpp_login_redirect_first_time($url, $req, $user)
+{
+    if ($user && is_object($user) && is_a($user, 'WP_User')) {
+        if (!$user->has_cap('administrator')) {
+            $first_login = get_user_meta($user->ID, 'first_login', true);
+            if (!$first_login || empty($first_login)) {
+                update_user_meta($user->ID, 'first_login', 'completed');
+                return home_url('/search-directory/');
+            }
+        }
+    }
+    return $url;
+}
+add_filter('login_redirect', 'mpp_login_redirect_first_time', 10, 3);
+
+// Login Redirect

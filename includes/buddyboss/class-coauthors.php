@@ -23,7 +23,7 @@ class Co_Authors
         add_action('atbdp_listing_updated', array($this, 'add_update_coauthors_with_listing'));
         add_action('atbdp_after_created_listing', array($this, 'add_update_coauthors_with_listing'));
 
-        add_filter('wp_new_user_notification_email', array($this, 'wp_new_user_notification_email'));
+        //add_filter('wp_new_user_notification_email', array($this, 'wp_new_user_notification_email'));
     }
 
     // Coauthor Plus
@@ -143,9 +143,11 @@ class Co_Authors
                                     } else {
                                         if ($field_name == 'email') {
                                             $('.custom_text_aai-name input').val('');
+                                            $('.custom_text_aai-last-name input').val('');
                                             $('.directorist-form-phone-field input').val('');
                                         } else {
                                             $('.custom_text_sac-name input').val('');
+                                            $('.custom_text_sac-last-name input').val('');
                                             $('.directorist-form-phone2-field input').val('');
                                         }
                                     }
@@ -208,7 +210,7 @@ class Co_Authors
                     $firstname = trim(isset($_POST['aai-name']) ? $_POST['aai-name'] : "");
                     $lastname = trim(isset($_POST['aai-last-name']) ? $_POST['aai-last-name'] : "");
                     $phone = trim(isset($_POST['phone']) ? $_POST['phone'] : "");
-                    $user_id = $this->mpp_add_new_user($email, $firstname, $lastname, $phone);
+                    $user_id = $this->mpp_add_new_user($email, $firstname, $lastname, $phone, $listing_id);
                     if ($user_id) $authors[] = $user_id;
                 }
             }
@@ -230,7 +232,7 @@ class Co_Authors
                     $firstname = trim(isset($_POST['sac-name']) ? $_POST['sac-name'] : "");
                     $lastname = trim(isset($_POST['sac-last-name']) ? $_POST['sac-last-name'] : "");
                     $phone = trim(isset($_POST['phone2']) ? $_POST['phone2'] : "");
-                    $user_id = $this->mpp_add_new_user($sac_email, $firstname, $lastname, $phone);
+                    $user_id = $this->mpp_add_new_user($sac_email, $firstname, $lastname, $phone, $listing_id);
                     if ($user_id) $authors[] = $user_id;
                 }
             }
@@ -251,9 +253,9 @@ class Co_Authors
     }
 
 
-    public function mpp_add_new_user($email = '', $firstname = '', $lastname = '', $phone = '')
+    public function mpp_add_new_user($email = '', $firstname = '', $lastname = '', $phone = '', $listing_id = 0)
     {
-        $user_name = $this->mpp_generate_username($firstname, $lastname);
+        $user_name = $this->mpp_generate_username($firstname, $lastname, $email);
         if (!empty($user_name)) {
             $random_password = wp_generate_password(12, false);
             $user_id = wp_create_user($user_name, $random_password, $email);
@@ -263,8 +265,11 @@ class Co_Authors
                 update_user_meta($user_id, 'last_name', $lastname);
                 update_user_meta($user_id, 'billing_phone', $phone);
                 // Send Notification
-                wp_new_user_notification($user_id, $random_password);
+                //wp_new_user_notification($user_id, null, 'user');
+                //update_user_meta($user_id, 'activation_key', $random_password);
+                //bp_core_activation_signup_user_notification($user_name, $email, $random_password, array());
                 // Return User ID
+                $this->send_password_reset_email($email, $random_password, $listing_id);
                 return $user_id;
             }
         }
@@ -282,10 +287,13 @@ class Co_Authors
         if (!empty($phone)) update_user_meta($user_id, 'billing_phone', $phone);
     }
 
-    public function mpp_generate_username($firstname = '', $lastname = '')
+    public function mpp_generate_username($firstname = '', $lastname = '', $email = '')
     {
         $fullname = !empty($lastname) ? trim($firstname . '_' . $lastname) : trim($firstname);
-        $username = $this->mpp_slugify_text($fullname, '_');
+        $username = !empty($fullname) ? $this->mpp_slugify_text($fullname, '_') : '';
+        if (!$username || empty($username)) {
+            $username = implode('@', explode('@', $email, -1));
+        }
         $x = 1;
         $y = 3;
         while ($x <= $y) {
@@ -320,7 +328,7 @@ class Co_Authors
         $text = strtolower($text);
 
         if (empty($text)) {
-            return 'n-a';
+            return false;
         }
 
         return $text;
@@ -345,6 +353,40 @@ class Co_Authors
         $new_email_message .= $notification_email['message'];
         $notification_email['message'] = $new_email_message;
         return $notification_email;
+    }
+
+    public function send_password_reset_email($email = '', $password = '', $listing_id = 0)
+    {
+        $user = get_user_by('email', $email);
+        $key = get_password_reset_key($user);
+        $username = $user->user_login;
+
+
+        //$reset_link = wp_login_url() . '?action=rp&key=' . $key . '&login=' . $username;
+        $message = '';
+        $message .= '<p>Your PooPrints Canada Program has provided a community listing on its MyPetsProfile&trade; Web and App Pet Platform at no cost.</p>';
+        $message .= '<p>Welcome to your Admin set-up for the pet-friendly community listing of <a href="' . get_permalink($listing_id) . '">' . get_the_title($listing_id) . '</a>.</p>';
+        $message .= '<p>Please click the link below to access your private and secure admin account and create a password. </p>';
+        $message .= '<h4>' . __('Proceed to login using the below username and password: ', 'mypetsprofile') . '</h4>';
+        $message .= '<p><strong>Login URL:</strong> <a href="' . get_permalink($listing_id) . '">Click here to login</a></p>';
+        $message .= '<p><strong>Username:</strong> ' . $email . '</p>';
+        $message .= '<p><strong>Password:</strong> ' . $password . '</p>';
+        $message .= '<p><strong>Note:</strong> Don’t forget to download the App banner at the top of your screen after login, to download the free App version.</p>';
+        /*
+        $message .= '<h2>' . __('Proceed to reset password : ', 'my_slug') . '</h2><br />' .
+            __('To set your password Click here.', 'mypetsprofile') .
+            '</br><a href="' . esc_url($reset_link) . '" title="' . __('Reset your password link', 'mypetsprofile') . '" >Reset your password</a>';
+        */
+        $message .= '<p>Your admin access allows you to manage and edit your pet-friendly community listing with photos, amenities and more.</p>';
+        $message .= '<p>If you choose, you can receive inquiries from new pet parents interested in securing a pet-friendly home in your community.</p>';
+        $message .= '<p>You can also share your community listing with existing residents with pets, and communicate directly or in a group. (Your communications group is attached to your listing)</p>';
+        $message .= '<p>Enjoy all the benefits of your pet-friendly community listing.</p>';
+        $message .= '<p>Please let us know if you have any questions?</p>';
+        $message .= '<p>Thank you</p>';
+        $message .= '<p>The MyPetsProfile&trade; Directory</br >Team</br >Hello@MyPetsProfile.com</p>';
+        $message .= '<p>https://mypetsprofile.com/</p>';
+
+        wp_mail($email, 'Welcome to MyPetsProfile™', stripslashes($message), "Content-Type: text/html; charset=UTF-8");
     }
 }
 
