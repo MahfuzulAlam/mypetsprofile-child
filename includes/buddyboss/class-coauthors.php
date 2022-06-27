@@ -20,8 +20,8 @@ class Co_Authors
 
         add_filter('atbdp_form_custom_widgets', array($this, 'atbdp_form_custom_widgets'));
 
-        add_action('atbdp_listing_updated', array($this, 'add_update_coauthors_with_listing'));
-        add_action('atbdp_after_created_listing', array($this, 'add_update_coauthors_with_listing'));
+        add_action('atbdp_listing_updated', array($this, 'add_update_coauthors_with_listing'), 10);
+        add_action('atbdp_after_created_listing', array($this, 'add_update_coauthors_with_listing'), 10);
 
         //add_filter('wp_new_user_notification_email', array($this, 'wp_new_user_notification_email'));
     }

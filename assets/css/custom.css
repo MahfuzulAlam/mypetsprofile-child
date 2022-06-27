@@ -829,3 +829,7 @@
     margin-bottom: 10px;
   }
 }
+
+.custom_text_bb_group_id {
+  display: none;
+}

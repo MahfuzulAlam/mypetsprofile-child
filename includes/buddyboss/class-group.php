@@ -13,9 +13,9 @@ class BuddyBoss_Group_Custom
     public function __construct()
     {
         // Create a group on create a listing with listing details
-        add_action('atbdp_after_created_listing', array($this, 'buddyboss_group_on_directorist_listing_creation'));
+        add_action('atbdp_after_created_listing', array($this, 'buddyboss_group_on_directorist_listing_creation'), 20);
         // Update a group on update a listing with listing details
-        add_action('atbdp_listing_updated', array($this, 'buddyboss_group_on_directorist_listing_creation'));
+        add_action('atbdp_listing_updated', array($this, 'buddyboss_group_on_directorist_listing_creation'), 20);
         // Custom import hooks
         add_action('directorist_listing_imported', array($this, 'buddyboss_create_group_after_import_listing'), 10, 2);
     }
@@ -44,6 +44,25 @@ class BuddyBoss_Group_Custom
                 if (!is_wp_error($group_id) && $group_id) {
                     $this->connect_with_directorist_listing($listing_id, $group_id);
                     $this->save_category_name_as_group_type($_POST, $group_id);
+                }
+            }
+
+            $this->assign_coauthors_as_admins($listing_id, $group_id);
+        }
+    }
+
+    public function assign_coauthors_as_admins($listing_id, $group_id)
+    {
+        if (is_plugin_active('co-authors-plus/co-authors-plus.php')) {
+            $coauthors = get_coauthors($listing_id);
+            if ($coauthors) {
+                foreach ($coauthors as $authorInfo) {
+                    $user_id = $authorInfo->ID;
+                    //Add User to the group and add as admin
+                    if (!groups_is_user_admin($user_id, $group_id)) {
+                        groups_join_group($group_id, $user_id);
+                        $this->assign_as_admin($group_id, $user_id);
+                    }
                 }
             }
         }
@@ -123,6 +142,15 @@ class BuddyBoss_Group_Custom
             groups_update_groupmeta($group_id, 'directorist_listings_enabled', 1);
             groups_update_groupmeta($group_id, 'directorist_listings_ids', array($listing_id));
         }
+    }
+
+    // Make Admins
+    public function assign_as_admin($group_id, $user_id)
+    {
+        global $wpdb, $bp;
+        $group_table = $bp->groups->table_name_members;
+        // Assign Admin
+        $wpdb->query($wpdb->prepare("UPDATE {$group_table} SET `is_admin`=1, `user_title`='Group Organizer' WHERE `group_id`=%d AND `user_id`=%d", $group_id, $user_id));
     }
 }
 
