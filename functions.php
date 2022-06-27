@@ -30,7 +30,7 @@ function buddyboss_theme_child_languages()
 	}
 
 	if (!defined('MPP_VERSION')) {
-		define('MPP_VERSION', '1.1.0');
+		define('MPP_VERSION', '1.1.1');
 	}
 
 	if (!defined('MPP_MAP_VERSION')) {
@@ -131,5 +131,6 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-qrcode.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-petalert.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-coauthors.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-profile-forms.php');
 
 endif;

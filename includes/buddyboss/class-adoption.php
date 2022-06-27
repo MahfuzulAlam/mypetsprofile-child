@@ -476,7 +476,7 @@ class Pet_Adoption
     }
 
     // URL GET CONTENT
-    function url_get_contents($Url)
+    public function url_get_contents($Url)
     {
         if (!function_exists('curl_init')) {
             die('CURL is not installed!');
