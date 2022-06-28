@@ -217,24 +217,24 @@ jQuery(document).ready(function ($) {
 
   // MyPetsAlert
 
-  $('#mpp_pets_alert').on('submit', function(e){
+  $("#mpp_pets_alert").on("submit", function (e) {
     e.preventDefault();
 
-    console.log('clicked');
+    console.log("clicked");
 
-    var message = $('#mpp_alert_message').val();
+    var message = $("#mpp_alert_message").val();
 
-    if(message != '' ){
-      $('#mpp_loading').show();
-      $('#mpp_warning').text('');
-    }else{
-      $('#mpp_warning').text('Please Enter Message.');
+    if (message != "") {
+      $("#mpp_loading").show();
+      $("#mpp_warning").text("");
+    } else {
+      $("#mpp_warning").text("Please Enter Message.");
       return;
     }
 
-    $('#mpp_pets_alert_submitted').prop('disabled', true);
+    $("#mpp_pets_alert_submitted").prop("disabled", true);
 
-    var nonce = $('#mpp_alert_nonce').val();
+    var nonce = $("#mpp_alert_nonce").val();
 
     // AJAX CALL
     $.ajax({
@@ -245,16 +245,50 @@ jQuery(document).ready(function ($) {
       success: function (response) {
         if (response.success == true) {
           Swal.fire("MPP Pet Alert Sent!", "", "success");
-          
         }
       },
-      complete: function(){
-        $('#mpp_loading').hide();
-        $('#mpp_pets_alert_submitted').prop('disabled', false);
-      }
+      complete: function () {
+        $("#mpp_loading").hide();
+        $("#mpp_pets_alert_submitted").prop("disabled", false);
+      },
     });
     // AJAX CALL
   });
 
   // MyPetsAlert
+
+  // Referral Messenger
+
+  $("#apply_as_referral").on("click", function (e) {
+    e.preventDefault();
+    var group = $(this).data("group");
+    var user = $(this).data("user");
+    Swal.fire({
+      title: "Do you want to join the referral program?",
+      showCancelButton: true,
+      confirmButtonText: "Join",
+    }).then((result) => {
+      /* Read more about isConfirmed, isDenied below */
+      if (result.isConfirmed) {
+        // AJAX CALL
+        $.ajax({
+          type: "post",
+          dataType: "json",
+          url: mppChild.ajaxurl,
+          data: { action: "mpp_apply_referral", group: group, user: user },
+          success: function (response) {
+            console.log(response);
+            if (response.result == true) {
+              Swal.fire("Joined!", "", "success");
+            } else {
+              Swal.fire("Sorry, could not join!", "", "error");
+            }
+          },
+        });
+        // AJAX CALL
+      }
+    });
+  });
+
+  // Referral Messenger
 });

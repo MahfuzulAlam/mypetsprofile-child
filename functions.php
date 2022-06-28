@@ -132,5 +132,6 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-petalert.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-coauthors.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-profile-forms.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-messenger.php');
 
 endif;
