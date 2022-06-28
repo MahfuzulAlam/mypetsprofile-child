@@ -291,4 +291,73 @@ jQuery(document).ready(function ($) {
   });
 
   // Referral Messenger
+
+  // Referral Approval
+  $(".mpp-referral-approval").on("click", function (e) {
+    e.preventDefault();
+    var row = $(this).parents("tr");
+    var group = $(this).data("group");
+    var user = $(this).data("user");
+    var type = $(this).data("type");
+
+    if (type == "accept") {
+      // APROVED
+      Swal.fire({
+        title: "Do you want to acccept this member?",
+        showCancelButton: true,
+        confirmButtonText: "Confirm",
+      }).then((result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+          // AJAX CALL
+          $.ajax({
+            type: "post",
+            dataType: "json",
+            url: mppChild.ajaxurl,
+            data: { action: "mpp_accept_referral", group: group, user: user },
+            success: function (response) {
+              console.log(response);
+              if (response.result == true) {
+                Swal.fire("Confirmed!", "", "success");
+                row.hide();
+              } else {
+                Swal.fire("Sorry, could not confirm!", "", "error");
+              }
+            },
+          });
+          // AJAX CALL
+        }
+      });
+    } else {
+      // REJECTED
+      Swal.fire({
+        title: "Do you want to reject the member?",
+        showCancelButton: true,
+        confirmButtonText: "Confirm",
+      }).then((result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+          // AJAX CALL
+          $.ajax({
+            type: "post",
+            dataType: "json",
+            url: mppChild.ajaxurl,
+            data: { action: "mpp_reject_referral", group: group, user: user },
+            success: function (response) {
+              console.log(response);
+              if (response.result == true) {
+                Swal.fire("Confirmed!", "", "success");
+                row.hide();
+              } else {
+                Swal.fire("Sorry, could not confirm!", "", "error");
+              }
+            },
+          });
+          // AJAX CALL
+        }
+      });
+    }
+  });
+
+  // Referral Approval
 });
