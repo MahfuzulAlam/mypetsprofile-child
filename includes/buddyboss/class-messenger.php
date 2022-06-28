@@ -153,6 +153,40 @@ class Referral_Messenger
             endforeach;
             ?>
         </table>
+        <div class="messenger-container">
+            <div class="messenger-header">
+                <h4>Chat with Username</h4>
+            </div>
+            <div class="messenger-body">
+                <div class="chat-line sender">
+                    <div class="chat-name">Name</div>
+                    <div class="chat-message"><span>Hello</span></div>
+                </div>
+                <div class="chat-line sender">
+                    <div class="chat-name">Name</div>
+                    <div class="chat-message"><span>Hello</span></div>
+                </div>
+                <div class="chat-line receiver">
+                    <div class="chat-name">Name</div>
+                    <div class="chat-message"><span>Hello</span></div>
+                </div>
+                <div class="chat-line sender">
+                    <div class="chat-name">Name</div>
+                    <div class="chat-message"><span>Hello</span></div>
+                </div>
+                <div class="chat-line sender">
+                    <div class="chat-name">Name</div>
+                    <div class="chat-message"><span>Hello</span></div>
+                </div>
+                <div class="chat-line receiver">
+                    <div class="chat-name">Name</div>
+                    <div class="chat-message"><span>Hello</span></div>
+                </div>
+            </div>
+            <div class="messenger-footer">
+                <input type="text" id="messenger_message" />
+            </div>
+        </div>
 <?php
         return ob_get_clean();
     }

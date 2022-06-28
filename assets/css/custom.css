@@ -833,3 +833,51 @@
 .custom_text_bb_group_id {
   display: none;
 }
+
+/* Messenger Design */
+
+.messenger-container {
+  border: 1px solid #eee;
+  border-radius: 2px;
+  padding: 15px;
+}
+
+.messenger-header {
+  border-bottom: 2px solid #eee;
+  margin-bottom: 20px;
+}
+
+.messenger-body .sender {
+  text-align: left;
+}
+
+.messenger-body .receiver {
+  text-align: right;
+}
+
+.chat-line .chat-name {
+  font-size: 14px;
+  color: #000;
+}
+
+.chat-line .chat-message {
+  width: 100%;
+}
+
+.chat-line .chat-message span {
+  font-size: 15px;
+  background-color: #eee;
+  width: fit-content;
+  padding: 5px 12px;
+  border-radius: 50px;
+}
+
+.messenger-footer {
+  margin-top: 20px;
+}
+
+.messenger-footer #messenger_message {
+  width: 100%;
+  border-radius: 20px;
+  padding: 10px 20px;
+}
