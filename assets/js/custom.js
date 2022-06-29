@@ -360,4 +360,38 @@ jQuery(document).ready(function ($) {
   });
 
   // Referral Approval
+
+  // MPP MESSENGER FORM SUBMIT
+  $("#mpp_messenger_form").submit(function (e) {
+    e.preventDefault();
+
+    if ($("#messenger_message").val() == "") return;
+
+    var message = $("#messenger_message").val();
+    var info = $("#msg_info").val();
+
+    $("#messenger_message").val("");
+
+    // AJAX CALL
+    $.ajax({
+      type: "post",
+      dataType: "json",
+      url: mppChild.ajaxurl,
+      data: { action: "mpp_insert_message_row", message: message, info: info },
+      success: function (response) {
+        console.log(response);
+        if (response.result == true) {
+          $("#messenger_message").val("");
+        } else {
+          $("#messenger_warning").text("Cannot sent!");
+          console.log("cannot sent");
+        }
+      },
+      error: function (e, error) {
+        console.log(e);
+        console.log(error);
+      },
+    });
+    // AJAX CALL
+  });
 });

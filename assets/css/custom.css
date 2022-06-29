@@ -839,12 +839,14 @@
 .messenger-container {
   border: 1px solid #eee;
   border-radius: 2px;
-  padding: 15px;
 }
 
 .messenger-header {
   border-bottom: 2px solid #eee;
-  margin-bottom: 20px;
+}
+
+.messenger-header h4 {
+  margin: 15px;
 }
 
 .messenger-body .sender {
@@ -873,11 +875,89 @@
 }
 
 .messenger-footer {
-  margin-top: 20px;
+  margin: 0px 15px 15px 15px;
 }
 
-.messenger-footer #messenger_message {
+form.messenger-form {
+  display: flex;
+  margin-bottom: 0;
+}
+
+.messenger-body {
+  height: 600px;
+  overflow-y: scroll;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.messenger-body::-webkit-scrollbar {
+  display: none;
+}
+
+.messenger-form #messenger_message {
+  height: 45px;
+  border-right: none;
+  border-radius: 0px;
+  overflow: hidden;
+  resize: none;
   width: 100%;
-  border-radius: 20px;
-  padding: 10px 20px;
+  line-height: 18px;
+}
+
+.messenger-form button {
+  padding: 0 12px;
+  color: cornflowerblue;
+  background-color: transparent;
+  border-radius: 0;
+  border-color: #eee;
+}
+
+.discussion {
+  margin: 0 auto;
+  display: flex;
+  flex-flow: column wrap;
+  padding: 15px;
+}
+
+.discussion > .bubble {
+  border-radius: 1em;
+  padding: 0.25em 0.75em;
+  margin: 0.0625em;
+  max-width: 80%;
+}
+
+.discussion > .bubble.last {
+  margin-bottom: 10px;
+}
+
+.discussion > .bubble.sender {
+  align-self: flex-start;
+  background-color: cornflowerblue;
+  color: #fff;
+}
+.discussion > .bubble.recipient {
+  align-self: flex-end;
+  background-color: #efefef;
+}
+
+.discussion > .bubble.sender.first {
+  border-bottom-left-radius: 0.1em;
+}
+.discussion > .bubble.sender.last {
+  border-top-left-radius: 0.1em;
+}
+.discussion > .bubble.sender.middle {
+  border-bottom-left-radius: 0.1em;
+  border-top-left-radius: 0.1em;
+}
+
+.discussion > .bubble.recipient.first {
+  border-bottom-right-radius: 0.1em;
+}
+.discussion > .bubble.recipient.last {
+  border-top-right-radius: 0.1em;
+}
+.discussion > .bubble.recipient.middle {
+  border-bottom-right-radius: 0.1em;
+  border-top-right-radius: 0.1em;
 }

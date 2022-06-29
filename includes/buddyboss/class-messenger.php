@@ -26,6 +26,8 @@ class Referral_Messenger
         add_action('wp_ajax_mpp_accept_referral', array($this, 'mpp_ajax_accept_referral'));
         // REJECT REFERRAL
         add_action('wp_ajax_mpp_reject_referral', array($this, 'mpp_ajax_reject_referral'));
+        // Insert Message
+        add_action('wp_ajax_mpp_insert_message_row', array($this, 'mpp_insert_message_row'));
     }
 
     // APPLY AS REFFERAL SHORTCODE
@@ -158,33 +160,59 @@ class Referral_Messenger
                 <h4>Chat with Username</h4>
             </div>
             <div class="messenger-body">
-                <div class="chat-line sender">
-                    <div class="chat-name">Name</div>
-                    <div class="chat-message"><span>Hello</span></div>
-                </div>
-                <div class="chat-line sender">
-                    <div class="chat-name">Name</div>
-                    <div class="chat-message"><span>Hello</span></div>
-                </div>
-                <div class="chat-line receiver">
-                    <div class="chat-name">Name</div>
-                    <div class="chat-message"><span>Hello</span></div>
-                </div>
-                <div class="chat-line sender">
-                    <div class="chat-name">Name</div>
-                    <div class="chat-message"><span>Hello</span></div>
-                </div>
-                <div class="chat-line sender">
-                    <div class="chat-name">Name</div>
-                    <div class="chat-message"><span>Hello</span></div>
-                </div>
-                <div class="chat-line receiver">
-                    <div class="chat-name">Name</div>
-                    <div class="chat-message"><span>Hello</span></div>
-                </div>
+                <section class="discussion">
+
+                    <?php
+
+                    $bd_message = new MPP_Database;
+                    $messages = $bd_message->retrieve_messages(3, 1);
+
+                    $prev_sender = $next_sender = 0;
+                    if ($messages) {
+                        foreach ($messages as $key => $message) {
+                            $prev_sender = $key > 0 ? $messages[$key - 1]->sender_id : 0;
+                            $next_sender = $key < count($messages) - 1 ? $messages[$key + 1]->sender_id : 0;
+
+                            $owner = $message->sender_id == bp_loggedin_user_id() ? 'sender' : 'recipient';
+                            $message_position = '';
+                            if ($prev_sender !== $message->sender_id) $message_position = 'first';
+                            if ($prev_sender == $message->sender_id) $message_position = 'middle';
+                            if ($next_sender !== $message->sender_id) $message_position = 'last';
+                            if ($next_sender !== $message->sender_id && $prev_sender !== $message->sender_id) $message_position = '';
+                    ?>
+                            <div class="bubble <?php echo $owner; ?> <?php echo $message_position; ?>"><?php echo $message->message; ?></div>
+                    <?php
+
+                        }
+                    }
+
+                    ?>
+
+
+                    <div class="bubble sender first">Hello</div>
+                    <div class="bubble sender last">This is a CSS demo of the Messenger chat bubbles, that merge when stacked together.</div>
+
+                    <div class="bubble recipient first">Oh that's cool!</div>
+                    <div class="bubble recipient last">Did you use JavaScript to perform that kind of effect?</div>
+
+                    <div class="bubble sender first">No, that's full CSS3!</div>
+                    <div class="bubble sender middle">(Take a look to the 'JS' section of this Pen... it's empty! 😃</div>
+                    <div class="bubble sender last">And it's also really lightweight!</div>
+
+                    <div class="bubble recipient">Dope!</div>
+
+                    <div class="bubble sender first">Yeah, but I still didn't succeed to get rid of these stupid .first and .last classes.</div>
+                    <div class="bubble sender middle">The only solution I see is using JS, or a &lt;div&gt; to group elements together, but I don't want to ...</div>
+                    <div class="bubble sender last">I think it's more transparent and easier to group .bubble elements in the same parent.</div>
+
+                </section>
             </div>
             <div class="messenger-footer">
-                <input type="text" id="messenger_message" />
+                <form class="messenger-form" id="mpp_messenger_form">
+                    <textarea id="messenger_message" name="messenger_message"></textarea>
+                    <input type="hidden" name="msg_info" id="msg_info" value='<?php echo json_encode(array('sender' => bp_loggedin_user_id(), 'recipient' => 1, 'group' => 174)); ?>' />
+                    <button type="submit"><i class="fa fa-paper-plane"></i></button>
+                </form>
             </div>
         </div>
 <?php
@@ -263,6 +291,28 @@ class Referral_Messenger
             }
         }
         echo json_encode(array('result' => $result, 'speakers' => $group_id));
+        die();
+    }
+
+    // AJAX INSERT MESSAGE ROW
+    public function mpp_insert_message_row()
+    {
+        $result = false;
+        $message = isset($_REQUEST['message']) ? $_REQUEST['message'] : '';
+        $info = isset($_REQUEST['info']) ? $_REQUEST['info'] : '';
+        if (!empty($info)) {
+            $info = stripslashes($info);
+            $info = json_decode($info);
+            $sender = $info->sender;
+            $recipient = $info->recipient;
+            $group = $info->group;
+            //$result = $sender;
+            if (!empty($message)) {
+                $bd_message = new MPP_Database;
+                $result = $bd_message->insert_message(array('sender_id' => $sender, 'recipient_id' => $recipient, 'group_id' => $group, 'message' => $message));
+            }
+        }
+        echo json_encode(array('result' => $result));
         die();
     }
 }
