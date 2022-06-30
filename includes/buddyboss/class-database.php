@@ -92,14 +92,39 @@ class MPP_Database
     }
 
     // RERIVE CHAT MESSAGES
-    public function retrieve_messages($sender_id = 0, $recipient_id = 0)
+    public function retrieve_messages($sender_id = 0, $recipient_id = 0, $group_id = 0)
     {
         global $wpdb;
 
         $table_name = $wpdb->prefix . "mpp_messenger";
 
         $results = $wpdb->get_results(
-            $wpdb->prepare("SELECT * FROM {$table_name} WHERE ( sender_id=%d AND recipient_id=%d ) OR ( sender_id=%d AND recipient_id=%d) ORDER BY date_sent ASC", $sender_id, $recipient_id, $recipient_id, $sender_id)
+            $wpdb->prepare("SELECT * FROM {$table_name} 
+            WHERE 
+                (( sender_id=%d AND recipient_id=%d ) 
+                OR ( sender_id=%d AND recipient_id=%d))
+                -- AND status = (1,2)
+                AND group_id = %d
+            ORDER BY date_sent ASC", $sender_id, $recipient_id, $recipient_id, $sender_id, $group_id)
+        );
+
+        return $results;
+    }
+
+    // RERIVE CHAT MESSAGES
+    public function retrieve_unread_messages($sender_id = 0, $recipient_id = 0, $group_id = 0)
+    {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . "mpp_messenger";
+
+        $results = $wpdb->get_results(
+            $wpdb->prepare("SELECT * FROM {$table_name} 
+            WHERE sender_id=%d
+            AND recipient_id=%d
+            AND group_id=%d
+            AND status='1'
+            ORDER BY date_sent ASC", $recipient_id, $sender_id, $group_id)
         );
 
         return $results;

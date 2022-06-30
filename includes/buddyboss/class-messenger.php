@@ -28,6 +28,10 @@ class Referral_Messenger
         add_action('wp_ajax_mpp_reject_referral', array($this, 'mpp_ajax_reject_referral'));
         // Insert Message
         add_action('wp_ajax_mpp_insert_message_row', array($this, 'mpp_insert_message_row'));
+        // GET UNREAD MESSAGE
+        add_action('wp_ajax_mpp_get_unread_message', array($this, 'mpp_get_unread_message'));
+        // DISPLAY ALL MESSAGES
+        add_action('wp_ajax_mpp_retrive_messages', array($this, 'mpp_retrive_messages'));
     }
 
     // APPLY AS REFFERAL SHORTCODE
@@ -148,7 +152,8 @@ class Referral_Messenger
                     <td><?php echo $user->data->display_name . " (" . $user->data->user_nicename . ")";
                         ?></td>
                     <td>
-                        <a class="btn button mpp-start-chatting" data-user="<?php echo $user_id; ?>" data-group="<?php echo $group_id; ?>" data-type="accept">Start Chatting</a>
+                        <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="<?php echo $user_id; ?>" data-group="<?php echo $group_id; ?>" data-type="accept">Start Chatting</a>
+                        <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="5" data-group="<?php echo $group_id; ?>" data-type="accept">Start Chatting</a>
                     </td>
                 </tr>
             <?php
@@ -168,7 +173,7 @@ class Referral_Messenger
                     $messages = $bd_message->retrieve_messages(3, 1);
 
                     $prev_sender = $next_sender = 0;
-                    if ($messages) {
+                    if (!$messages) {
                         foreach ($messages as $key => $message) {
                             $prev_sender = $key > 0 ? $messages[$key - 1]->sender_id : 0;
                             $next_sender = $key < count($messages) - 1 ? $messages[$key + 1]->sender_id : 0;
@@ -178,18 +183,22 @@ class Referral_Messenger
                             if ($prev_sender !== $message->sender_id) $message_position = 'first';
                             if ($prev_sender == $message->sender_id) $message_position = 'middle';
                             if ($next_sender !== $message->sender_id) $message_position = 'last';
-                            if ($next_sender !== $message->sender_id && $prev_sender !== $message->sender_id) $message_position = '';
+                            if ($next_sender !== $message->sender_id && $prev_sender !== $message->sender_id) $message_position = 'single';
                     ?>
                             <div class="bubble <?php echo $owner; ?> <?php echo $message_position; ?>"><?php echo $message->message; ?></div>
                     <?php
 
+                            // Change status
+                            if ($message->status == 1 && $message->recipient_id == bp_loggedin_user_id()) {
+                                //$bd_message->update_status($message->id, 2); // 2 = read
+                            }
                         }
                     }
 
                     ?>
 
 
-                    <div class="bubble sender first">Hello</div>
+                    <!-- <div class="bubble sender first">Hello</div>
                     <div class="bubble sender last">This is a CSS demo of the Messenger chat bubbles, that merge when stacked together.</div>
 
                     <div class="bubble recipient first">Oh that's cool!</div>
@@ -203,7 +212,7 @@ class Referral_Messenger
 
                     <div class="bubble sender first">Yeah, but I still didn't succeed to get rid of these stupid .first and .last classes.</div>
                     <div class="bubble sender middle">The only solution I see is using JS, or a &lt;div&gt; to group elements together, but I don't want to ...</div>
-                    <div class="bubble sender last">I think it's more transparent and easier to group .bubble elements in the same parent.</div>
+                    <div class="bubble sender last">I think it's more transparent and easier to group .bubble elements in the same parent.</div> -->
 
                 </section>
             </div>
@@ -313,6 +322,69 @@ class Referral_Messenger
             }
         }
         echo json_encode(array('result' => $result));
+        die();
+    }
+
+    // AJAX INSERT MESSAGE ROW
+    public function mpp_get_unread_message()
+    {
+        $result = false;
+        $info = isset($_REQUEST['info']) ? $_REQUEST['info'] : '';
+        $messages = '';
+
+        if (!empty($info)) {
+            $info = stripslashes($info);
+            $info = json_decode($info);
+            $sender = $info->sender;
+            $recipient = $info->recipient;
+            $group = $info->group;
+
+            if (!empty($sender) && !empty($recipient)) {
+                $bd_message = new MPP_Database;
+                $messages = $bd_message->retrieve_unread_messages($sender, $recipient, $group);
+                if ($messages && count($messages) > 0) {
+                    foreach ($messages as $message) {
+                        $bd_message->update_status($message->id, 2);
+                    }
+                    $result = true;
+                }
+            }
+        }
+
+        echo json_encode(array('result' => $result, 'messages' => $messages));
+        die();
+    }
+
+    // RETRIVE MESSAGES
+    function mpp_retrive_messages()
+    {
+        $result = false;
+        $info = isset($_REQUEST['info']) ? $_REQUEST['info'] : '';
+        $messages = '';
+
+
+        if (!empty($info)) {
+            $sender = $info['sender'];
+            $recipient = $info['recipient'];
+            $group = $info['group'];
+
+            if (!empty($sender) && !empty($recipient)) {
+                $bd_message = new MPP_Database;
+                $messages = $bd_message->retrieve_messages($sender, $recipient, $group);
+                if ($messages && count($messages) > 0) {
+                    foreach ($messages as $message) {
+                        // Change status
+                        if ($message->status == 1 && $message->recipient_id == $sender) {
+                            $bd_message->update_status($message->id, 2);
+                        }
+                    }
+                    $result = true;
+                }
+            }
+        }
+
+
+        echo json_encode(array('result' => $result, 'messages' => $messages));
         die();
     }
 }

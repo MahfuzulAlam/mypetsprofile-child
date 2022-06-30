@@ -379,9 +379,11 @@ jQuery(document).ready(function ($) {
       url: mppChild.ajaxurl,
       data: { action: "mpp_insert_message_row", message: message, info: info },
       success: function (response) {
-        console.log(response);
         if (response.result == true) {
           $("#messenger_message").val("");
+          $("section.discussion").append(
+            "<div class='bubble sender'>" + message + "</div>"
+          );
         } else {
           $("#messenger_warning").text("Cannot sent!");
           console.log("cannot sent");
@@ -394,4 +396,127 @@ jQuery(document).ready(function ($) {
     });
     // AJAX CALL
   });
+
+  // LOAD CHAT IN EVERY 30 SEC
+  if ($("body").hasClass("single-at_biz_dir")) {
+    setInterval(function () {
+      if ($(".messenger-container").hasClass("active")) {
+        var $this = $(".messenger-container");
+        var info = $this.find("#msg_info").val();
+        console.log(info);
+
+        // AJAX CALL
+        $.ajax({
+          type: "post",
+          dataType: "json",
+          url: mppChild.ajaxurl,
+          data: {
+            action: "mpp_get_unread_message",
+            info: info,
+          },
+          success: function (response) {
+            console.log(response);
+            if (response.result == true) {
+              $("#messenger_message").val("");
+              $("section.discussion").append(
+                "<div class='bubble recipient'>" +
+                  response.messages[0].message +
+                  "</div>"
+              );
+            } else {
+              $("#messenger_warning").text("Cannot sent!");
+              console.log("cannot sent");
+            }
+          },
+          error: function (e, error) {
+            console.log(e);
+            console.log(error);
+          },
+        });
+        // AJAX CALL
+      }
+    }, 10000);
+  }
+  // LOAD CHAT IN EVERY 30 SEC
+
+  // MPP START CHATTING
+  $(".mpp-start-chatting").on("click", function () {
+    var $sender = $(this).data("sender");
+    var recipient = $(this).data("recipient");
+    var group = $(this).data("group");
+    if ($sender != "") {
+      var info = {
+        sender: $sender,
+        recipient: recipient,
+        group: group,
+      };
+      console.log(info);
+      $("#msg_info").val(JSON.stringify(info));
+      $(".messenger-container .discussion").html("");
+      $(".messenger-container").show();
+
+      // AJAX CALL
+      $.ajax({
+        type: "post",
+        dataType: "json",
+        url: mppChild.ajaxurl,
+        data: {
+          action: "mpp_retrive_messages",
+          info: info,
+        },
+        success: function (response) {
+          console.log(response);
+          if (response.result == true) {
+            $(".messenger-container .discussion").html(
+              mpp_prepare_messages(response.messages, $sender)
+            );
+            $(".messenger-container").addClass("active");
+          } else {
+            $("#messenger_warning").text("Cannot sent!");
+            console.log("cannot sent");
+          }
+        },
+        error: function (e, error) {
+          console.log(e);
+          console.log(error);
+        },
+      });
+      // AJAX CALL
+    }
+  });
+
+  // Prepare Messages
+  function mpp_prepare_messages(messages = [], current_user = 0) {
+    var html = "";
+    var prev_sender = 0;
+    var next_sender = 0;
+    if (messages.length > 0) {
+      $.each(messages, function (key, message) {
+        prev_sender = key > 0 ? messages[key - 1].sender_id : 0;
+        next_sender =
+          key < messages.length - 1 ? messages[key + 1].sender_id : 0;
+
+        var owner = message.sender_id == current_user ? "sender" : "recipient";
+        message_position = "";
+        if (prev_sender !== message.sender_id) message_position = "first";
+        if (prev_sender == message.sender_id) message_position = "middle";
+        if (next_sender !== message.sender_id) message_position = "last";
+        if (
+          next_sender !== message.sender_id &&
+          prev_sender !== message.sender_id
+        )
+          message_position = "single";
+        html +=
+          '<div class="bubble ' +
+          message_position +
+          " " +
+          owner +
+          '">' +
+          message.message +
+          "</div>";
+      });
+    }
+    return html;
+  }
+  // Prepare Messages
 });
