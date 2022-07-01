@@ -17,7 +17,7 @@ class Referral_Messenger
         // REFERRAL APPROVAL
         add_shortcode('refferal-approval', array($this, 'shortcode_refferal_approval'));
         // SHOW AVAILABLE SPOKEPERSON
-        add_shortcode('available-spokepersion', array($this, 'shortcode_available_spokepersion'));
+        add_shortcode('available-spokespersons', array($this, 'shortcode_available_spokespersons'));
 
         // AJAX CALLS
         // APPLY AS REFERRAL
@@ -123,7 +123,7 @@ class Referral_Messenger
     }
 
     // AVAIALLE SPOKEPERSION
-    public function shortcode_available_spokepersion()
+    public function shortcode_available_spokespersons()
     {
         $listing_id = get_the_ID();
         if (empty($listing_id)) return;
