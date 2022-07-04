@@ -22,6 +22,8 @@ class Referral_Messenger
         add_shortcode('spokespersons-application-form', array($this, 'shortcode_spokespersons_application_form'));
         // PROPERTY OWNER DISPLAY
         add_shortcode('property-owner-dashboard', array($this, 'shortcode_property_owner_dashboard'));
+        // DISPLAY CHAT MODULE
+        add_shortcode('display-chat-module', array($this, 'shortcode_display_chat_module'));
 
         // AJAX CALLS
         // APPLY AS REFERRAL
@@ -426,6 +428,155 @@ class Referral_Messenger
                 </div>
             <?php endforeach; ?>
         </div>
+    <?php
+        return ob_get_clean();
+    }
+
+    // DISPLAY CHAT MODULE
+    public function shortcode_display_chat_module()
+    {
+        ob_start();
+    ?>
+        <div class="mpp-chat-module">
+            <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+
+            <div class="container">
+                <div class="row clearfix">
+                    <div class="col-lg-12">
+                        <div class="card chat-app">
+                            <div id="plist" class="people-list">
+                                <ul class="list-unstyled chat-list mt-2 mb-0">
+                                    <li class="clearfix">
+                                        <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="avatar">
+                                        <div class="about">
+                                            <div class="name">Vincent Porter</div>
+                                            <div class="status"> <i class="fa fa-circle offline"></i> left 7 mins ago </div>
+                                        </div>
+                                    </li>
+                                    <li class="clearfix active">
+                                        <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
+                                        <div class="about">
+                                            <div class="name">Aiden Chavez</div>
+                                            <div class="status"> <i class="fa fa-circle online"></i> online </div>
+                                        </div>
+                                    </li>
+                                    <li class="clearfix">
+                                        <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar">
+                                        <div class="about">
+                                            <div class="name">Mike Thomas</div>
+                                            <div class="status"> <i class="fa fa-circle online"></i> online </div>
+                                        </div>
+                                    </li>
+                                    <li class="clearfix">
+                                        <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
+                                        <div class="about">
+                                            <div class="name">Christian Kelly</div>
+                                            <div class="status"> <i class="fa fa-circle offline"></i> left 10 hours ago </div>
+                                        </div>
+                                    </li>
+                                    <li class="clearfix">
+                                        <img src="https://bootdey.com/img/Content/avatar/avatar8.png" alt="avatar">
+                                        <div class="about">
+                                            <div class="name">Monica Ward</div>
+                                            <div class="status"> <i class="fa fa-circle online"></i> online </div>
+                                        </div>
+                                    </li>
+                                    <li class="clearfix">
+                                        <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar">
+                                        <div class="about">
+                                            <div class="name">Dean Henry</div>
+                                            <div class="status"> <i class="fa fa-circle offline"></i> offline since Oct 28 </div>
+                                        </div>
+                                    </li>
+                                    <li class="clearfix">
+                                        <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
+                                        <div class="about">
+                                            <div class="name">Christian Kelly</div>
+                                            <div class="status"> <i class="fa fa-circle offline"></i> left 10 hours ago </div>
+                                        </div>
+                                    </li>
+                                    <li class="clearfix">
+                                        <img src="https://bootdey.com/img/Content/avatar/avatar8.png" alt="avatar">
+                                        <div class="about">
+                                            <div class="name">Monica Ward</div>
+                                            <div class="status"> <i class="fa fa-circle online"></i> online </div>
+                                        </div>
+                                    </li>
+                                    <li class="clearfix">
+                                        <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar">
+                                        <div class="about">
+                                            <div class="name">Dean Henry</div>
+                                            <div class="status"> <i class="fa fa-circle offline"></i> offline since Oct 28 </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="chat">
+                                <div class="chat-header clearfix">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
+                                                <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
+                                            </a>
+                                            <div class="chat-about">
+                                                <h6 class="m-b-0">Aiden Chavez</h6>
+                                                <small>Last seen: 2 hours ago</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chat-history">
+                                    <section class="discussion">
+
+                                        <?php
+
+                                        $bd_message = new MPP_Database;
+                                        $messages = $bd_message->retrieve_messages(3, 1, 788);
+
+                                        //e_var_dump($messages);
+
+                                        $prev_sender = $next_sender = 0;
+                                        if ($messages) {
+                                            foreach ($messages as $key => $message) {
+                                                $prev_sender = $key > 0 ? $messages[$key - 1]->sender_id : 0;
+                                                $next_sender = $key < count($messages) - 1 ? $messages[$key + 1]->sender_id : 0;
+
+                                                $owner = $message->sender_id == bp_loggedin_user_id() ? 'sender' : 'recipient';
+                                                $message_position = '';
+                                                if ($prev_sender !== $message->sender_id) $message_position = 'first';
+                                                if ($prev_sender == $message->sender_id) $message_position = 'middle';
+                                                if ($next_sender !== $message->sender_id) $message_position = 'last';
+                                                if ($next_sender !== $message->sender_id && $prev_sender !== $message->sender_id) $message_position = 'single';
+                                        ?>
+                                                <div class="bubble <?php echo $owner; ?> <?php echo $message_position; ?>"><?php echo $message->message; ?></div>
+                                        <?php
+
+                                                // Change status
+                                                if ($message->status == 1 && $message->recipient_id == bp_loggedin_user_id()) {
+                                                    //$bd_message->update_status($message->id, 2); // 2 = read
+                                                }
+                                            }
+                                        }
+
+                                        ?>
+
+                                    </section>
+                                </div>
+                                <div class="chat-message clearfix">
+                                    <div class="input-group mb-0">
+                                        <form class="messenger-form" id="mpp_messenger_form">
+                                            <textarea id="messenger_message" name="messenger_message"></textarea>
+                                            <input type="hidden" name="msg_info" id="msg_info" value='<?php echo json_encode(array('sender' => bp_loggedin_user_id(), 'recipient' => 3, 'listing' => 788)); ?>' />
+                                            <button type="submit"><i class="fa fa-paper-plane"></i></button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 <?php
         return ob_get_clean();
     }
@@ -539,11 +690,11 @@ class Referral_Messenger
             $info = json_decode($info);
             $sender = $info->sender;
             $recipient = $info->recipient;
-            $group = $info->group;
+            $listing = $info->listing;
 
             if (!empty($sender) && !empty($recipient)) {
                 $bd_message = new MPP_Database;
-                $messages = $bd_message->retrieve_unread_messages($sender, $recipient, $group);
+                $messages = $bd_message->retrieve_unread_messages($sender, $recipient, $listing);
                 if ($messages && count($messages) > 0) {
                     foreach ($messages as $message) {
                         $bd_message->update_status($message->id, 2);

@@ -369,8 +369,12 @@ jQuery(document).ready(function ($) {
 
     var message = $("#messenger_message").val();
     var info = $("#msg_info").val();
+    var $class_name = Math.random() * 11;
 
     $("#messenger_message").val("");
+    $("section.discussion").append(
+      "<div class='bubble sender "+ $class_name +"'>" + message + "</div>"
+    );
 
     // AJAX CALL
     $.ajax({
@@ -380,18 +384,17 @@ jQuery(document).ready(function ($) {
       data: { action: "mpp_insert_message_row", message: message, info: info },
       success: function (response) {
         if (response.result == true) {
-          $("#messenger_message").val("");
-          $("section.discussion").append(
-            "<div class='bubble sender'>" + message + "</div>"
-          );
+          console.log('success');
         } else {
           $("#messenger_warning").text("Cannot sent!");
           console.log("cannot sent");
+          $class_name.hide();
         }
       },
       error: function (e, error) {
         console.log(e);
         console.log(error);
+        $class_name.hide();
       },
     });
     // AJAX CALL
