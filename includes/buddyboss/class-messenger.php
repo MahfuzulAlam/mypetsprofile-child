@@ -18,6 +18,10 @@ class Referral_Messenger
         add_shortcode('refferal-approval', array($this, 'shortcode_refferal_approval'));
         // SHOW AVAILABLE SPOKEPERSON
         add_shortcode('available-spokespersons', array($this, 'shortcode_available_spokespersons'));
+        // SPOKEPERSON APPLICATION FORM
+        add_shortcode('spokespersons-application-form', array($this, 'shortcode_spokespersons_application_form'));
+        // PROPERTY OWNER DISPLAY
+        add_shortcode('property-owner-dashboard', array($this, 'shortcode_property_owner_dashboard'));
 
         // AJAX CALLS
         // APPLY AS REFERRAL
@@ -32,6 +36,15 @@ class Referral_Messenger
         add_action('wp_ajax_mpp_get_unread_message', array($this, 'mpp_get_unread_message'));
         // DISPLAY ALL MESSAGES
         add_action('wp_ajax_mpp_retrive_messages', array($this, 'mpp_retrive_messages'));
+        // PROPERTY SEARCH
+        add_action('wp_ajax_mpp_property_search', array($this, 'mpp_property_search'));
+
+        // APPLY AS REFERRAL LISTING
+        //add_action('wp_ajax_mpp_apply_referral_listing', array($this, 'mpp_ajax_apply_referral_listing'));
+        // ACCEPT REFERRAL LISTING
+        add_action('wp_ajax_mpp_accept_referral_listing', array($this, 'mpp_ajax_accept_referral_listing'));
+        // REJECT REFERRAL LISTING
+        add_action('wp_ajax_mpp_reject_referral_listing', array($this, 'mpp_ajax_reject_referral_listing'));
     }
 
     // APPLY AS REFFERAL SHORTCODE
@@ -64,21 +77,25 @@ class Referral_Messenger
 
         ob_start();
 ?>
-        <h2><?php echo $group->name; ?></h2>
+        <div>
+            <h2><?php echo $group->name; ?></h2>
+            <?php
+            if (!$exist && !$applied) :
+            ?>
+                <a class="btn button" id="apply_as_referral" data-user="<?php echo $user_id; ?>" data-group="<?php echo $group_id; ?>">Apply For Referral Program</a>
+            <?php
+            elseif (!$applied) :
+            ?>
+                <a class="btn button" id="leave_from_referral" data-user="<?php echo $user_id; ?>" data-group="<?php echo $group_id; ?>">Leave From Referral Program</a>
+            <?php
+            else :
+            ?>
+                <p>You have already applied to join the referral program.</p>
+            <?php
+            endif;
+            ?>
+        </div>
         <?php
-        if (!$exist && !$applied) :
-        ?>
-            <a class="btn button" id="apply_as_referral" data-user="<?php echo $user_id; ?>" data-group="<?php echo $group_id; ?>">Apply For Referral Program</a>
-        <?php
-        elseif (!$applied) :
-        ?>
-            <a class="btn button" id="leave_from_referral" data-user="<?php echo $user_id; ?>" data-group="<?php echo $group_id; ?>">Leave From Referral Program</a>
-        <?php
-        else :
-        ?>
-            <p>You have already applied to join the referral program.</p>
-        <?php
-        endif;
         return ob_get_clean();
     }
 
@@ -224,6 +241,188 @@ class Referral_Messenger
                 </form>
             </div>
         </div>
+    <?php
+        return ob_get_clean();
+    }
+
+    // SPOKESPERSONS APPLICATION FORM
+    public function shortcode_spokespersons_application_form()
+    {
+
+        if (!is_user_logged_in()) return;
+
+        if (isset($_POST['spokeperson_submitted'])) :
+            $property_id = isset($_POST['property_id']) && !empty($_POST['property_id']) ? $_POST['property_id'] : '';
+            $unit_number = isset($_POST['unit_number']) && !empty($_POST['unit_number']) ? $_POST['unit_number'] : '';
+            $lease_start = isset($_POST['lease_start']) && !empty($_POST['lease_start']) ? $_POST['lease_start'] : '';
+            $lease_end = isset($_POST['lease_end']) && !empty($_POST['lease_end']) ? $_POST['lease_end'] : '';
+            $phone = isset($_POST['phone']) && !empty($_POST['phone']) ? $_POST['phone'] : '';
+
+            if ($property_id && !empty($property_id)) {
+                $args = array(
+                    'user_id'   => get_current_user_id(),
+                    'property_id' => $property_id,
+                    'unit_number' => $unit_number,
+                    'lease_start' => $lease_start,
+                    'lease_end' => $lease_end,
+                    'phone' => $phone
+                );
+
+                $inserted  = $this->mpp_apply_as_referral_listing($property_id, $args);
+                if ($inserted) echo 'Inserted!!!';
+            } else {
+                echo 'Please insert a Property first';
+            }
+        endif;
+
+        ob_start();
+    ?>
+        <div class="spokesperson-application-form-wrapper">
+            <form method="post" id="spokesperson_application_form">
+                <div class="select-property directorist-fieldset">
+                    <label>Property Name</label>
+                    <select class="spokespersons-field spokespersons-property-name" name="property_id" id="property_id" style="width:100%"></select>
+                </div>
+                <div class="directorist-fieldset">
+                    <label for="unit_number">Unit Number</label>
+                    <input type="text" class="spokespersons-field" name="unit_number" id="unit_number" />
+                </div>
+                <div class="directorist-fieldset">
+                    <label for="lease_start">Lease Starts</label>
+                    <input type="date" class="spokespersons-field" name="lease_start" id="lease_start" />
+                </div>
+                <div class="directorist-fieldset">
+                    <label for="lease_end">Lease Ends</label>
+                    <input type="date" class="spokespersons-field" name="lease_end" id="lease_end" />
+                </div>
+                <div class="directorist-fieldset">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+                <div class="directorist-fieldset submit-button">
+                    <input type="submit" value="Submit" class="button" name="spokeperson_submitted" />
+                </div>
+            </form>
+        </div>
+    <?php
+        return ob_get_clean();
+    }
+
+    // PROPERTY OWNER DASHBOARD
+    public function shortcode_property_owner_dashboard()
+    {
+        $listings = new WP_Query(array(
+            'post_type' => ATBDP_POST_TYPE,
+            'post_status' => 'publish', // if you don't want drafts to be returned
+            'posts_per_page' => -1, // how much to show at once
+            'tax_query' => array(
+                array(
+                    'taxonomy' => ATBDP_DIRECTORY_TYPE,
+                    'field'    => 'slug',
+                    'terms'    => 'pets-community',
+                ),
+            ),
+            'author' => get_current_user_id(),
+        ));
+        $properties = [];
+        if ($listings->have_posts()) :
+            while ($listings->have_posts()) : $listings->the_post();
+                // shorten the title a little
+                //$title = (mb_strlen($listings->post->post_title) > 50) ? mb_substr($listings->post->post_title, 0, 49) . '...' : $listings->post->post_title;
+                $spokespersons = get_post_meta($listings->post->ID, 'mpp_spokespersons', true);
+                $applied_speakers = get_post_meta($listings->post->ID, 'mpp_applied_speakers', true);
+                if (!empty($spokespersons) || !empty($applied_speakers)) {
+                    $properties[] = array(
+                        'id' => $listings->post->ID,
+                        'title' => $listings->post->post_title,
+                        'spokespersons' => $spokespersons,
+                        'applied_speakers' => $applied_speakers,
+                    ); // array( Post ID, Post Title )
+                }
+            endwhile;
+            wp_reset_postdata();
+        endif;
+        ob_start();
+        //e_var_dump($properties);
+    ?>
+        <div class="property-owner-dashboard">
+            <h3>Property List</h3>
+            <?php foreach ($properties as $property) : ?>
+                <div class="mpp-property">
+                    <h4><?php echo $property['title']; ?></h4>
+                    <div class="property-spokepersons">
+                        <h5>Spokespersons</h5>
+                        <div class="mpp-spokepersons">
+                            <?php
+                            if (!empty($property['spokespersons']) && count($property['spokespersons']) > 0) :
+                                foreach ($property['spokespersons'] as $speaker) :
+                            ?>
+                                    <table class="mpp-applied-speaker">
+                                        <?php
+                                        $user = get_user_by('id', $speaker['user_id']);
+                                        ?>
+                                        <tr>
+                                            <td>
+                                                <?php echo bp_core_fetch_avatar(
+                                                    array(
+                                                        'item_id' => $speaker['user_id'], // id of user for desired avatar
+                                                        'type'    => 'thumb',
+                                                        'html'   => true     // FALSE = return url, TRUE (default) = return img html
+                                                    )
+                                                ); ?>
+                                            </td>
+                                            <td><?php echo $user->data->display_name . " (" . $user->data->user_nicename . ")";
+                                                ?></td>
+                                            <td>
+                                                <a class="btn button mpp-referral-reports" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="reports">Reports</a>
+                                                <a class="btn button mpp-referral-remove" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="remove">Remove</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                            <?php
+                                endforeach;
+                            endif;
+                            ?>
+                        </div>
+                    </div>
+                    <div class="property-applied-speakers">
+                        <h5>Applied Speakers</h5>
+                        <div class="mpp-applied-speakers">
+                            <?php
+                            if (!empty($property['applied_speakers']) && count($property['applied_speakers']) > 0) :
+                                foreach ($property['applied_speakers'] as $speaker) :
+                            ?>
+                                    <table class="mpp-applied-speaker">
+                                        <?php
+                                        $user = get_user_by('id', $speaker['user_id']);
+                                        ?>
+                                        <tr>
+                                            <td>
+                                                <?php echo bp_core_fetch_avatar(
+                                                    array(
+                                                        'item_id' => $speaker['user_id'], // id of user for desired avatar
+                                                        'type'    => 'thumb',
+                                                        'html'   => true     // FALSE = return url, TRUE (default) = return img html
+                                                    )
+                                                ); ?>
+                                            </td>
+                                            <td><?php echo $user->data->display_name . " (" . $user->data->user_nicename . ")";
+                                                ?></td>
+                                            <td>
+                                                <a class="btn button mpp-referral-approval-listing" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="accept">Accept</a>
+                                                <a class="btn button mpp-referral-approval-listing" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="reject">Reject</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                            <?php
+                                endforeach;
+                            endif;
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
 <?php
         return ob_get_clean();
     }
@@ -362,7 +561,6 @@ class Referral_Messenger
         $info = isset($_REQUEST['info']) ? $_REQUEST['info'] : '';
         $messages = '';
 
-
         if (!empty($info)) {
             $sender = $info['sender'];
             $recipient = $info['recipient'];
@@ -382,9 +580,110 @@ class Referral_Messenger
                 }
             }
         }
-
-
         echo json_encode(array('result' => $result, 'messages' => $messages));
+        die();
+    }
+
+    // AJAX - MPP PROPERTY SEARCH
+    public function mpp_property_search()
+    {
+        // we will pass post IDs and titles to this array
+        $return = array();
+
+        // you can use WP_Query, query_posts() or get_posts() here - it doesn't matter
+        $search_results = new WP_Query(array(
+            'post_type' => ATBDP_POST_TYPE,
+            's' => $_GET['q'], // the search query
+            'post_status' => 'publish', // if you don't want drafts to be returned
+            'ignore_sticky_posts' => 1,
+            'posts_per_page' => 20, // how much to show at once
+            'tax_query' => array(
+                array(
+                    'taxonomy' => ATBDP_DIRECTORY_TYPE,
+                    'field'    => 'slug',
+                    'terms'    => 'pets-community',
+                ),
+            ),
+        ));
+        if ($search_results->have_posts()) :
+            while ($search_results->have_posts()) : $search_results->the_post();
+                // shorten the title a little
+                $title = (mb_strlen($search_results->post->post_title) > 50) ? mb_substr($search_results->post->post_title, 0, 49) . '...' : $search_results->post->post_title;
+                $return[] = array($search_results->post->ID, $title); // array( Post ID, Post Title )
+            endwhile;
+        endif;
+        echo json_encode($return);
+
+        die();
+    }
+
+    // MPP APPLY AS REFFERAL LISTING
+    public function mpp_apply_as_referral_listing($listing_id = 0, $args = array())
+    {
+        $result = false;
+        $user_id = get_current_user_id();
+        $applied_speakers = get_post_meta($listing_id, 'mpp_applied_speakers', true) ? get_post_meta($listing_id, 'mpp_applied_speakers', true) : array();
+        $mpp_spokespersons = get_post_meta($listing_id, 'mpp_spokespersons', true) ? get_post_meta($listing_id, 'mpp_spokespersons', true) : array();
+        if (empty($mpp_spokespersons) || !array_key_exists($user_id, $mpp_spokespersons)) {
+            if ($applied_speakers && !empty($applied_speakers)) {
+                if (!array_key_exists($user_id, $applied_speakers)) {
+                    $applied_speakers[$user_id] = $args;
+                    update_post_meta($listing_id, 'mpp_applied_speakers', $applied_speakers);
+                    $result = true;
+                }
+            } else {
+                $applied_speakers[$user_id] = $args;
+                update_post_meta($listing_id, 'mpp_applied_speakers', $applied_speakers);
+                $result = true;
+            }
+        }
+        return $result;
+    }
+
+    // AJAX ACCEPT REFERRAL LISTING
+    public function mpp_ajax_accept_referral_listing()
+    {
+        $result = false;
+        $args = array();
+        $user_id = isset($_REQUEST['user']) ? $_REQUEST['user'] : 0;
+        $listing_id = isset($_REQUEST['listing']) ? $_REQUEST['listing'] : 0;
+        $applied_speakers = get_post_meta($listing_id, 'mpp_applied_speakers', true) ? get_post_meta($listing_id, 'mpp_applied_speakers', true) : array();
+        if ($applied_speakers && !empty($applied_speakers)) {
+            if (array_key_exists($user_id, $applied_speakers)) {
+                $args = $applied_speakers[$user_id];
+                unset($applied_speakers[$user_id]);
+                update_post_meta($listing_id, 'mpp_applied_speakers', $applied_speakers);
+
+                // ADD to the existing list
+                $spokespersons = get_post_meta($listing_id, 'mpp_spokespersons', true);
+                $spokespersons = $spokespersons && !empty($spokespersons) ? $spokespersons : array();
+
+                if (empty($spokespersons) || !array_key_exists($user_id, $spokespersons)) {
+                    $spokespersons[$user_id] = $args;
+                    update_post_meta($listing_id, 'mpp_spokespersons', $spokespersons);
+                    $result = true;
+                }
+            }
+        }
+        echo json_encode(array('result' => $result, 'speakers' => $listing_id));
+        die();
+    }
+
+    // AJAX REJECT REFERRAL LISTING
+    public function mpp_ajax_reject_referral_listing()
+    {
+        $result = false;
+        $user_id = isset($_REQUEST['user']) ? $_REQUEST['user'] : 0;
+        $listing_id = isset($_REQUEST['listing']) ? $_REQUEST['listing'] : 0;
+        $applied_speakers = get_post_meta($listing_id, 'mpp_applied_speakers', true) ? get_post_meta($listing_id, 'mpp_applied_speakers', true) : array();
+        if ($applied_speakers && !empty($applied_speakers)) {
+            if (array_key_exists($user_id, $applied_speakers)) {
+                unset($applied_speakers[$user_id]);
+                update_post_meta($listing_id, 'mpp_applied_speakers', $applied_speakers);
+                $result = true;
+            }
+        }
+        echo json_encode(array('result' => $result, 'speakers' => $listing_id));
         die();
     }
 }

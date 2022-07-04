@@ -519,4 +519,138 @@ jQuery(document).ready(function ($) {
     return html;
   }
   // Prepare Messages
+
+    $(".spokespersons-property-name").select2({
+      ajax: {
+        url: mppChild.ajaxurl,
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          return {
+            action: 'mpp_property_search',
+            q: params.term,
+          };
+        },
+        processResults: function (data) {
+          var options = [];
+          if ( data ) {
+        
+            // data is the array of arrays, and each of them contains ID and the Label of the option
+            $.each( data, function( index, text ) { // do not forget that "index" is just auto incremented value
+              options.push( { id: text[0], text: text[1]  } );
+            });
+          
+          }
+          return {
+            results: options
+          };
+        },
+        cache: true
+      },
+      placeholder: 'Search for a property',
+      minimumInputLength: 3,
+      // templateResult: formatRepo,
+      // templateSelection: formatRepoSelection
+    });
+    
+    function formatRepo (repo) {
+      if (repo.loading) {
+        return repo.text;
+      }
+    
+      var $container = $(
+        "<div class='select2-result-repository clearfix'>" +
+          "<div class='select2-result-repository__avatar'><img src='" + repo.owner.avatar_url + "' /></div>" +
+          "<div class='select2-result-repository__meta'>" +
+            "<div class='select2-result-repository__title'></div>" +
+            "<div class='select2-result-repository__description'></div>" +
+            "<div class='select2-result-repository__statistics'>" +
+              "<div class='select2-result-repository__forks'><i class='fa fa-flash'></i> </div>" +
+              "<div class='select2-result-repository__stargazers'><i class='fa fa-star'></i> </div>" +
+              "<div class='select2-result-repository__watchers'><i class='fa fa-eye'></i> </div>" +
+            "</div>" +
+          "</div>" +
+        "</div>"
+      );
+    
+      $container.find(".select2-result-repository__title").text(repo.full_name);
+      $container.find(".select2-result-repository__description").text(repo.description);
+      $container.find(".select2-result-repository__forks").append(repo.forks_count + " Forks");
+      $container.find(".select2-result-repository__stargazers").append(repo.stargazers_count + " Stars");
+      $container.find(".select2-result-repository__watchers").append(repo.watchers_count + " Watchers");
+    
+      return $container;
+    }
+    
+    function formatRepoSelection (repo) {
+      return repo.full_name || repo.text;
+    }
+
+    // ACCEPT/REJECT SPEAKER - LISTING
+    // Referral Approval
+  $(".mpp-referral-approval-listing").on("click", function (e) {
+    e.preventDefault();
+    var row = $(this).parents("tr");
+    var listing = $(this).data("listing");
+    var user = $(this).data("user");
+    var type = $(this).data("type");
+
+    if (type == "accept") {
+      // APROVED
+      Swal.fire({
+        title: "Do you want to acccept this member?",
+        showCancelButton: true,
+        confirmButtonText: "Confirm",
+      }).then((result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+          // AJAX CALL
+          $.ajax({
+            type: "post",
+            dataType: "json",
+            url: mppChild.ajaxurl,
+            data: { action: "mpp_accept_referral_listing", listing: listing, user: user },
+            success: function (response) {
+              console.log(response);
+              if (response.result == true) {
+                Swal.fire("Confirmed!", "", "success");
+                row.hide();
+              } else {
+                Swal.fire("Sorry, could not confirm!", "", "error");
+              }
+            },
+          });
+          // AJAX CALL
+        }
+      });
+    } else {
+      // REJECTED
+      Swal.fire({
+        title: "Do you want to reject the member?",
+        showCancelButton: true,
+        confirmButtonText: "Confirm",
+      }).then((result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+          // AJAX CALL
+          $.ajax({
+            type: "post",
+            dataType: "json",
+            url: mppChild.ajaxurl,
+            data: { action: "mpp_reject_referral_listing", listing: listing, user: user },
+            success: function (response) {
+              console.log(response);
+              if (response.result == true) {
+                Swal.fire("Confirmed!", "", "success");
+                row.hide();
+              } else {
+                Swal.fire("Sorry, could not confirm!", "", "error");
+              }
+            },
+          });
+          // AJAX CALL
+        }
+      });
+    }
+  });
 });

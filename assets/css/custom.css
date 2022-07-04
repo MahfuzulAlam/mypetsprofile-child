@@ -963,3 +963,18 @@ form.messenger-form {
   border-bottom-right-radius: 0.1em;
   border-top-right-radius: 0.1em;
 }
+
+#spokesperson_application_form {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+#spokesperson_application_form .directorist-fieldset {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+#spokesperson_application_form .submit-button{
+  margin-top: 20px;
+}
