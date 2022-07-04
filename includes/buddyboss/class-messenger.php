@@ -45,6 +45,8 @@ class Referral_Messenger
         add_action('wp_ajax_mpp_accept_referral_listing', array($this, 'mpp_ajax_accept_referral_listing'));
         // REJECT REFERRAL LISTING
         add_action('wp_ajax_mpp_reject_referral_listing', array($this, 'mpp_ajax_reject_referral_listing'));
+        // REMOVE REFERRAL LISTING
+        add_action('wp_ajax_mpp_remove_referral_listing', array($this, 'mpp_ajax_remove_referral_listing'));
     }
 
     // APPLY AS REFFERAL SHORTCODE
@@ -144,16 +146,17 @@ class Referral_Messenger
     {
         $listing_id = get_the_ID();
         if (empty($listing_id)) return;
-        $group_id = get_post_meta($listing_id, "_bb_group_id", true);
-        if (!$group_id || empty($group_id)) return;
-        $spokeperson = groups_get_groupmeta($group_id, 'mpp_spokeperson', true);
-        if (!$spokeperson || empty($spokeperson)) return;
+        // $group_id = get_post_meta($listing_id, "_bb_group_id", true);
+        // if (!$group_id || empty($group_id)) return;
+        $spokespersons = get_post_meta($listing_id, 'mpp_spokespersons', true);
+        if (!$spokespersons || empty($spokespersons)) return;
 
         ob_start();
         ?>
         <table class="mpp-applied-speaker">
             <?php
-            foreach ($spokeperson as $user_id) :
+            foreach ($spokespersons as $spokeperson) :
+                $user_id = $spokeperson['user_id'];
                 $user = get_user_by('id', $user_id);
             ?>
                 <tr>
@@ -166,11 +169,11 @@ class Referral_Messenger
                             )
                         ); ?>
                     </td>
-                    <td><?php echo $user->data->display_name . " (" . $user->data->user_nicename . ")";
-                        ?></td>
+                    <td class="username"><?php echo $user->data->display_name . " (" . $user->data->user_nicename . ")";
+                                            ?></td>
                     <td>
-                        <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="<?php echo $user_id; ?>" data-group="<?php echo $group_id; ?>" data-type="accept">Start Chatting</a>
-                        <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="5" data-group="<?php echo $group_id; ?>" data-type="accept">Start Chatting</a>
+                        <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="<?php echo $user_id; ?>" data-listing="<?php echo $listing_id; ?>" data-type="accept">Start Chatting</a>
+                        <!-- <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="5" data-listing="<?php echo $listing_id; ?>" data-type="accept">Start Chatting</a> -->
                     </td>
                 </tr>
             <?php
@@ -513,11 +516,11 @@ class Referral_Messenger
             $info = json_decode($info);
             $sender = $info->sender;
             $recipient = $info->recipient;
-            $group = $info->group;
+            $listing = $info->listing;
             //$result = $sender;
             if (!empty($message)) {
                 $bd_message = new MPP_Database;
-                $result = $bd_message->insert_message(array('sender_id' => $sender, 'recipient_id' => $recipient, 'group_id' => $group, 'message' => $message));
+                $result = $bd_message->insert_message(array('sender_id' => $sender, 'recipient_id' => $recipient, 'listing_id' => $listing, 'message' => $message));
             }
         }
         echo json_encode(array('result' => $result));
@@ -564,11 +567,11 @@ class Referral_Messenger
         if (!empty($info)) {
             $sender = $info['sender'];
             $recipient = $info['recipient'];
-            $group = $info['group'];
+            $listing = $info['listing'];
 
             if (!empty($sender) && !empty($recipient)) {
                 $bd_message = new MPP_Database;
-                $messages = $bd_message->retrieve_messages($sender, $recipient, $group);
+                $messages = $bd_message->retrieve_messages($sender, $recipient, $listing);
                 if ($messages && count($messages) > 0) {
                     foreach ($messages as $message) {
                         // Change status
@@ -680,6 +683,24 @@ class Referral_Messenger
             if (array_key_exists($user_id, $applied_speakers)) {
                 unset($applied_speakers[$user_id]);
                 update_post_meta($listing_id, 'mpp_applied_speakers', $applied_speakers);
+                $result = true;
+            }
+        }
+        echo json_encode(array('result' => $result, 'speakers' => $listing_id));
+        die();
+    }
+
+    // AJAX REMOVE REFERRAL LISTING
+    public function mpp_ajax_remove_referral_listing()
+    {
+        $result = false;
+        $user_id = isset($_REQUEST['user']) ? $_REQUEST['user'] : 0;
+        $listing_id = isset($_REQUEST['listing']) ? $_REQUEST['listing'] : 0;
+        $spokespersons = get_post_meta($listing_id, 'mpp_spokespersons', true) ? get_post_meta($listing_id, 'mpp_spokespersons', true) : array();
+        if ($spokespersons && !empty($spokespersons)) {
+            if (array_key_exists($user_id, $spokespersons)) {
+                unset($spokespersons[$user_id]);
+                update_post_meta($listing_id, 'mpp_spokespersons', $spokespersons);
                 $result = true;
             }
         }

@@ -441,19 +441,23 @@ jQuery(document).ready(function ($) {
 
   // MPP START CHATTING
   $(".mpp-start-chatting").on("click", function () {
+    var tr = $(this).parents('tr');
     var $sender = $(this).data("sender");
     var recipient = $(this).data("recipient");
-    var group = $(this).data("group");
+    var listing = $(this).data("listing");
+    var username = tr.find('td.username').text();
     if ($sender != "") {
       var info = {
         sender: $sender,
         recipient: recipient,
-        group: group,
+        listing: listing,
       };
-      console.log(info);
+      //console.log('retrive start');
       $("#msg_info").val(JSON.stringify(info));
       $(".messenger-container .discussion").html("");
       $(".messenger-container").show();
+      $(".messenger-header h4").text("Chat with "+ username);
+      //console.log(info);
 
       // AJAX CALL
       $.ajax({
@@ -465,15 +469,15 @@ jQuery(document).ready(function ($) {
           info: info,
         },
         success: function (response) {
-          console.log(response);
+          //console.log(response);
           if (response.result == true) {
             $(".messenger-container .discussion").html(
               mpp_prepare_messages(response.messages, $sender)
             );
             $(".messenger-container").addClass("active");
           } else {
-            $("#messenger_warning").text("Cannot sent!");
-            console.log("cannot sent");
+            $("#messenger_warning").text("Cannot retrive!");
+            console.log("cannot retrive");
           }
         },
         error: function (e, error) {
@@ -586,8 +590,8 @@ jQuery(document).ready(function ($) {
       return repo.full_name || repo.text;
     }
 
-    // ACCEPT/REJECT SPEAKER - LISTING
-    // Referral Approval
+  // ACCEPT/REJECT SPEAKER - LISTING
+  // Referral Approval
   $(".mpp-referral-approval-listing").on("click", function (e) {
     e.preventDefault();
     var row = $(this).parents("tr");
@@ -652,5 +656,43 @@ jQuery(document).ready(function ($) {
         }
       });
     }
+  });
+
+
+  // Referral Remove
+  $(".mpp-referral-remove").on("click", function (e) {
+    e.preventDefault();
+    var row = $(this).parents("tr");
+    var listing = $(this).data("listing");
+    var user = $(this).data("user");
+
+      // REMOVE
+      Swal.fire({
+        title: "Do you want to remove this member?",
+        showCancelButton: true,
+        confirmButtonText: "Confirm",
+      }).then((result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+          // AJAX CALL
+          $.ajax({
+            type: "post",
+            dataType: "json",
+            url: mppChild.ajaxurl,
+            data: { action: "mpp_remove_referral_listing", listing: listing, user: user },
+            success: function (response) {
+              console.log(response);
+              if (response.result == true) {
+                Swal.fire("Confirmed!", "", "success");
+                row.hide();
+              } else {
+                Swal.fire("Sorry, could not confirm!", "", "error");
+              }
+            },
+          });
+          // AJAX CALL
+        }
+      });
+    
   });
 });
