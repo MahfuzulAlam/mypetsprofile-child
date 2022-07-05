@@ -401,11 +401,11 @@ jQuery(document).ready(function ($) {
   });
 
   // LOAD CHAT IN EVERY 30 SEC
-  if ($("body").hasClass("single-at_biz_dir")) {
+  if ($("body").hasClass("single-at_biz_dir") || $("body").hasClass("page-id-797")) {
     setInterval(function () {
       if ($(".messenger-container").hasClass("active")) {
         var $this = $(".messenger-container");
-        var info = $this.find("#msg_info").val();
+        var info = $("#msg_info").val();
         console.log(info);
 
         // AJAX CALL

@@ -1014,6 +1014,12 @@ body{
   transition: .5s;
   overflow-y: scroll;
   height: 100%;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.people-list::-webkit-scrollbar {
+  display: none;
 }
 
 .people-list > ul {
@@ -1056,7 +1062,8 @@ body{
 
 .people-list .status {
   color: #999;
-  font-size: 13px
+  font-size: 13px;
+  line-height: 16px;
 }
 
 .chat .chat-header {
@@ -1081,7 +1088,19 @@ body{
 
 .chat .chat-history {
   padding: 20px;
-  border-bottom: 2px solid #fff
+  border-bottom: 2px solid #fff;
+  height: 450px;
+  overflow-y: scroll;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.messenger-container.chat-history{
+  display: block;
+}
+
+.chat .chat-history::-webkit-scrollbar {
+  display: none;
 }
 
 .chat .chat-history ul {
@@ -1206,6 +1225,14 @@ body{
 
 .chat .chat-history .discussion{
   padding: 0;
+}
+
+.people-list li.people-block{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px 0;
 }
 
 @media only screen and (max-width: 767px) {

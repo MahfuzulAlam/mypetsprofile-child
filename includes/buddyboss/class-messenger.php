@@ -435,6 +435,20 @@ class Referral_Messenger
     // DISPLAY CHAT MODULE
     public function shortcode_display_chat_module()
     {
+        $db = new MPP_Database;
+        $chat_client_id = get_current_user_id();
+        $isOwner = false;
+        $owner_id = 0;
+        $people_list = $db->retrieve_people_list($chat_client_id);
+        $first_info = array();
+
+        if (isset($_GET['chatclient']) && !empty($_GET['chatclient'])) {
+            $chat_client_id = $_GET['chatclient'];
+            $isOwner = true;
+            $owner_id = get_current_user_id();
+            // More Validation
+        }
+
         ob_start();
     ?>
         <div class="mpp-chat-module">
@@ -446,6 +460,43 @@ class Referral_Messenger
                         <div class="card chat-app">
                             <div id="plist" class="people-list">
                                 <ul class="list-unstyled chat-list mt-2 mb-0">
+                                    <?php
+                                    if ($people_list && count($people_list) > 0) {
+                                        foreach ($people_list as $key => $people) {
+
+                                            $listing_author_id = get_post_field('post_author', $people->listing_id);
+                                            if ($isOwner && $owner_id !=  $listing_author_id) continue;
+                                            $people_id = $people->sender_id != $chat_client_id ? $people->sender_id : $people->recipient_id;
+                                            $user = get_user_by('id', $people_id);
+                                            $avatar_url =  bp_core_fetch_avatar(
+                                                array(
+                                                    'item_id' => $people_id, // id of user for desired avatar
+                                                    'type'    => 'thumb',
+                                                    'html'   => false     // FALSE = return url, TRUE (default) = return img html
+                                                )
+                                            );
+                                            $info = array(
+                                                'name' => $user->data->display_name,
+                                                'avatar' => $avatar_url,
+                                                'sender' => $chat_client_id,
+                                                'recipient' => $people_id,
+                                                'listing' => $people->listing_id,
+                                            );
+
+                                            if (empty($first_info)) $first_info = $info;
+                                    ?>
+                                            <li class="clearfix people-block <?php echo $key == 0 ? 'active' : ''; ?>" data-info='<?php echo json_encode($info); ?>'>
+                                                <img src="<?php echo $avatar_url; ?>" alt="avatar">
+                                                <div class="about">
+                                                    <div class="name"><?php echo $user->data->display_name . " (" . $user->data->user_nicename . ")"; ?></div>
+                                                    <div class="status"><?php echo get_the_title($people->listing_id); ?></div>
+                                                    <!-- <div class="status"> <i class="fa fa-circle offline"></i> left 7 mins ago </div> -->
+                                                </div>
+                                            </li>
+                                    <?php
+                                        }
+                                    }
+                                    ?>
                                     <li class="clearfix">
                                         <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="avatar">
                                         <div class="about">
@@ -453,125 +504,82 @@ class Referral_Messenger
                                             <div class="status"> <i class="fa fa-circle offline"></i> left 7 mins ago </div>
                                         </div>
                                     </li>
-                                    <li class="clearfix active">
+                                    <li class="clearfix">
                                         <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
                                         <div class="about">
                                             <div class="name">Aiden Chavez</div>
                                             <div class="status"> <i class="fa fa-circle online"></i> online </div>
                                         </div>
                                     </li>
-                                    <li class="clearfix">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar">
-                                        <div class="about">
-                                            <div class="name">Mike Thomas</div>
-                                            <div class="status"> <i class="fa fa-circle online"></i> online </div>
-                                        </div>
-                                    </li>
-                                    <li class="clearfix">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
-                                        <div class="about">
-                                            <div class="name">Christian Kelly</div>
-                                            <div class="status"> <i class="fa fa-circle offline"></i> left 10 hours ago </div>
-                                        </div>
-                                    </li>
-                                    <li class="clearfix">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar8.png" alt="avatar">
-                                        <div class="about">
-                                            <div class="name">Monica Ward</div>
-                                            <div class="status"> <i class="fa fa-circle online"></i> online </div>
-                                        </div>
-                                    </li>
-                                    <li class="clearfix">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar">
-                                        <div class="about">
-                                            <div class="name">Dean Henry</div>
-                                            <div class="status"> <i class="fa fa-circle offline"></i> offline since Oct 28 </div>
-                                        </div>
-                                    </li>
-                                    <li class="clearfix">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
-                                        <div class="about">
-                                            <div class="name">Christian Kelly</div>
-                                            <div class="status"> <i class="fa fa-circle offline"></i> left 10 hours ago </div>
-                                        </div>
-                                    </li>
-                                    <li class="clearfix">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar8.png" alt="avatar">
-                                        <div class="about">
-                                            <div class="name">Monica Ward</div>
-                                            <div class="status"> <i class="fa fa-circle online"></i> online </div>
-                                        </div>
-                                    </li>
-                                    <li class="clearfix">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar">
-                                        <div class="about">
-                                            <div class="name">Dean Henry</div>
-                                            <div class="status"> <i class="fa fa-circle offline"></i> offline since Oct 28 </div>
-                                        </div>
-                                    </li>
                                 </ul>
                             </div>
-                            <div class="chat">
-                                <div class="chat-header clearfix">
-                                    <div class="row">
-                                        <div class="col-lg-6">
-                                            <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
-                                                <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
-                                            </a>
-                                            <div class="chat-about">
-                                                <h6 class="m-b-0">Aiden Chavez</h6>
-                                                <small>Last seen: 2 hours ago</small>
+                            <?php if (!empty($first_info)) : ?>
+                                <div class="chat">
+                                    <div class="chat-header clearfix">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
+                                                    <img src="<?php echo $first_info['avatar']; ?>" alt="avatar">
+                                                </a>
+                                                <div class="chat-about">
+                                                    <h6 class="m-b-0"><?php echo $first_info['name']; ?></h6>
+                                                    <small><?php echo get_the_title($first_info['listing']); ?></small>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="chat-history">
-                                    <section class="discussion">
+                                    <div class="chat-history messenger-container active">
+                                        <section class="discussion">
 
-                                        <?php
+                                            <?php
+                                            //e_var_dump($first_info);
 
-                                        $bd_message = new MPP_Database;
-                                        $messages = $bd_message->retrieve_messages(3, 1, 788);
+                                            $bd_message = new MPP_Database;
+                                            $messages = $bd_message->retrieve_messages($first_info['sender'], $first_info['recipient'], $first_info['listing']);
 
-                                        //e_var_dump($messages);
+                                            //e_var_dump($messages);
 
-                                        $prev_sender = $next_sender = 0;
-                                        if ($messages) {
-                                            foreach ($messages as $key => $message) {
-                                                $prev_sender = $key > 0 ? $messages[$key - 1]->sender_id : 0;
-                                                $next_sender = $key < count($messages) - 1 ? $messages[$key + 1]->sender_id : 0;
+                                            $prev_sender = $next_sender = 0;
+                                            if ($messages) {
+                                                foreach ($messages as $key => $message) {
+                                                    $prev_sender = $key > 0 ? $messages[$key - 1]->sender_id : 0;
+                                                    $next_sender = $key < count($messages) - 1 ? $messages[$key + 1]->sender_id : 0;
 
-                                                $owner = $message->sender_id == bp_loggedin_user_id() ? 'sender' : 'recipient';
-                                                $message_position = '';
-                                                if ($prev_sender !== $message->sender_id) $message_position = 'first';
-                                                if ($prev_sender == $message->sender_id) $message_position = 'middle';
-                                                if ($next_sender !== $message->sender_id) $message_position = 'last';
-                                                if ($next_sender !== $message->sender_id && $prev_sender !== $message->sender_id) $message_position = 'single';
-                                        ?>
-                                                <div class="bubble <?php echo $owner; ?> <?php echo $message_position; ?>"><?php echo $message->message; ?></div>
-                                        <?php
+                                                    $owner = $message->sender_id == $chat_client_id ? 'sender' : 'recipient';
+                                                    $message_position = '';
+                                                    if ($prev_sender !== $message->sender_id) $message_position = 'first';
+                                                    if ($prev_sender == $message->sender_id) $message_position = 'middle';
+                                                    if ($next_sender !== $message->sender_id) $message_position = 'last';
+                                                    if ($next_sender !== $message->sender_id && $prev_sender !== $message->sender_id) $message_position = 'single';
+                                            ?>
+                                                    <div class="bubble <?php echo $owner; ?> <?php echo $message_position; ?>"><?php echo $message->message; ?></div>
+                                            <?php
 
-                                                // Change status
-                                                if ($message->status == 1 && $message->recipient_id == bp_loggedin_user_id()) {
-                                                    //$bd_message->update_status($message->id, 2); // 2 = read
+                                                    // Change status
+                                                    if ($message->status == 1 && $message->recipient_id == $chat_client_id) {
+                                                        $bd_message->update_status($message->id, 2); // 2 = read
+                                                    }
                                                 }
                                             }
-                                        }
 
-                                        ?>
 
-                                    </section>
-                                </div>
-                                <div class="chat-message clearfix">
-                                    <div class="input-group mb-0">
-                                        <form class="messenger-form" id="mpp_messenger_form">
-                                            <textarea id="messenger_message" name="messenger_message"></textarea>
-                                            <input type="hidden" name="msg_info" id="msg_info" value='<?php echo json_encode(array('sender' => bp_loggedin_user_id(), 'recipient' => 3, 'listing' => 788)); ?>' />
-                                            <button type="submit"><i class="fa fa-paper-plane"></i></button>
-                                        </form>
+                                            ?>
+
+                                        </section>
                                     </div>
+                                    <?php if ($isOwner) : ?>
+                                        <div class="chat-message clearfix">
+                                            <div class="input-group mb-0">
+                                                <form class="messenger-form" id="mpp_messenger_form">
+                                                    <textarea id="messenger_message" name="messenger_message"></textarea>
+                                                    <input type="hidden" name="msg_info" id="msg_info" value='<?php echo json_encode(array('sender' => $first_info['sender'], 'recipient' => $first_info['recipient'], 'listing' => $first_info['listing'])); ?>' />
+                                                    <button type="submit"><i class="fa fa-paper-plane"></i></button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
-                            </div>
+                            <? endif; ?>
                         </div>
                     </div>
                 </div>

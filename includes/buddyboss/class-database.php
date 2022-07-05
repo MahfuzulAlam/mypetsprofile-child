@@ -129,6 +129,25 @@ class MPP_Database
 
         return $results;
     }
+
+    // GET CHAT PEOPLE LIST
+    public function retrieve_people_list($sender_id = 0)
+    {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . "mpp_messenger";
+
+        $results = $wpdb->get_results(
+            $wpdb->prepare("SELECT * FROM {$table_name} 
+            WHERE 
+            ( sender_id=%d
+            OR recipient_id=%d )
+            GROUP BY listing_id
+            ORDER BY date_sent ASC", $sender_id, $sender_id)
+        );
+
+        return $results;
+    }
 }
 
 new MPP_Database;
