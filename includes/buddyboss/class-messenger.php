@@ -565,7 +565,7 @@ class Referral_Messenger
                                         </div>
                                     <?php endif; ?>
                                 </div>
-                            <? endif; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
