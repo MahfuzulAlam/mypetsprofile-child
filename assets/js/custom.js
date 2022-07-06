@@ -492,6 +492,67 @@ jQuery(document).ready(function ($) {
     }
   });
 
+
+  // MPP START CHATTING ADMIN
+  $(".people-block").on("click", function () {
+
+    // CHANGE STATUS
+    $('.people-block').removeClass('active');
+    $(this).addClass('active');
+    // CHANGE STATUS
+
+    var $this = $(this);
+
+    var blockInfo = $this.attr('data-info');
+    blockInfo = JSON.parse(blockInfo);
+
+    var info = {
+      sender: blockInfo.sender,
+      recipient: blockInfo.recipient,
+      listing: blockInfo.listing,
+    };
+
+    console.log(info);
+
+
+    if (info != "") {
+      $("#msg_info").val(JSON.stringify(info));
+      $(".messenger-container .discussion").html("");
+      $(".messenger-container").show();
+      $(".chat .chat-header img").attr("src", blockInfo.avatar);
+      $(".chat .chat-header .chat-about h6").text(blockInfo.name);
+      $(".chat .chat-header .chat-about small").text($this.find('div.status').text());
+
+      // AJAX CALL
+      $.ajax({
+        type: "post",
+        dataType: "json",
+        url: mppChild.ajaxurl,
+        data: {
+          action: "mpp_retrive_messages",
+          info: info,
+        },
+        success: function (response) {
+          //console.log(response);
+          if (response.result == true) {
+            $(".messenger-container .discussion").html(
+              mpp_prepare_messages(response.messages, blockInfo.sender)
+            );
+            $(".messenger-container").addClass("active");
+          } else {
+            $("#messenger_warning").text("Cannot retrive!");
+            console.log("cannot retrive");
+          }
+        },
+        error: function (e, error) {
+          console.log(e);
+          console.log(error);
+        },
+      });
+      // AJAX CALL
+    }
+  });
+
   // Prepare Messages
   function mpp_prepare_messages(messages = [], current_user = 0) {
     var html = "";
