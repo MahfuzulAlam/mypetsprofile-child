@@ -1242,7 +1242,6 @@ body{
       overflow-x: auto;
       background: #fff;
       left: -400px;
-      display: none
   }
   .chat-app .people-list.open {
       left: 0
@@ -1279,4 +1278,8 @@ body{
       height: calc(100vh - 350px);
       overflow-x: auto
   }
+}
+
+.mpp-start-chatting{
+  color: #fff !important;
 }

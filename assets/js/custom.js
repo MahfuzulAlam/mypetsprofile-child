@@ -421,11 +421,11 @@ jQuery(document).ready(function ($) {
             console.log(response);
             if (response.result == true) {
               $("#messenger_message").val("");
-              $("section.discussion").append(
-                "<div class='bubble recipient'>" +
-                  response.messages[0].message +
-                  "</div>"
-              );
+              $.each( response.messages, function( key, message ) {
+                $("section.discussion").append(
+                  "<div class='bubble recipient'>" + message.message +"</div>"
+                );
+              });
             } else {
               $("#messenger_warning").text("Cannot sent!");
               console.log("cannot sent");

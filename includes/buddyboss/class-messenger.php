@@ -379,7 +379,7 @@ class Referral_Messenger
                                             <td><?php echo $user->data->display_name . " (" . $user->data->user_nicename . ")";
                                                 ?></td>
                                             <td>
-                                                <a class="btn button mpp-referral-reports" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="reports">Reports</a>
+                                                <a class="btn button mpp-referral-reports" href="<?php echo home_url('/chat-module/') . '?chatclient=' . $speaker['user_id']; ?>" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="reports">Reports</a>
                                                 <a class="btn button mpp-referral-remove" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="remove">Remove</a>
                                             </td>
                                         </tr>
@@ -497,20 +497,6 @@ class Referral_Messenger
                                         }
                                     }
                                     ?>
-                                    <li class="clearfix">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="avatar">
-                                        <div class="about">
-                                            <div class="name">Vincent Porter</div>
-                                            <div class="status"> <i class="fa fa-circle offline"></i> left 7 mins ago </div>
-                                        </div>
-                                    </li>
-                                    <li class="clearfix">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
-                                        <div class="about">
-                                            <div class="name">Aiden Chavez</div>
-                                            <div class="status"> <i class="fa fa-circle online"></i> online </div>
-                                        </div>
-                                    </li>
                                 </ul>
                             </div>
                             <?php if (!empty($first_info)) : ?>
@@ -567,7 +553,7 @@ class Referral_Messenger
 
                                         </section>
                                     </div>
-                                    <?php if ($isOwner) : ?>
+                                    <?php if (!$isOwner) : ?>
                                         <div class="chat-message clearfix">
                                             <div class="input-group mb-0">
                                                 <form class="messenger-form" id="mpp_messenger_form">
