@@ -452,8 +452,6 @@ class Referral_Messenger
         ob_start();
     ?>
         <div class="mpp-chat-module">
-            <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
-
             <div class="container">
                 <div class="row clearfix">
                     <div class="col-lg-12">

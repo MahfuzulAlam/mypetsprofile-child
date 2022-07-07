@@ -1815,6 +1815,7 @@ add_filter('atbdp_all_listings_meta_queries', 'mpp_directorist_remove_directory_
 
 function mpp_directorist_remove_directory_type($args)
 {
+    /*
     if (isset($args['directory_type']) && !in_array(1418, $args['directory_type'])) {
         $args['directory_type'] = array(
             'key' => '_directory_type',
@@ -1822,6 +1823,7 @@ function mpp_directorist_remove_directory_type($args)
             'compare' => 'IN'
         );
     }
+    */
     /*
     if (isset($args['directory_type'])) {
         $args['directory_type'] = array(

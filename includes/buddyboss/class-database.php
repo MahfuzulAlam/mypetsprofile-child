@@ -15,7 +15,7 @@ class MPP_Database
         $this->date_sent = bp_core_current_time();
         $this->sender_id = bp_loggedin_user_id();
         // Hooks
-        add_action("after_switch_theme", array($this, "mpp_create_messenger_table"));
+        //add_action("after_switch_theme", array($this, "mpp_create_messenger_table"));
     }
 
     public function mpp_create_messenger_table()

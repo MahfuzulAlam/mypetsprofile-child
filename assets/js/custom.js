@@ -401,7 +401,7 @@ jQuery(document).ready(function ($) {
   });
 
   // LOAD CHAT IN EVERY 30 SEC
-  if ($("body").hasClass("single-at_biz_dir") || $("body").hasClass("page-id-797")) {
+  if ($("body").hasClass("single-at_biz_dir") || $("body").hasClass("page-id-797") || $("body").hasClass("page-id-21348")) {
     setInterval(function () {
       if ($(".messenger-container").hasClass("active")) {
         var $this = $(".messenger-container");
@@ -438,7 +438,7 @@ jQuery(document).ready(function ($) {
         });
         // AJAX CALL
       }
-    }, 10000);
+    }, 60000);
   }
   // LOAD CHAT IN EVERY 30 SEC
 
