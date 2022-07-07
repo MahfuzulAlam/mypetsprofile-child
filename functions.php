@@ -30,7 +30,7 @@ function buddyboss_theme_child_languages()
 	}
 
 	if (!defined('MPP_VERSION')) {
-		define('MPP_VERSION', '1.1.2');
+		define('MPP_VERSION', '1.1.3');
 	}
 
 	if (!defined('MPP_MAP_VERSION')) {
