@@ -458,6 +458,10 @@ class Referral_Messenger
         }
 
         ob_start();
+
+        if (!$people_list || count($people_list) < 1) {
+            echo '<p>No refferal chat history found!</p>';
+        }
     ?>
         <div class="mpp-chat-module <?php if ($isOwner) echo "owner-module"; ?>" id="mpp_chat_module">
             <a href="#" class="btn button" id="show-hide-people"><i class="fa fa-users" aria-hidden="true"></i></a>

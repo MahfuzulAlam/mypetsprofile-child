@@ -1241,6 +1241,7 @@ form.messenger-form {
 
 #show-hide-people{
   margin: 15px 0;
+  display: none;
 }
 
 .mpp-applied-speaker img{
