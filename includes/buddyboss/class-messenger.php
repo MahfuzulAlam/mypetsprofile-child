@@ -24,6 +24,8 @@ class Referral_Messenger
         add_shortcode('property-owner-dashboard', array($this, 'shortcode_property_owner_dashboard'));
         // DISPLAY CHAT MODULE
         add_shortcode('display-chat-module', array($this, 'shortcode_display_chat_module'));
+        // BECOME A SPOKESPERSON
+        add_shortcode('become-a-spokesperson', array($this, 'shortcode_become_a_spokesperson'));
 
         // AJAX CALLS
         // APPLY AS REFERRAL
@@ -238,14 +240,24 @@ class Referral_Messenger
             }
         endif;
 
+        $listing_id = isset($_REQUEST['listing']) && !empty($_REQUEST['listing']) ? $_REQUEST['listing'] : 0;
+
         ob_start();
         ?>
         <div class="spokesperson-application-form-wrapper">
             <form method="post" id="spokesperson_application_form">
-                <div class="select-property directorist-fieldset">
-                    <label>Property Name</label>
-                    <select class="spokespersons-field spokespersons-property-name" name="property_id" id="property_id" style="width:100%"></select>
-                </div>
+                <?php if ($listing_id) { ?>
+                    <div class="directorist-fieldset">
+                        <label>Property Name</label>
+                        <h5><?php echo get_the_title($listing_id); ?></h5>
+                        <input type="hidden" name="property_id" value="<?php echo $listing_id; ?>" />
+                    </div>
+                <?php } else { ?>
+                    <div class="select-property directorist-fieldset">
+                        <label>Property Name</label>
+                        <select class="spokespersons-field spokespersons-property-name" name="property_id" id="property_id" style="width:100%"></select>
+                    </div>
+                <?php } ?>
                 <div class="directorist-fieldset">
                     <label for="unit_number">Unit Number</label>
                     <input type="text" class="spokespersons-field" name="unit_number" id="unit_number" />
@@ -278,13 +290,13 @@ class Referral_Messenger
             'post_type' => ATBDP_POST_TYPE,
             'post_status' => 'publish', // if you don't want drafts to be returned
             'posts_per_page' => -1, // how much to show at once
-            'tax_query' => array(
-                array(
-                    'taxonomy' => ATBDP_DIRECTORY_TYPE,
-                    'field'    => 'slug',
-                    'terms'    => 'pets-community',
-                ),
-            ),
+            // 'tax_query' => array(
+            //     array(
+            //         'taxonomy' => ATBDP_DIRECTORY_TYPE,
+            //         'field'    => 'slug',
+            //         'terms'    => 'pets-community',
+            //     ),
+            // ),
             'author' => get_current_user_id(),
         ));
         $properties = [];
@@ -540,9 +552,23 @@ class Referral_Messenger
                 </div>
             </div>
         </div>
+    <?php
+        return ob_get_clean();
+    }
+
+
+    public function shortcode_become_a_spokesperson($atts)
+    {
+        $attributes = shortcode_atts(array(
+            'title' => "Property"
+        ), $atts);
+        ob_start();
+    ?>
+        <a class="btn button become-a-spokesperson" href="<?php echo home_url('/spokesperson-application/') . "?listing=" . get_the_ID(); ?>">Become a Pet-friendly Spokesperson for this “<?php echo $attributes['title']; ?>”</a>
 <?php
         return ob_get_clean();
     }
+
 
     // AJAX APPLY AS REFERRAL
     public function mpp_ajax_apply_referral()

@@ -1110,10 +1110,6 @@ form.messenger-form {
   margin-bottom: 30px
 }
 
-.chat .chat-history ul li:last-child {
-  margin-bottom: 0px
-}
-
 .chat .chat-history .message-data {
   margin-bottom: 15px
 }
@@ -1295,6 +1291,10 @@ form.messenger-form {
   #show-hide-people{
     display: inline-block;
   }
+
+  .chat .chat-history ul li:last-child {
+    margin-bottom: 0px
+  }
 }
 
 @media only screen and (min-width: 768px) and (max-width: 992px) {
@@ -1325,4 +1325,8 @@ form.messenger-form {
 
 #resident_chat_section .directorist-single-info__value {
 	margin-left: 0 !important;
+}
+
+.become-a-spokesperson{
+  color: #fff !important;
 }
