@@ -402,12 +402,16 @@ jQuery(document).ready(function ($) {
 
   // LOAD CHAT IN EVERY 30 SEC
   if ($("body").hasClass("single-at_biz_dir") || $("body").hasClass("page-id-797") || $("body").hasClass("page-id-21348")) {
+    
     // REMOVE ACTIVE
     if($('#mpp_chat_module').hasClass('owner-module')) $(".messenger-container").removeClass("active");
+    
     // SCROLL TO BOTTOM
-    $('.chat-history').animate({
-      scrollTop: $('.chat-history').get(0).scrollHeight
-    }, 1500);
+    if(!$("body").hasClass("single-at_biz_dir")){
+      $('.chat-history').animate({
+        scrollTop: $('.chat-history').get(0).scrollHeight
+      }, 1500);
+    }
     // SET INTERVAL
     setInterval(function () {
       if ($(".messenger-container").hasClass("active")) {
@@ -470,6 +474,9 @@ jQuery(document).ready(function ($) {
       $(".messenger-header h4").text("Chat with "+ username);
       //console.log(info);
 
+      // Loading Show
+      $("#loading_messages").show();
+
       // AJAX CALL
       $.ajax({
         type: "post",
@@ -486,6 +493,12 @@ jQuery(document).ready(function ($) {
               mpp_prepare_messages(response.messages, $sender)
             );
             $(".messenger-container").addClass("active");
+
+            // SCROLL TO BOTTOM
+            $('.messenger-body').animate({
+              scrollTop: $('.messenger-body').get(0).scrollHeight
+            }, 1500);
+            
           } else {
             $("#messenger_warning").text("Cannot retrive!");
             console.log("cannot retrive");
@@ -494,6 +507,10 @@ jQuery(document).ready(function ($) {
         error: function (e, error) {
           console.log(e);
           console.log(error);
+        },
+        complete: function(){
+          // Loading Hide
+          $("#loading_messages").hide();
         },
       });
       // AJAX CALL

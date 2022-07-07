@@ -1252,8 +1252,8 @@ form.messenger-form {
   width: 33.33%;
 }
 
-.mpp-applied-speaker td .button{
-  margin-bottom: 10px;
+.mpp-applied-speaker td .button:nth-child(2){
+  margin-top: 8px;
 }
 
 #loading_messages{

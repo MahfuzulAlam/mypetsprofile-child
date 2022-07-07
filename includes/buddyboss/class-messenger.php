@@ -187,6 +187,7 @@ class Referral_Messenger
                 <h4>Chat with Username</h4>
             </div>
             <div class="messenger-body">
+                <p id="loading_messages" style="margin: 15px;">Loading messages...</p>
                 <section class="discussion">
 
                     <?php
