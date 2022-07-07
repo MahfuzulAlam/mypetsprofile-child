@@ -274,9 +274,9 @@ class Referral_Messenger
                 );
 
                 $inserted  = $this->mpp_apply_as_referral_listing($property_id, $args);
-                if ($inserted) echo 'Inserted!!!';
+                if ($inserted) echo '<p>You have successfully submitted the application. We will inform you within 24 hours.<p>';
             } else {
-                echo 'Please insert a Property first';
+                echo '<p>Please insert a Property first!</p>';
             }
         endif;
 
@@ -348,13 +348,12 @@ class Referral_Messenger
             wp_reset_postdata();
         endif;
         ob_start();
-        //e_var_dump($properties);
+        if (empty($properties)) echo '<p>No pending application found.</p>';
     ?>
         <div class="property-owner-dashboard">
-            <h3>Property List</h3>
             <?php foreach ($properties as $property) : ?>
                 <div class="mpp-property">
-                    <h4><?php echo $property['title']; ?></h4>
+                    <h4 class="property-title"><?php echo $property['title']; ?></h4>
                     <div class="property-spokepersons">
                         <h5>Spokespersons</h5>
                         <div class="mpp-spokepersons">
@@ -384,8 +383,12 @@ class Referral_Messenger
                                             </td>
                                         </tr>
                                     </table>
-                            <?php
+                                <?php
                                 endforeach;
+                            else :
+                                ?>
+                                <p>No SpokesPerson Found</p>
+                            <?php
                             endif;
                             ?>
                         </div>
@@ -419,8 +422,12 @@ class Referral_Messenger
                                             </td>
                                         </tr>
                                     </table>
-                            <?php
+                                <?php
                                 endforeach;
+                            else :
+                                ?>
+                                <p>No pending application found.</p>
+                            <?php
                             endif;
                             ?>
                         </div>
@@ -451,12 +458,13 @@ class Referral_Messenger
 
         ob_start();
     ?>
-        <div class="mpp-chat-module">
+        <div class="mpp-chat-module <?php if ($isOwner) echo "owner-module"; ?>" id="mpp_chat_module">
+            <a href="#" class="btn button" id="show-hide-people"><i class="fa fa-users" aria-hidden="true"></i></a>
             <div class="container">
                 <div class="row clearfix">
                     <div class="col-lg-12">
                         <div class="card chat-app">
-                            <div id="plist" class="people-list">
+                            <div id="plist" class="people-list plist-hidden">
                                 <ul class="list-unstyled chat-list mt-2 mb-0">
                                     <?php
                                     if ($people_list && count($people_list) > 0) {

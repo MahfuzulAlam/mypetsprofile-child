@@ -402,9 +402,11 @@ jQuery(document).ready(function ($) {
 
   // LOAD CHAT IN EVERY 30 SEC
   if ($("body").hasClass("single-at_biz_dir") || $("body").hasClass("page-id-797") || $("body").hasClass("page-id-21348")) {
+    if($('#mpp_chat_module').hasClass('owner-module')) $(".messenger-container").removeClass("active");
     setInterval(function () {
       if ($(".messenger-container").hasClass("active")) {
         var $this = $(".messenger-container");
+
         var info = $("#msg_info").val();
         console.log(info);
 
@@ -438,7 +440,7 @@ jQuery(document).ready(function ($) {
         });
         // AJAX CALL
       }
-    }, 60000);
+    }, mppChild.chatInterval);
   }
   // LOAD CHAT IN EVERY 30 SEC
 
@@ -538,7 +540,14 @@ jQuery(document).ready(function ($) {
             $(".messenger-container .discussion").html(
               mpp_prepare_messages(response.messages, blockInfo.sender)
             );
-            $(".messenger-container").addClass("active");
+            if(!$('#mpp_chat_module').hasClass('owner-module')) $(".messenger-container").addClass("active");
+
+            if ($(window).width() < 768) {
+              $("#plist").css({"left": "-400px"});
+              $("#plist").removeClass("plist-showed").addClass("plist-hidden");
+              return;
+            }
+
           } else {
             $("#messenger_warning").text("Cannot retrive!");
             console.log("cannot retrive");
@@ -758,5 +767,25 @@ jQuery(document).ready(function ($) {
         }
       });
     
+  });
+
+  // TOGGLE
+  // $("#show-hide-people").toggle(
+  //   function(){$("#plist").css({"left": 0});},
+  //   function(){$("#plist").css({"color": "-400px"});
+  // });
+
+  $("#show-hide-people").on('click', function(e){
+    e.preventDefault();
+    if($("#plist").hasClass("plist-hidden")){
+      $("#plist").css({"left": 0});
+      $("#plist").removeClass("plist-hidden").addClass("plist-showed");
+      return;
+    }
+    if($("#plist").hasClass("plist-showed")){
+      $("#plist").css({"left": "-400px"});
+      $("#plist").removeClass("plist-showed").addClass("plist-hidden");
+      return;
+    }
   });
 });

@@ -1232,9 +1232,41 @@ form.messenger-form {
   padding: 10px 0;
 }
 
+.mpp-property h4.property-title{
+  padding: 20px;
+  text-align: center;
+  background-color: #03a9f4;
+  color: #fff;
+}
+
+#show-hide-people{
+  margin: 15px 0;
+}
+
+.mpp-applied-speaker img{
+  width: 50px;
+}
+
+.mpp-applied-speaker td{
+  vertical-align: middle;
+  width: 33.33%;
+}
+
+.mpp-applied-speaker td .button{
+  margin-bottom: 10px;
+}
+
 @media only screen and (max-width: 767px) {
+  .mpp-chat-module .container {
+    padding: 0;
+  }
+
+  .mpp-chat-module{
+    margin-top: 15px;
+  }
+
   .chat-app .people-list {
-      height: 465px;
+      height: 615px;
       width: 100%;
       overflow-x: auto;
       background: #fff;
@@ -1250,8 +1282,12 @@ form.messenger-form {
       border-radius: 0.55rem 0.55rem 0 0
   }
   .chat-app .chat-history {
-      height: 300px;
+      height: 450px;
       overflow-x: auto
+  }
+
+  #show-hide-people{
+    display: inline-block;
   }
 }
 
