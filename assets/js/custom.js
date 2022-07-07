@@ -402,7 +402,13 @@ jQuery(document).ready(function ($) {
 
   // LOAD CHAT IN EVERY 30 SEC
   if ($("body").hasClass("single-at_biz_dir") || $("body").hasClass("page-id-797") || $("body").hasClass("page-id-21348")) {
+    // REMOVE ACTIVE
     if($('#mpp_chat_module').hasClass('owner-module')) $(".messenger-container").removeClass("active");
+    // SCROLL TO BOTTOM
+    $('.chat-history').animate({
+      scrollTop: $('.chat-history').get(0).scrollHeight
+    }, 1500);
+    // SET INTERVAL
     setInterval(function () {
       if ($(".messenger-container").hasClass("active")) {
         var $this = $(".messenger-container");
@@ -498,6 +504,15 @@ jQuery(document).ready(function ($) {
   // MPP START CHATTING ADMIN
   $(".people-block").on("click", function () {
 
+    // CHECK ACTIVE
+    if($(this).hasClass('active')) {
+      if ($(window).width() < 768) {
+        $("#plist").css({"left": "-400px"});
+        $("#plist").removeClass("plist-showed").addClass("plist-hidden");
+        return;
+      }
+    }
+
     // CHANGE STATUS
     $('.people-block').removeClass('active');
     $(this).addClass('active');
@@ -524,6 +539,16 @@ jQuery(document).ready(function ($) {
       $(".chat .chat-header img").attr("src", blockInfo.avatar);
       $(".chat .chat-header .chat-about h6").text(blockInfo.name);
       $(".chat .chat-header .chat-about small").text($this.find('div.status').text());
+      $(".messenger-container").removeClass("active");
+
+      // Loading Show
+      $("#loading_messages").show();
+
+      // Toggle
+      if ($(window).width() < 768) {
+        $("#plist").css({"left": "-400px"});
+        $("#plist").removeClass("plist-showed").addClass("plist-hidden");
+      }
 
       // AJAX CALL
       $.ajax({
@@ -537,16 +562,17 @@ jQuery(document).ready(function ($) {
         success: function (response) {
           //console.log(response);
           if (response.result == true) {
+
             $(".messenger-container .discussion").html(
               mpp_prepare_messages(response.messages, blockInfo.sender)
             );
-            if(!$('#mpp_chat_module').hasClass('owner-module')) $(".messenger-container").addClass("active");
 
-            if ($(window).width() < 768) {
-              $("#plist").css({"left": "-400px"});
-              $("#plist").removeClass("plist-showed").addClass("plist-hidden");
-              return;
-            }
+            // SCROLL TO BOTTOM
+            $('.chat-history').animate({
+              scrollTop: $('.chat-history').get(0).scrollHeight
+            }, 1500);
+
+            if(!$('#mpp_chat_module').hasClass('owner-module')) $(".messenger-container").addClass("active");
 
           } else {
             $("#messenger_warning").text("Cannot retrive!");
@@ -557,6 +583,11 @@ jQuery(document).ready(function ($) {
           console.log(e);
           console.log(error);
         },
+        complete: function(){
+          // Loading Hide
+          $("#loading_messages").hide();
+          if(!$('#mpp_chat_module').hasClass('owner-module')) $(".messenger-container").addClass("active");
+        }
       });
       // AJAX CALL
     }

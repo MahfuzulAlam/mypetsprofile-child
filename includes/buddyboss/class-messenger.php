@@ -521,6 +521,7 @@ class Referral_Messenger
                                         </div>
                                     </div>
                                     <div class="chat-history messenger-container active">
+                                        <p id="loading_messages">Loading messages...</p>
                                         <section class="discussion">
 
                                             <?php

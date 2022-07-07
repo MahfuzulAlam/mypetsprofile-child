@@ -1229,7 +1229,7 @@ form.messenger-form {
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-  padding: 10px 0;
+  padding: 10px;
 }
 
 .mpp-property h4.property-title{
@@ -1254,6 +1254,10 @@ form.messenger-form {
 
 .mpp-applied-speaker td .button{
   margin-bottom: 10px;
+}
+
+#loading_messages{
+  display: none;
 }
 
 @media only screen and (max-width: 767px) {
