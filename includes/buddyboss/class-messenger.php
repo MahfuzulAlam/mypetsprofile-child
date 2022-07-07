@@ -151,103 +151,60 @@ class Referral_Messenger
         // $group_id = get_post_meta($listing_id, "_bb_group_id", true);
         // if (!$group_id || empty($group_id)) return;
         $spokespersons = get_post_meta($listing_id, 'mpp_spokespersons', true);
-        if (!$spokespersons || empty($spokespersons)) return;
 
         ob_start();
+        if (!$spokespersons || empty($spokespersons)) :
         ?>
-        <table class="mpp-applied-speaker">
-            <?php
-            foreach ($spokespersons as $spokeperson) :
-                $user_id = $spokeperson['user_id'];
-                $user = get_user_by('id', $user_id);
-            ?>
-                <tr>
-                    <td>
-                        <?php echo bp_core_fetch_avatar(
-                            array(
-                                'item_id' => $user_id, // id of user for desired avatar
-                                'type'    => 'thumb',
-                                'html'   => true     // FALSE = return url, TRUE (default) = return img html
-                            )
-                        ); ?>
-                    </td>
-                    <td class="username"><?php echo $user->data->display_name . " (" . $user->data->user_nicename . ")";
-                                            ?></td>
-                    <td>
-                        <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="<?php echo $user_id; ?>" data-listing="<?php echo $listing_id; ?>" data-type="accept">Start Chatting</a>
-                        <!-- <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="5" data-listing="<?php echo $listing_id; ?>" data-type="accept">Start Chatting</a> -->
-                    </td>
-                </tr>
-            <?php
-            endforeach;
-            ?>
-        </table>
-        <div class="messenger-container">
-            <div class="messenger-header">
-                <h4>Chat with Username</h4>
+            <p>Currrently we do not have any spokesperson.</p>
+        <?php
+        else :
+        ?>
+            <table class="mpp-applied-speaker">
+                <?php
+                foreach ($spokespersons as $spokeperson) :
+                    $user_id = $spokeperson['user_id'];
+                    $user = get_user_by('id', $user_id);
+                ?>
+                    <tr>
+                        <td>
+                            <?php echo bp_core_fetch_avatar(
+                                array(
+                                    'item_id' => $user_id, // id of user for desired avatar
+                                    'type'    => 'thumb',
+                                    'html'   => true     // FALSE = return url, TRUE (default) = return img html
+                                )
+                            ); ?>
+                        </td>
+                        <td class="username"><?php echo $user->data->display_name . " (" . $user->data->user_nicename . ")";
+                                                ?></td>
+                        <td>
+                            <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="<?php echo $user_id; ?>" data-listing="<?php echo $listing_id; ?>" data-type="accept">Start Chatting</a>
+                            <!-- <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="5" data-listing="<?php echo $listing_id; ?>" data-type="accept">Start Chatting</a> -->
+                        </td>
+                    </tr>
+                <?php
+                endforeach;
+                ?>
+            </table>
+            <div class="messenger-container">
+                <div class="messenger-header">
+                    <h4>Chat with ...</h4>
+                </div>
+                <div class="messenger-body">
+                    <p id="loading_messages" style="margin: 15px;">Loading messages...</p>
+                    <section class="discussion">
+                    </section>
+                </div>
+                <div class="messenger-footer">
+                    <form class="messenger-form" id="mpp_messenger_form">
+                        <textarea id="messenger_message" name="messenger_message"></textarea>
+                        <input type="hidden" name="msg_info" id="msg_info" value='<?php echo json_encode(array('sender' => bp_loggedin_user_id(), 'recipient' => 1, 'group' => 174)); ?>' />
+                        <button type="submit"><i class="fa fa-paper-plane"></i></button>
+                    </form>
+                </div>
             </div>
-            <div class="messenger-body">
-                <p id="loading_messages" style="margin: 15px;">Loading messages...</p>
-                <section class="discussion">
-
-                    <?php
-
-                    $bd_message = new MPP_Database;
-                    $messages = $bd_message->retrieve_messages(3, 1);
-
-                    $prev_sender = $next_sender = 0;
-                    if (!$messages) {
-                        foreach ($messages as $key => $message) {
-                            $prev_sender = $key > 0 ? $messages[$key - 1]->sender_id : 0;
-                            $next_sender = $key < count($messages) - 1 ? $messages[$key + 1]->sender_id : 0;
-
-                            $owner = $message->sender_id == bp_loggedin_user_id() ? 'sender' : 'recipient';
-                            $message_position = '';
-                            if ($prev_sender !== $message->sender_id) $message_position = 'first';
-                            if ($prev_sender == $message->sender_id) $message_position = 'middle';
-                            if ($next_sender !== $message->sender_id) $message_position = 'last';
-                            if ($next_sender !== $message->sender_id && $prev_sender !== $message->sender_id) $message_position = 'single';
-                    ?>
-                            <div class="bubble <?php echo $owner; ?> <?php echo $message_position; ?>"><?php echo $message->message; ?></div>
-                    <?php
-
-                            // Change status
-                            if ($message->status == 1 && $message->recipient_id == bp_loggedin_user_id()) {
-                                //$bd_message->update_status($message->id, 2); // 2 = read
-                            }
-                        }
-                    }
-
-                    ?>
-
-
-                    <!-- <div class="bubble sender first">Hello</div>
-                    <div class="bubble sender last">This is a CSS demo of the Messenger chat bubbles, that merge when stacked together.</div>
-
-                    <div class="bubble recipient first">Oh that's cool!</div>
-                    <div class="bubble recipient last">Did you use JavaScript to perform that kind of effect?</div>
-
-                    <div class="bubble sender first">No, that's full CSS3!</div>
-                    <div class="bubble sender middle">(Take a look to the 'JS' section of this Pen... it's empty! 😃</div>
-                    <div class="bubble sender last">And it's also really lightweight!</div>
-
-                    <div class="bubble recipient">Dope!</div>
-
-                    <div class="bubble sender first">Yeah, but I still didn't succeed to get rid of these stupid .first and .last classes.</div>
-                    <div class="bubble sender middle">The only solution I see is using JS, or a &lt;div&gt; to group elements together, but I don't want to ...</div>
-                    <div class="bubble sender last">I think it's more transparent and easier to group .bubble elements in the same parent.</div> -->
-
-                </section>
-            </div>
-            <div class="messenger-footer">
-                <form class="messenger-form" id="mpp_messenger_form">
-                    <textarea id="messenger_message" name="messenger_message"></textarea>
-                    <input type="hidden" name="msg_info" id="msg_info" value='<?php echo json_encode(array('sender' => bp_loggedin_user_id(), 'recipient' => 1, 'group' => 174)); ?>' />
-                    <button type="submit"><i class="fa fa-paper-plane"></i></button>
-                </form>
-            </div>
-        </div>
-    <?php
+        <?php
+        endif;
         return ob_get_clean();
     }
 
@@ -282,7 +239,7 @@ class Referral_Messenger
         endif;
 
         ob_start();
-    ?>
+        ?>
         <div class="spokesperson-application-form-wrapper">
             <form method="post" id="spokesperson_application_form">
                 <div class="select-property directorist-fieldset">

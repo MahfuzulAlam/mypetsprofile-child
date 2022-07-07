@@ -885,7 +885,8 @@ form.messenger-form {
 }
 
 .messenger-body {
-  height: 600px;
+  min-height: 200px;
+  max-height: 600px;
   overflow-y: scroll;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
@@ -1320,4 +1321,8 @@ form.messenger-form {
 
 .mpp-start-chatting{
   color: #fff !important;
+}
+
+#resident_chat_section .directorist-single-info__value {
+	margin-left: 0 !important;
 }
