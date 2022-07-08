@@ -385,6 +385,13 @@ jQuery(document).ready(function ($) {
       success: function (response) {
         if (response.result == true) {
           console.log('success');
+          // SCROLL TO BOTTOM
+          if(!$("body").hasClass("single-at_biz_dir")){
+            $('.chat-history').animate({
+              scrollTop: $('.chat-history').get(0).scrollHeight
+            }, 1500);
+          }
+          // SCROLL TO BOTTOM
         } else {
           $("#messenger_warning").text("Cannot sent!");
           console.log("cannot sent");
@@ -412,45 +419,96 @@ jQuery(document).ready(function ($) {
         scrollTop: $('.chat-history').get(0).scrollHeight
       }, 1500);
     }
+    // SCROLL TO BOTTOM
+
+    // INTERVAL VARIABLES
+    var intervalTime = parseInt(mppChild.chatInterval); // 10 sec
+    var intervalCounter = 0;
+    var intervalEnd = 1000 * 60 * 30; // 30 min
+    var intervalMid = 1000 * 60 * 10; // 10 min
+    var midIntervalTime = 1000 * 60; // 1 min
+
+    var intervalMidStatic = intervalMid;
+
     // SET INTERVAL
-    setInterval(function () {
-      if ($(".messenger-container").hasClass("active")) {
-        var $this = $(".messenger-container");
+    interval = setInterval(intervalFunction, intervalTime);
 
-        var info = $("#msg_info").val();
-        console.log(info);
+    function intervalFunction(){
 
-        // AJAX CALL
-        $.ajax({
-          type: "post",
-          dataType: "json",
-          url: mppChild.ajaxurl,
-          data: {
-            action: "mpp_get_unread_message",
-            info: info,
-          },
-          success: function (response) {
-            console.log(response);
-            if (response.result == true) {
-              $("#messenger_message").val("");
-              $.each( response.messages, function( key, message ) {
-                $("section.discussion").append(
-                  "<div class='bubble recipient'>" + message.message +"</div>"
-                );
-              });
-            } else {
-              $("#messenger_warning").text("Cannot sent!");
-              console.log("cannot sent");
-            }
-          },
-          error: function (e, error) {
-            console.log(e);
-            console.log(error);
-          },
-        });
-        // AJAX CALL
-      }
-    }, mppChild.chatInterval);
+        if ($(".messenger-container").hasClass("active")) {
+          var $this = $(".messenger-container");
+  
+          var info = $("#msg_info").val();
+          console.log(info);
+  
+          // COUNTER
+          intervalCounter = intervalCounter + intervalTime;
+          console.log(intervalCounter);
+          
+  
+          // AJAX CALL
+          $.ajax({
+            type: "post",
+            dataType: "json",
+            url: mppChild.ajaxurl,
+            data: {
+              action: "mpp_get_unread_message",
+              info: info,
+            },
+            success: function (response) {
+              console.log(response);
+              if (response.result == true) {
+                console.log(intervalCounter);
+                console.log(intervalMid);
+                $("#messenger_message").val("");
+                $.each( response.messages, function( key, message ) {
+                  $("section.discussion").append(
+                    "<div class='bubble recipient'>" + message.message +"</div>"
+                  );
+                });
+                // RESET INTERVAL
+                if(intervalCounter > intervalMidStatic){
+                  clearInterval(interval);
+                  intervalTime = parseInt(mppChild.chatInterval);
+                  interval = setInterval(intervalFunction, intervalTime);
+                  intervalMid = intervalMidStatic;
+                }
+                intervalCounter = 0;
+                // RESET INTERVAL
+              } else {
+                $("#messenger_warning").text("Cannot sent!");
+                console.log("cannot sent");
+                // CLEAR INTERVAL
+                if(intervalCounter > intervalEnd ){
+                  clearInterval(interval);
+                }else if(intervalCounter > intervalMid){
+                  clearInterval(interval);
+                  intervalTime = midIntervalTime;
+                  interval = setInterval(intervalFunction, intervalTime);
+                  intervalMid = intervalEnd + 1;
+                }
+                // CLEAR INTERVAL
+              }
+            },
+            error: function (e, error) {
+              console.log(e);
+              console.log(error);
+              // CLEAR INTERVAL
+              if(intervalCounter > intervalEnd ){
+                clearInterval(interval);
+              }else if(intervalCounter > intervalMid){
+                clearInterval(interval);
+                intervalTime = midIntervalTime;
+                interval = setInterval(intervalFunction, intervalTime);
+                intervalMid = intervalEnd + 1;
+              }
+              // CLEAR INTERVAL
+            },
+          });
+          // AJAX CALL
+        }
+    }
+
   }
   // LOAD CHAT IN EVERY 30 SEC
 

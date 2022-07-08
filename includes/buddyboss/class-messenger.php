@@ -564,7 +564,7 @@ class Referral_Messenger
         ), $atts);
         ob_start();
     ?>
-        <a class="btn button become-a-spokesperson" href="<?php echo home_url('/spokesperson-application/') . "?listing=" . get_the_ID(); ?>">Become a Pet-friendly Spokesperson for this “<?php echo $attributes['title']; ?>”</a>
+        <a class="btn button become-a-spokesperson" href="<?php echo home_url('/spokespersons-application/') . "?listing=" . get_the_ID(); ?>">Become a Pet-friendly Spokesperson for this “<?php echo $attributes['title']; ?>”</a>
 <?php
         return ob_get_clean();
     }
