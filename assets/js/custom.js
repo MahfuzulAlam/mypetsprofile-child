@@ -373,7 +373,7 @@ jQuery(document).ready(function ($) {
 
     $("#messenger_message").val("");
     $("section.discussion").append(
-      "<div class='bubble sender "+ $class_name +"'>" + message + "</div>"
+      "<div class='bubble sender " + $class_name + "'>" + message + "</div>"
     );
 
     // AJAX CALL
@@ -384,12 +384,15 @@ jQuery(document).ready(function ($) {
       data: { action: "mpp_insert_message_row", message: message, info: info },
       success: function (response) {
         if (response.result == true) {
-          console.log('success');
+          console.log("success");
           // SCROLL TO BOTTOM
-          if(!$("body").hasClass("single-at_biz_dir")){
-            $('.chat-history').animate({
-              scrollTop: $('.chat-history').get(0).scrollHeight
-            }, 1500);
+          if (!$("body").hasClass("single-at_biz_dir")) {
+            $(".chat-history").animate(
+              {
+                scrollTop: $(".chat-history").get(0).scrollHeight,
+              },
+              1500
+            );
           }
           // SCROLL TO BOTTOM
         } else {
@@ -408,16 +411,23 @@ jQuery(document).ready(function ($) {
   });
 
   // LOAD CHAT IN EVERY 30 SEC
-  if ($("body").hasClass("single-at_biz_dir") || $("body").hasClass("page-id-797") || $("body").hasClass("page-id-21348")) {
-    
+  if (
+    $("body").hasClass("single-at_biz_dir") ||
+    $("body").hasClass("page-id-797") ||
+    $("body").hasClass("page-id-21348")
+  ) {
     // REMOVE ACTIVE
-    if($('#mpp_chat_module').hasClass('owner-module')) $(".messenger-container").removeClass("active");
-    
+    if ($("#mpp_chat_module").hasClass("owner-module"))
+      $(".messenger-container").removeClass("active");
+
     // SCROLL TO BOTTOM
-    if(!$("body").hasClass("single-at_biz_dir")){
-      $('.chat-history').animate({
-        scrollTop: $('.chat-history').get(0).scrollHeight
-      }, 1500);
+    if (!$("body").hasClass("single-at_biz_dir")) {
+      $(".chat-history").animate(
+        {
+          scrollTop: $(".chat-history").get(0).scrollHeight,
+        },
+        1500
+      );
     }
     // SCROLL TO BOTTOM
 
@@ -433,92 +443,89 @@ jQuery(document).ready(function ($) {
     // SET INTERVAL
     interval = setInterval(intervalFunction, intervalTime);
 
-    function intervalFunction(){
+    function intervalFunction() {
+      if ($(".messenger-container").hasClass("active")) {
+        var $this = $(".messenger-container");
 
-        if ($(".messenger-container").hasClass("active")) {
-          var $this = $(".messenger-container");
-  
-          var info = $("#msg_info").val();
-          console.log(info);
-  
-          // COUNTER
-          intervalCounter = intervalCounter + intervalTime;
-          console.log(intervalCounter);
-          
-  
-          // AJAX CALL
-          $.ajax({
-            type: "post",
-            dataType: "json",
-            url: mppChild.ajaxurl,
-            data: {
-              action: "mpp_get_unread_message",
-              info: info,
-            },
-            success: function (response) {
-              console.log(response);
-              if (response.result == true) {
-                console.log(intervalCounter);
-                console.log(intervalMid);
-                $("#messenger_message").val("");
-                $.each( response.messages, function( key, message ) {
-                  $("section.discussion").append(
-                    "<div class='bubble recipient'>" + message.message +"</div>"
-                  );
-                });
-                // RESET INTERVAL
-                if(intervalCounter > intervalMidStatic){
-                  clearInterval(interval);
-                  intervalTime = parseInt(mppChild.chatInterval);
-                  interval = setInterval(intervalFunction, intervalTime);
-                  intervalMid = intervalMidStatic;
-                }
-                intervalCounter = 0;
-                // RESET INTERVAL
-              } else {
-                $("#messenger_warning").text("Cannot sent!");
-                console.log("cannot sent");
-                // CLEAR INTERVAL
-                if(intervalCounter > intervalEnd ){
-                  clearInterval(interval);
-                }else if(intervalCounter > intervalMid){
-                  clearInterval(interval);
-                  intervalTime = midIntervalTime;
-                  interval = setInterval(intervalFunction, intervalTime);
-                  intervalMid = intervalEnd + 1;
-                }
-                // CLEAR INTERVAL
-              }
-            },
-            error: function (e, error) {
-              console.log(e);
-              console.log(error);
-              // CLEAR INTERVAL
-              if(intervalCounter > intervalEnd ){
+        var info = $("#msg_info").val();
+        console.log(info);
+
+        // COUNTER
+        intervalCounter = intervalCounter + intervalTime;
+        console.log(intervalCounter);
+
+        // AJAX CALL
+        $.ajax({
+          type: "post",
+          dataType: "json",
+          url: mppChild.ajaxurl,
+          data: {
+            action: "mpp_get_unread_message",
+            info: info,
+          },
+          success: function (response) {
+            console.log(response);
+            if (response.result == true) {
+              console.log(intervalCounter);
+              console.log(intervalMid);
+              $("#messenger_message").val("");
+              $.each(response.messages, function (key, message) {
+                $("section.discussion").append(
+                  "<div class='bubble recipient'>" + message.message + "</div>"
+                );
+              });
+              // RESET INTERVAL
+              if (intervalCounter > intervalMidStatic) {
                 clearInterval(interval);
-              }else if(intervalCounter > intervalMid){
+                intervalTime = parseInt(mppChild.chatInterval);
+                interval = setInterval(intervalFunction, intervalTime);
+                intervalMid = intervalMidStatic;
+              }
+              intervalCounter = 0;
+              // RESET INTERVAL
+            } else {
+              $("#messenger_warning").text("Cannot sent!");
+              console.log("cannot sent");
+              // CLEAR INTERVAL
+              if (intervalCounter > intervalEnd) {
+                clearInterval(interval);
+              } else if (intervalCounter > intervalMid) {
                 clearInterval(interval);
                 intervalTime = midIntervalTime;
                 interval = setInterval(intervalFunction, intervalTime);
                 intervalMid = intervalEnd + 1;
               }
               // CLEAR INTERVAL
-            },
-          });
-          // AJAX CALL
-        }
+            }
+          },
+          error: function (e, error) {
+            console.log(e);
+            console.log(error);
+            // CLEAR INTERVAL
+            if (intervalCounter > intervalEnd) {
+              clearInterval(interval);
+            } else if (intervalCounter > intervalMid) {
+              clearInterval(interval);
+              intervalTime = midIntervalTime;
+              interval = setInterval(intervalFunction, intervalTime);
+              intervalMid = intervalEnd + 1;
+            }
+            // CLEAR INTERVAL
+          },
+        });
+        // AJAX CALL
+      }
     }
-
   }
   // LOAD CHAT IN EVERY 30 SEC
 
   // MPP START CHATTING
   $(".mpp-start-chatting").on("click", function () {
-    var tr = $(this).parents('tr');
+    var tr = $(this).parents("tr");
     var $sender = $(this).data("sender");
     var recipient = $(this).data("recipient");
     var listing = $(this).data("listing");
-    var username = tr.find('td.username').text();
+    var username = tr.find("td.username").text();
     if ($sender != "") {
       var info = {
         sender: $sender,
@@ -529,7 +536,7 @@ jQuery(document).ready(function ($) {
       $("#msg_info").val(JSON.stringify(info));
       $(".messenger-container .discussion").html("");
       $(".messenger-container").show();
-      $(".messenger-header h4").text("Chat with "+ username);
+      $(".messenger-header h4").text("Chat with " + username);
       //console.log(info);
 
       // Loading Show
@@ -553,10 +560,12 @@ jQuery(document).ready(function ($) {
             $(".messenger-container").addClass("active");
 
             // SCROLL TO BOTTOM
-            $('.messenger-body').animate({
-              scrollTop: $('.messenger-body').get(0).scrollHeight
-            }, 1500);
-            
+            $(".messenger-body").animate(
+              {
+                scrollTop: $(".messenger-body").get(0).scrollHeight,
+              },
+              1500
+            );
           } else {
             $("#messenger_warning").text("Cannot retrive!");
             console.log("cannot retrive");
@@ -566,7 +575,7 @@ jQuery(document).ready(function ($) {
           console.log(e);
           console.log(error);
         },
-        complete: function(){
+        complete: function () {
           // Loading Hide
           $("#loading_messages").hide();
         },
@@ -575,27 +584,25 @@ jQuery(document).ready(function ($) {
     }
   });
 
-
   // MPP START CHATTING ADMIN
   $(".people-block").on("click", function () {
-
     // CHECK ACTIVE
-    if($(this).hasClass('active')) {
+    if ($(this).hasClass("active")) {
       if ($(window).width() < 768) {
-        $("#plist").css({"left": "-400px"});
+        $("#plist").css({ left: "-400px" });
         $("#plist").removeClass("plist-showed").addClass("plist-hidden");
         return;
       }
     }
 
     // CHANGE STATUS
-    $('.people-block').removeClass('active');
-    $(this).addClass('active');
+    $(".people-block").removeClass("active");
+    $(this).addClass("active");
     // CHANGE STATUS
 
     var $this = $(this);
 
-    var blockInfo = $this.attr('data-info');
+    var blockInfo = $this.attr("data-info");
     blockInfo = JSON.parse(blockInfo);
 
     var info = {
@@ -606,14 +613,15 @@ jQuery(document).ready(function ($) {
 
     console.log(info);
 
-
     if (info != "") {
       $("#msg_info").val(JSON.stringify(info));
       $(".messenger-container .discussion").html("");
       $(".messenger-container").show();
       $(".chat .chat-header img").attr("src", blockInfo.avatar);
       $(".chat .chat-header .chat-about h6").text(blockInfo.name);
-      $(".chat .chat-header .chat-about small").text($this.find('div.status').text());
+      $(".chat .chat-header .chat-about small").text(
+        $this.find("div.status").text()
+      );
       $(".messenger-container").removeClass("active");
 
       // Loading Show
@@ -621,7 +629,7 @@ jQuery(document).ready(function ($) {
 
       // Toggle
       if ($(window).width() < 768) {
-        $("#plist").css({"left": "-400px"});
+        $("#plist").css({ left: "-400px" });
         $("#plist").removeClass("plist-showed").addClass("plist-hidden");
       }
 
@@ -637,18 +645,20 @@ jQuery(document).ready(function ($) {
         success: function (response) {
           //console.log(response);
           if (response.result == true) {
-
             $(".messenger-container .discussion").html(
               mpp_prepare_messages(response.messages, blockInfo.sender)
             );
 
             // SCROLL TO BOTTOM
-            $('.chat-history').animate({
-              scrollTop: $('.chat-history').get(0).scrollHeight
-            }, 1500);
+            $(".chat-history").animate(
+              {
+                scrollTop: $(".chat-history").get(0).scrollHeight,
+              },
+              1500
+            );
 
-            if(!$('#mpp_chat_module').hasClass('owner-module')) $(".messenger-container").addClass("active");
-
+            if (!$("#mpp_chat_module").hasClass("owner-module"))
+              $(".messenger-container").addClass("active");
           } else {
             $("#messenger_warning").text("Cannot retrive!");
             console.log("cannot retrive");
@@ -658,11 +668,12 @@ jQuery(document).ready(function ($) {
           console.log(e);
           console.log(error);
         },
-        complete: function(){
+        complete: function () {
           // Loading Hide
           $("#loading_messages").hide();
-          if(!$('#mpp_chat_module').hasClass('owner-module')) $(".messenger-container").addClass("active");
-        }
+          if (!$("#mpp_chat_module").hasClass("owner-module"))
+            $(".messenger-container").addClass("active");
+        },
       });
       // AJAX CALL
     }
@@ -703,71 +714,80 @@ jQuery(document).ready(function ($) {
   }
   // Prepare Messages
 
-    $(".spokespersons-property-name").select2({
-      ajax: {
-        url: mppChild.ajaxurl,
-        dataType: 'json',
-        delay: 250,
-        data: function (params) {
-          return {
-            action: 'mpp_property_search',
-            q: params.term,
-          };
-        },
-        processResults: function (data) {
-          var options = [];
-          if ( data ) {
-        
-            // data is the array of arrays, and each of them contains ID and the Label of the option
-            $.each( data, function( index, text ) { // do not forget that "index" is just auto incremented value
-              options.push( { id: text[0], text: text[1]  } );
-            });
-          
-          }
-          return {
-            results: options
-          };
-        },
-        cache: true
+  $(".spokespersons-property-name").select2({
+    ajax: {
+      url: mppChild.ajaxurl,
+      dataType: "json",
+      delay: 250,
+      data: function (params) {
+        return {
+          action: "mpp_property_search",
+          q: params.term,
+        };
       },
-      placeholder: 'Search for a property',
-      minimumInputLength: 3,
-      // templateResult: formatRepo,
-      // templateSelection: formatRepoSelection
-    });
-    
-    function formatRepo (repo) {
-      if (repo.loading) {
-        return repo.text;
-      }
-    
-      var $container = $(
-        "<div class='select2-result-repository clearfix'>" +
-          "<div class='select2-result-repository__avatar'><img src='" + repo.owner.avatar_url + "' /></div>" +
-          "<div class='select2-result-repository__meta'>" +
-            "<div class='select2-result-repository__title'></div>" +
-            "<div class='select2-result-repository__description'></div>" +
-            "<div class='select2-result-repository__statistics'>" +
-              "<div class='select2-result-repository__forks'><i class='fa fa-flash'></i> </div>" +
-              "<div class='select2-result-repository__stargazers'><i class='fa fa-star'></i> </div>" +
-              "<div class='select2-result-repository__watchers'><i class='fa fa-eye'></i> </div>" +
-            "</div>" +
-          "</div>" +
+      processResults: function (data) {
+        var options = [];
+        if (data) {
+          // data is the array of arrays, and each of them contains ID and the Label of the option
+          $.each(data, function (index, text) {
+            // do not forget that "index" is just auto incremented value
+            options.push({ id: text[0], text: text[1] });
+          });
+        }
+        return {
+          results: options,
+        };
+      },
+      cache: true,
+    },
+    placeholder: "Search for a property",
+    minimumInputLength: 3,
+    // templateResult: formatRepo,
+    // templateSelection: formatRepoSelection
+  });
+
+  function formatRepo(repo) {
+    if (repo.loading) {
+      return repo.text;
+    }
+
+    var $container = $(
+      "<div class='select2-result-repository clearfix'>" +
+        "<div class='select2-result-repository__avatar'><img src='" +
+        repo.owner.avatar_url +
+        "' /></div>" +
+        "<div class='select2-result-repository__meta'>" +
+        "<div class='select2-result-repository__title'></div>" +
+        "<div class='select2-result-repository__description'></div>" +
+        "<div class='select2-result-repository__statistics'>" +
+        "<div class='select2-result-repository__forks'><i class='fa fa-flash'></i> </div>" +
+        "<div class='select2-result-repository__stargazers'><i class='fa fa-star'></i> </div>" +
+        "<div class='select2-result-repository__watchers'><i class='fa fa-eye'></i> </div>" +
+        "</div>" +
+        "</div>" +
         "</div>"
-      );
-    
-      $container.find(".select2-result-repository__title").text(repo.full_name);
-      $container.find(".select2-result-repository__description").text(repo.description);
-      $container.find(".select2-result-repository__forks").append(repo.forks_count + " Forks");
-      $container.find(".select2-result-repository__stargazers").append(repo.stargazers_count + " Stars");
-      $container.find(".select2-result-repository__watchers").append(repo.watchers_count + " Watchers");
-    
-      return $container;
-    }
-    
-    function formatRepoSelection (repo) {
-      return repo.full_name || repo.text;
-    }
+    );
+
+    $container.find(".select2-result-repository__title").text(repo.full_name);
+    $container
+      .find(".select2-result-repository__description")
+      .text(repo.description);
+    $container
+      .find(".select2-result-repository__forks")
+      .append(repo.forks_count + " Forks");
+    $container
+      .find(".select2-result-repository__stargazers")
+      .append(repo.stargazers_count + " Stars");
+    $container
+      .find(".select2-result-repository__watchers")
+      .append(repo.watchers_count + " Watchers");
+
+    return $container;
+  }
+
+  function formatRepoSelection(repo) {
+    return repo.full_name || repo.text;
+  }
 
   // ACCEPT/REJECT SPEAKER - LISTING
   // Referral Approval
@@ -792,7 +812,11 @@ jQuery(document).ready(function ($) {
             type: "post",
             dataType: "json",
             url: mppChild.ajaxurl,
-            data: { action: "mpp_accept_referral_listing", listing: listing, user: user },
+            data: {
+              action: "mpp_accept_referral_listing",
+              listing: listing,
+              user: user,
+            },
             success: function (response) {
               console.log(response);
               if (response.result == true) {
@@ -820,7 +844,11 @@ jQuery(document).ready(function ($) {
             type: "post",
             dataType: "json",
             url: mppChild.ajaxurl,
-            data: { action: "mpp_reject_referral_listing", listing: listing, user: user },
+            data: {
+              action: "mpp_reject_referral_listing",
+              listing: listing,
+              user: user,
+            },
             success: function (response) {
               console.log(response);
               if (response.result == true) {
@@ -836,7 +864,6 @@ jQuery(document).ready(function ($) {
       });
     }
   });
-
 
   // Referral Remove
   $(".mpp-referral-remove").on("click", function (e) {
@@ -845,11 +872,56 @@ jQuery(document).ready(function ($) {
     var listing = $(this).data("listing");
     var user = $(this).data("user");
 
-      // REMOVE
+    // REMOVE
+    Swal.fire({
+      title: "Do you want to remove this member?",
+      showCancelButton: true,
+      confirmButtonText: "Confirm",
+    }).then((result) => {
+      /* Read more about isConfirmed, isDenied below */
+      if (result.isConfirmed) {
+        // AJAX CALL
+        $.ajax({
+          type: "post",
+          dataType: "json",
+          url: mppChild.ajaxurl,
+          data: {
+            action: "mpp_remove_referral_listing",
+            listing: listing,
+            user: user,
+          },
+          success: function (response) {
+            console.log(response);
+            if (response.result == true) {
+              Swal.fire("Confirmed!", "", "success");
+              row.hide();
+            } else {
+              Swal.fire("Sorry, could not confirm!", "", "error");
+            }
+          },
+        });
+        // AJAX CALL
+      }
+    });
+  });
+
+  // MPP REFERRAL CHANGE STATUS
+  $(".mpp-referral-status").on("click", function (e) {
+    e.preventDefault();
+    var $this = $(this);
+    var listing = $(this).data("listing");
+    var user = $(this).data("user");
+    var type = $(this).attr("data-type");
+
+    var wrapper = $this.parents(".spokesperson-wrapper");
+    var $status = wrapper.find(".spokesperson-status");
+
+    if (type == "activate") {
+      // APROVED
       Swal.fire({
-        title: "Do you want to remove this member?",
+        title: "Do you want to activate the Spokesperson?",
         showCancelButton: true,
-        confirmButtonText: "Confirm",
+        confirmButtonText: "Activate",
       }).then((result) => {
         /* Read more about isConfirmed, isDenied below */
         if (result.isConfirmed) {
@@ -858,21 +930,123 @@ jQuery(document).ready(function ($) {
             type: "post",
             dataType: "json",
             url: mppChild.ajaxurl,
-            data: { action: "mpp_remove_referral_listing", listing: listing, user: user },
+            data: {
+              action: "mpp_referral_listing_change_status",
+              listing: listing,
+              user: user,
+              status: "active",
+            },
             success: function (response) {
               console.log(response);
               if (response.result == true) {
                 Swal.fire("Confirmed!", "", "success");
-                row.hide();
+                $status.text("Active");
+                $this.text("Deactivate");
+                $this.attr("data-type", "deactivate");
               } else {
-                Swal.fire("Sorry, could not confirm!", "", "error");
+                Swal.fire("Sorry, could not change!", "", "error");
               }
             },
           });
           // AJAX CALL
         }
       });
-    
+    } else {
+      // REJECTED
+      Swal.fire({
+        title: "Do you want to deactivate this Spokesperson?",
+        showCancelButton: true,
+        confirmButtonText: "Deactivate",
+      }).then((result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+          // AJAX CALL
+          $.ajax({
+            type: "post",
+            dataType: "json",
+            url: mppChild.ajaxurl,
+            data: {
+              action: "mpp_referral_listing_change_status",
+              listing: listing,
+              user: user,
+              status: "deactive",
+            },
+            success: function (response) {
+              console.log(response);
+              if (response.result == true) {
+                Swal.fire("Confirmed!", "", "success");
+                $status.text("Deactive");
+                $this.text("Activate");
+                $this.attr("data-type", "activate");
+              } else {
+                Swal.fire("Sorry, could not change!", "", "error");
+              }
+            },
+          });
+          // AJAX CALL
+        }
+      });
+    }
+  });
+
+  // PROPERTY - REFERRAL PROGRAM CHANGE
+  $(document).on("change", "select.spokesperson_ref_system", function () {
+    console.log($(this).val());
+    var status = $(this).val();
+    var listing = $(this).attr("data-listing");
+    console.log(listing);
+    // AJAX CALL
+    $.ajax({
+      type: "post",
+      dataType: "json",
+      url: mppChild.ajaxurl,
+      data: {
+        action: "mpp_spokesperson_ref_system",
+        listing: listing,
+        status: status,
+      },
+      success: function (response) {
+        console.log(response);
+        if (response.result == true) {
+          //Swal.fire("Updated!", "", "success");
+          console.log("Updated!");
+        } else {
+          //Swal.fire("Sorry, could not update!", "", "error");
+          console.log("Sorry, could not update!");
+        }
+      },
+    });
+    // AJAX CALL
+  });
+
+  // PROPERTY - REFERRAL REGISTRATION STATUS
+  $(document).on("change", "select.spokesperson_reg_status", function () {
+    console.log($(this).val());
+    var status = $(this).val();
+    var listing = $(this).attr("data-listing");
+    console.log(listing);
+    // AJAX CALL
+    $.ajax({
+      type: "post",
+      dataType: "json",
+      url: mppChild.ajaxurl,
+      data: {
+        action: "mpp_spokesperson_reg_status",
+        listing: listing,
+        status: status,
+      },
+      success: function (response) {
+        console.log(response);
+        if (response.result == true) {
+          //Swal.fire("Updated!", "", "success");
+          console.log("Updated!");
+        } else {
+          //Swal.fire("Sorry, could not update!", "", "error");
+          console.log("Sorry, could not update!");
+        }
+      },
+    });
+    // AJAX CALL
   });
 
   // TOGGLE
@@ -881,15 +1055,15 @@ jQuery(document).ready(function ($) {
   //   function(){$("#plist").css({"color": "-400px"});
   // });
 
-  $("#show-hide-people").on('click', function(e){
+  $("#show-hide-people").on("click", function (e) {
     e.preventDefault();
-    if($("#plist").hasClass("plist-hidden")){
-      $("#plist").css({"left": 0});
+    if ($("#plist").hasClass("plist-hidden")) {
+      $("#plist").css({ left: 0 });
       $("#plist").removeClass("plist-hidden").addClass("plist-showed");
       return;
     }
-    if($("#plist").hasClass("plist-showed")){
-      $("#plist").css({"left": "-400px"});
+    if ($("#plist").hasClass("plist-showed")) {
+      $("#plist").css({ left: "-400px" });
       $("#plist").removeClass("plist-showed").addClass("plist-hidden");
       return;
     }

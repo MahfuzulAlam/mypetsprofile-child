@@ -51,6 +51,12 @@ class Referral_Messenger
         add_action('wp_ajax_mpp_reject_referral_listing', array($this, 'mpp_ajax_reject_referral_listing'));
         // REMOVE REFERRAL LISTING
         add_action('wp_ajax_mpp_remove_referral_listing', array($this, 'mpp_ajax_remove_referral_listing'));
+        // CHANGE REFERRAL STATUS
+        add_action('wp_ajax_mpp_referral_listing_change_status', array($this, 'mpp_referral_listing_change_status'));
+        // CHANGE PROPERTY REFERRAL STATUS
+        add_action('wp_ajax_mpp_spokesperson_ref_system', array($this, 'mpp_spokesperson_ref_system'));
+        // CHANGE SPOKESPERSON REGISTRATION STATUS
+        add_action('wp_ajax_mpp_spokesperson_reg_status', array($this, 'mpp_spokesperson_reg_status'));
     }
 
     // APPLY AS REFFERAL SHORTCODE
@@ -157,7 +163,7 @@ class Referral_Messenger
         ob_start();
         if (!$spokespersons || empty($spokespersons)) :
         ?>
-            <p>Currrently we do not have any spokesperson.</p>
+            <p>Currrently we do not have any spokespersons.</p>
         <?php
         else :
         ?>
@@ -343,8 +349,24 @@ class Referral_Messenger
             <?php foreach ($properties as $property) : ?>
                 <div class="mpp-property">
                     <h4 class="property-title"><?php echo $property['title']; ?></h4>
+                    <?php $mpp_sref = get_post_meta($property['id'], 'mpp_spokesperson_ref', true);?>
+                    <?php $mpp_sreg = get_post_meta($property['id'], 'mpp_spokesperson_reg', true);?>
+                    <div class="spokesperson_reff_system">
+                        <label>Referral Program</label>
+                        <select class="spokesperson_ref_system" name="spokesperson_ref_system" data-listing="<?php echo $property['id']; ?>">
+                            <option value="enabled" <?php selected($mpp_sref, 'enabled', true); ?>>Enabled</option>   
+                            <option value="disabled" <?php selected($mpp_sref, 'disabled', true); ?>>Disabled</option>    
+                        </select>
+                    </div>
+                    <div class="spokesperson_switch">
+                        <label>Registering Spokesperson</label>
+                        <select class="spokesperson_reg_status" name="spokesperson_reg_status" data-listing="<?php echo $property['id']; ?>">
+                            <option value="enabled" <?php selected($mpp_sreg, 'enabled', true); ?>>Enabled</option>   
+                            <option value="disabled" <?php selected($mpp_sreg, 'disabled', true); ?>>Disabled</option>    
+                        </select>
+                    </div>
                     <div class="property-spokepersons">
-                        <h5>Spokespersons</h5>
+                        <h4>Spokespersons</h4>
                         <div class="mpp-spokepersons">
                             <?php
                             if (!empty($property['spokespersons']) && count($property['spokespersons']) > 0) :
@@ -379,7 +401,7 @@ class Referral_Messenger
                                                         <div><span class="label">Name:</span> <?php echo $full_name; ?></div>
                                                     <?php endif; ?>
                                                     <?php if(isset($speaker['status']) && !empty($speaker['status'])): ?>
-                                                        <div><span class="label">Status:</span> <?php echo $speaker['status'] == 'active' ? 'Active': 'Deactive'; ?></div>
+                                                        <div><span class="label">Status:</span> <span class="spokesperson-status"><?php echo $speaker['status'] == 'active' ? 'Active': 'Deactive'; ?></span></div>
                                                     <?php endif; ?>
                                                     <?php if(isset($speaker['unit_number']) && !empty($speaker['unit_number'])): ?>
                                                         <div><span class="label">Unit number:</span> <?php echo $speaker['unit_number']; ?></div>
@@ -398,7 +420,7 @@ class Referral_Messenger
                                                     <?php endif; ?>
                                                 </div>
                                                 <div class="spokesperson-actions spokeperson-section">
-                                                    <input type="hidden" class="spokeperson_info" value='<?php echo json_encode( $speaker ); ?>'/>
+                                                    <!-- <input type="hidden" class="spokeperson_info" value='<?php //echo json_encode( $speaker ); ?>'/> -->
                                                     <a class="btn button mpp-referral-reports" href="<?php echo home_url('/chat-module/') . '?chatclient=' . $speaker['user_id']; ?>" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="reports">Reports</a>
                                                     <a class="btn button mpp-referral-remove" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="remove">Remove</a>
                                                     <?php if(isset($speaker['status']) && $speaker['status'] == 'active'): ?>
@@ -416,14 +438,14 @@ class Referral_Messenger
                             <?php
                             else :
                             ?>
-                                <p>No SpokesPerson Found</p>
+                                <p>No Spokesperson Found</p>
                             <?php
                             endif;
                             ?>
                         </div>
                     </div>
                     <div class="property-applied-speakers">
-                        <h5>Applied Speakers</h5>
+                        <h4>Applied Speakers</h4>
                         <div class="mpp-applied-speakers">
                             <?php
                             if (!empty($property['applied_speakers']) && count($property['applied_speakers']) > 0) :
@@ -735,6 +757,25 @@ class Referral_Messenger
         die();
     }
 
+    // AJAX CHANGE SPOKESPERSON STATUS
+    public function mpp_referral_listing_change_status()
+    {
+        $result = false;
+        $user_id = isset($_REQUEST['user']) ? $_REQUEST['user'] : 0;
+        $listing_id = isset($_REQUEST['listing']) ? $_REQUEST['listing'] : 0;
+        $status = isset($_REQUEST['status']) ? $_REQUEST['status'] : 0;
+        $spokespersons = get_post_meta($listing_id, 'mpp_spokespersons', true) ? get_post_meta($listing_id, 'mpp_spokespersons', true) : array();
+        if ($spokespersons && !empty($spokespersons)) {
+            if (array_key_exists($user_id, $spokespersons)) {
+                $spokespersons[$user_id]['status'] = $status;
+                update_post_meta($listing_id, 'mpp_spokespersons', $spokespersons);
+                $result = true;
+            }
+        }
+        echo json_encode(array('result' => $result, 'speakers' => $listing_id));
+        die();
+    }
+
     // AJAX INSERT MESSAGE ROW
     public function mpp_insert_message_row()
     {
@@ -936,6 +977,36 @@ class Referral_Messenger
             }
         }
         echo json_encode(array('result' => $result, 'speakers' => $listing_id));
+        die();
+    }
+
+    // CHANGE PROPERTY REFERRAL STATUS
+    public function mpp_spokesperson_ref_system()
+    {
+        $result = false;
+        $r = '';
+        $status = isset($_REQUEST['status']) ? $_REQUEST['status'] : 0;
+        $listing_id = isset($_REQUEST['listing']) ? $_REQUEST['listing'] : 0;
+        if (!empty($listing_id) && !empty($status)) {
+            $r = update_post_meta($listing_id, 'mpp_spokesperson_ref', $status);
+            if($r) $result = true;
+        }
+        echo json_encode(array('result' => $result, 'r'=> $r));
+        die();
+    }
+
+    // CHANGE SPOKESPERSON REGISTRATION STATUS
+    public function mpp_spokesperson_reg_status()
+    {
+        $result = false;
+        $r = '';
+        $status = isset($_REQUEST['status']) ? $_REQUEST['status'] : 0;
+        $listing_id = isset($_REQUEST['listing']) ? $_REQUEST['listing'] : 0;
+        if (!empty($listing_id) && !empty($status)) {
+            $r = update_post_meta($listing_id, 'mpp_spokesperson_reg', $status);
+            if($r) $result = true;
+        }
+        echo json_encode(array('result' => $result, 'r'=> $r));
         die();
     }
 }

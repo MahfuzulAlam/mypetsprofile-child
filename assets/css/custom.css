@@ -1351,3 +1351,15 @@ form.messenger-form {
 .spokesperson-actions .button {
   margin-bottom: 10px;
 }
+
+.spokesperson_reff_system,
+.spokesperson_switch {
+  margin-bottom: 20px;
+}
+
+.spokesperson_reff_system label,
+.spokesperson_switch label {
+  display: block;
+  font-weight: 700;
+  margin: 5px;
+}
