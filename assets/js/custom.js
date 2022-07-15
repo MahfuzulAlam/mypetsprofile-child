@@ -969,13 +969,13 @@ jQuery(document).ready(function ($) {
               action: "mpp_referral_listing_change_status",
               listing: listing,
               user: user,
-              status: "deactive",
+              status: "inactive",
             },
             success: function (response) {
               console.log(response);
               if (response.result == true) {
                 Swal.fire("Confirmed!", "", "success");
-                $status.text("Deactive");
+                $status.text("Inactive");
                 $this.text("Activate");
                 $this.attr("data-type", "activate");
               } else {
@@ -1068,4 +1068,7 @@ jQuery(document).ready(function ($) {
       return;
     }
   });
+
+  // INPUT MASK
+  $("#phone").inputmask({ mask: "(999)-999-9999" });
 });

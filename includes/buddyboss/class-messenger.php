@@ -275,7 +275,7 @@ class Referral_Messenger
                     <input type="text" class="spokespersons-field" name="first_name" id="first_name" />
                 </div>
                 <div class="directorist-fieldset">
-                    <label for="last_name">First Name</label>
+                    <label for="last_name">Last Name</label>
                     <input type="text" class="spokespersons-field" name="last_name" id="last_name" />
                 </div>
                 <div class="directorist-fieldset">
@@ -296,7 +296,7 @@ class Referral_Messenger
                 </div>
                 <div class="directorist-fieldset">
                     <label for="message">Message</label>
-                    <p>Please briefly describe why you’re like to be a spokesperson for our business, property or workplace</p>
+                    <p>Please briefly describe your interest to become a spokesperson.</p>
                     <textarea id="message" name="message"></textarea>
                 </div>
                 <div class="directorist-fieldset submit-button">
@@ -401,7 +401,7 @@ class Referral_Messenger
                                                         <div><span class="label">Name:</span> <?php echo $full_name; ?></div>
                                                     <?php endif; ?>
                                                     <?php if(isset($speaker['status']) && !empty($speaker['status'])): ?>
-                                                        <div><span class="label">Status:</span> <span class="spokesperson-status"><?php echo $speaker['status'] == 'active' ? 'Active': 'Deactive'; ?></span></div>
+                                                        <div><span class="label">Status:</span> <span class="spokesperson-status"><?php echo $speaker['status'] == 'active' ? 'Active': 'Inactive'; ?></span></div>
                                                     <?php endif; ?>
                                                     <?php if(isset($speaker['unit_number']) && !empty($speaker['unit_number'])): ?>
                                                         <div><span class="label">Unit number:</span> <?php echo $speaker['unit_number']; ?></div>
@@ -426,7 +426,7 @@ class Referral_Messenger
                                                     <?php if(isset($speaker['status']) && $speaker['status'] == 'active'): ?>
                                                     <a class="btn button mpp-referral-status" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="deactivate">Deactivate</a>
                                                     <?php endif; ?>
-                                                    <?php if(isset($speaker['status']) && $speaker['status'] == 'deactive'): ?>
+                                                    <?php if(isset($speaker['status']) && $speaker['status'] == 'inactive'): ?>
                                                     <a class="btn button mpp-referral-status" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="activate">Activate</a>
                                                     <?php endif; ?>
                                                 </div>
