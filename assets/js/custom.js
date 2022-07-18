@@ -555,7 +555,11 @@ jQuery(document).ready(function ($) {
           //console.log(response);
           if (response.result == true) {
             $(".messenger-container .discussion").html(
-              mpp_prepare_messages(response.messages, $sender)
+              mpp_prepare_messages(
+                response.messages,
+                $sender,
+                response.profile_images
+              )
             );
             $(".messenger-container").addClass("active");
 
@@ -646,7 +650,11 @@ jQuery(document).ready(function ($) {
           //console.log(response);
           if (response.result == true) {
             $(".messenger-container .discussion").html(
-              mpp_prepare_messages(response.messages, blockInfo.sender)
+              mpp_prepare_messages(
+                response.messages,
+                blockInfo.sender,
+                response.profile_images
+              )
             );
 
             // SCROLL TO BOTTOM
@@ -680,7 +688,11 @@ jQuery(document).ready(function ($) {
   });
 
   // Prepare Messages
-  function mpp_prepare_messages(messages = [], current_user = 0) {
+  function mpp_prepare_messages(
+    messages = [],
+    current_user = 0,
+    profile_images = []
+  ) {
     var html = "";
     var prev_sender = 0;
     var next_sender = 0;
@@ -700,6 +712,17 @@ jQuery(document).ready(function ($) {
           prev_sender !== message.sender_id
         )
           message_position = "single";
+
+        var profile_image = profile_images[owner];
+        if (message_position == "first") {
+          html +=
+            '<img src="' +
+            profile_image +
+            '" class="bubble-image ' +
+            owner +
+            '"/>';
+        }
+
         html +=
           '<div class="bubble ' +
           message_position +

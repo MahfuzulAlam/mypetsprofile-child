@@ -1363,3 +1363,18 @@ form.messenger-form {
   font-weight: 700;
   margin: 5px;
 }
+
+.bubble-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 40px;
+  margin: 5px 0;
+}
+
+.bubble-image.sender {
+  align-self: flex-end;
+}
+
+.bubble-image.recipient {
+  align-self: flex-start;
+}

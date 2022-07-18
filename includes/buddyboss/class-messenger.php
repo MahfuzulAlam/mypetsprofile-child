@@ -183,8 +183,8 @@ class Referral_Messenger
                                 )
                             ); ?>
                         </td>
-                        <td class="username"><?php echo $user->data->display_name . " (" . $user->data->user_nicename . ")";
-                                                ?></td>
+                        <!-- <td class="username"><?php //echo $user->data->display_name . " (" . $user->data->user_nicename . ")"; ?></td> -->
+                        <td class="username"><?php echo $user->data->display_name; ?></td>
                         <td>
                             <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="<?php echo $user_id; ?>" data-listing="<?php echo $listing_id; ?>" data-type="accept">Start Chatting</a>
                             <!-- <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="5" data-listing="<?php echo $listing_id; ?>" data-type="accept">Start Chatting</a> -->
@@ -616,7 +616,21 @@ class Referral_Messenger
                                             $bd_message = new MPP_Database;
                                             $messages = $bd_message->retrieve_messages($first_info['sender'], $first_info['recipient'], $first_info['listing']);
 
-                                            //e_var_dump($messages);
+                                            $sender_avatar_url =  bp_core_fetch_avatar(
+                                                array(
+                                                    'item_id' => $first_info['sender'], // id of user for desired avatar
+                                                    'type'    => 'thumb',
+                                                    'html'   => false     // FALSE = return url, TRUE (default) = return img html
+                                                )
+                                            );
+
+                                            $recipient_avatar_url =  bp_core_fetch_avatar(
+                                                array(
+                                                    'item_id' => $first_info['recipient'], // id of user for desired avatar
+                                                    'type'    => 'thumb',
+                                                    'html'   => false     // FALSE = return url, TRUE (default) = return img html
+                                                )
+                                            );
 
                                             $prev_sender = $next_sender = 0;
                                             if ($messages) {
@@ -630,6 +644,14 @@ class Referral_Messenger
                                                     if ($prev_sender == $message->sender_id) $message_position = 'middle';
                                                     if ($next_sender !== $message->sender_id) $message_position = 'last';
                                                     if ($next_sender !== $message->sender_id && $prev_sender !== $message->sender_id) $message_position = 'single';
+                                            
+                                                    if($message_position == 'first'){
+                                                        $profile_image = $message->sender_id == $chat_client_id ? $sender_avatar_url : $recipient_avatar_url;
+                                            ?>
+                                                    <img src="<?php echo $profile_image; ?>" class="bubble-image <?php echo $owner; ?>"/>
+                                            <?php
+                                                    }
+                                            
                                             ?>
                                                     <div class="bubble <?php echo $owner; ?> <?php echo $message_position; ?>"><?php echo $message->message; ?></div>
                                             <?php
@@ -834,6 +856,7 @@ class Referral_Messenger
         $result = false;
         $info = isset($_REQUEST['info']) ? $_REQUEST['info'] : '';
         $messages = '';
+        $profile_images = array();
 
         if (!empty($info)) {
             $sender = $info['sender'];
@@ -851,10 +874,26 @@ class Referral_Messenger
                         }
                     }
                     $result = true;
+                    // Profile Images
+                    $profile_images['sender'] = bp_core_fetch_avatar(
+                        array(
+                            'item_id' => $sender, // id of user for desired avatar
+                            'type'    => 'thumb',
+                            'html'   => false     // FALSE = return url, TRUE (default) = return img html
+                        )
+                    );
+                    // Recipient
+                    $profile_images['recipient'] = bp_core_fetch_avatar(
+                        array(
+                            'item_id' => $recipient, // id of user for desired avatar
+                            'type'    => 'thumb',
+                            'html'   => false     // FALSE = return url, TRUE (default) = return img html
+                        )
+                    );
                 }
             }
         }
-        echo json_encode(array('result' => $result, 'messages' => $messages));
+        echo json_encode(array('result' => $result, 'messages' => $messages, 'profile_images' => $profile_images));
         die();
     }
 
