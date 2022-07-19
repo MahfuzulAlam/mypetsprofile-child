@@ -246,7 +246,11 @@ class Referral_Messenger
                 );
 
                 $inserted  = $this->mpp_apply_as_referral_listing($property_id, $args);
-                if ($inserted) echo '<p>You have successfully submitted the application. We will inform you within 24 hours.<p>';
+                if ($inserted) { 
+                    echo '<p>You have successfully submitted the application. We will inform you within 24 hours.<p>';
+                    $post = get_post( $inserted );
+                    do_action('after_inserting_referral', $inserted, $post->post_author);
+                }
             } else {
                 echo '<p>Please insert a Property first!</p>';
             }
@@ -942,12 +946,12 @@ class Referral_Messenger
                 if (!array_key_exists($user_id, $applied_speakers)) {
                     $applied_speakers[$user_id] = $args;
                     update_post_meta($listing_id, 'mpp_applied_speakers', $applied_speakers);
-                    $result = true;
+                    $result = $listing_id;
                 }
             } else {
                 $applied_speakers[$user_id] = $args;
                 update_post_meta($listing_id, 'mpp_applied_speakers', $applied_speakers);
-                $result = true;
+                $result = $listing_id;
             }
         }
         return $result;

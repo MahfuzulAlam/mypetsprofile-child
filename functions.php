@@ -134,17 +134,7 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-coauthors.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-profile-forms.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-database.php');
-	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-referral-notification.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-messenger.php');
-
-	// add_action(
-	// 	'init',
-	// 	function () {
-	// 	   // Register custom notification in preferences screen.
-	// 	   if ( class_exists( 'BP_Custom_Notification' ) ) {
-	// 		  BP_Custom_Notification::instance();
-	// 	   }
-	// 	}
-	//  );
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-referral-notification.php');
 
 endif;
