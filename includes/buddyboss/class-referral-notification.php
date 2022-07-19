@@ -59,7 +59,7 @@ class MPP_Referral_Notification
         if ( $action == 'spokesperson_request' ) {
 
             $spokesperson = get_userdata($secondary_item_id);
-            $link = home_url('/dashboard-2/');
+            $link = home_url('/owner-dashboard/');
             $text = "New spokesperson request from ". $spokesperson->display_name;
             $title = "Spokesperson Request";
 
