@@ -2204,3 +2204,34 @@ function mpp_login_redirect_first_time($url, $req, $user)
 add_filter('login_redirect', 'mpp_login_redirect_first_time', 10, 3);
 
 // Login Redirect
+
+// APP MENU ISSUE
+
+add_filter('bbapp_app_menu_filter', 'mpp_bbapp_app_menu_filter', 10, 2);
+
+function mpp_bbapp_app_menu_filter($app_menu, $menu_type)
+{
+    if ($menu_type == 'tabbar') {
+        $app_menu[] = array(
+            'label' => 'More',
+            'icon' =>
+            array(
+                'uri' => 'bbapp/list',
+                'monochrome_setting' => '{\"icon_monochrome_checkbox\":\"yes\",\"monochrome_option\":\"default\",\"icon_monochrome_color\":\"#0e5073\"}',
+            ),
+            'original' => 'More',
+            'id' => '6092b9c98b037',
+            'object' => 'more',
+            'data' =>
+            array(
+                'id' => 'more',
+                'parent' => '',
+            ),
+            'type' => 'core',
+        );
+    }
+
+    return $app_menu;
+}
+
+// APP MENU ISSUE
