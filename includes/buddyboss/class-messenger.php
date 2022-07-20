@@ -346,6 +346,10 @@ class Referral_Messenger
             endwhile;
             wp_reset_postdata();
         endif;
+
+        //$db = new MPP_Database;
+        //e_var_dump($db->get_unread_messages_receiver_list());
+
         ob_start();
         if (empty($properties)) echo '<p>No pending application found.</p>';
     ?>

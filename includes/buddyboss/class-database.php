@@ -148,6 +148,23 @@ class MPP_Database
 
         return $results;
     }
+
+    // GET REFERRAL UNREAD MESSAGE LIST
+    public function get_unread_messages_receiver_list()
+    {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . "mpp_messenger";
+
+        $results = $wpdb->get_results(
+            $wpdb->prepare("SELECT * FROM {$table_name} 
+            WHERE `status` = %d
+            GROUP BY recipient_id, sender_id
+            ORDER BY date_sent ASC", 2)
+        );
+
+        return $results;
+    }
 }
 
 new MPP_Database;
