@@ -796,6 +796,7 @@ class Referral_Messenger
                 $spokespersons[$user_id]['status'] = $status;
                 update_post_meta($listing_id, 'mpp_spokespersons', $spokespersons);
                 $result = true;
+                do_action('mpp_spokespersor_status_changed', $user_id, $listing_id, $status);
             }
         }
         echo json_encode(array('result' => $result, 'speakers' => $listing_id));
@@ -980,6 +981,7 @@ class Referral_Messenger
                     $spokespersons[$user_id] = $args;
                     update_post_meta($listing_id, 'mpp_spokespersons', $spokespersons);
                     $result = true;
+                    do_action('mpp_accept_spokespersor_application', $user_id, $listing_id);
                 }
             }
         }
@@ -999,6 +1001,7 @@ class Referral_Messenger
                 unset($applied_speakers[$user_id]);
                 update_post_meta($listing_id, 'mpp_applied_speakers', $applied_speakers);
                 $result = true;
+                do_action('mpp_reject_spokespersor_application', $user_id, $listing_id);
             }
         }
         echo json_encode(array('result' => $result, 'speakers' => $listing_id));
@@ -1017,6 +1020,7 @@ class Referral_Messenger
                 unset($spokespersons[$user_id]);
                 update_post_meta($listing_id, 'mpp_spokespersons', $spokespersons);
                 $result = true;
+                do_action('mpp_spokesperson_removed', $user_id, $listing_id);
             }
         }
         echo json_encode(array('result' => $result, 'speakers' => $listing_id));
