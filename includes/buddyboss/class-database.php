@@ -148,16 +148,16 @@ class MPP_Database
             ORDER BY date_sent DESC", $sender_id, $sender_id)
         );
 
-        if( $results && count($results) > 0 ){
-            foreach( $results as $row ){
-                if( $row->sender_id == $sender_id ){
+        if ($results && count($results) > 0) {
+            foreach ($results as $row) {
+                if ($row->sender_id == $sender_id) {
                     $people_id = $row->recipient_id;
-                }else{
+                } else {
                     $people_id = $row->sender_id;
                 }
-                
-                $search_result = $this->search($people, array( 'people' => $people_id, 'listing_id' => $row->listing_id ));
-                if(empty($search_result)) array_push($people, $row);
+
+                $search_result = $this->search($people, array('people' => $people_id, 'listing_id' => $row->listing_id));
+                if (empty($search_result)) array_push($people, $row);
             }
         }
 
@@ -184,22 +184,22 @@ class MPP_Database
     }
 
     // ARRAY SEARCH
-    public function search($array, $search_list) {
-  
+    public function search($array, $search_list)
+    {
+
         // Create the result array
         $result = array();
-      
+
         // Iterate over each array element
         foreach ($array as $key => $value) {
-      
-            if($value->recipient_id == $search_list['people'] || $value->sender_id == $search_list['people'] ){
-                if($value->listing_id == $search_list['listing_id']){
+
+            if ($value->recipient_id == $search_list['people'] || $value->sender_id == $search_list['people']) {
+                if ($value->listing_id == $search_list['listing_id']) {
                     $result[] = $value;
                 }
             }
-
         }
-      
+
         // Return result 
         return $result;
     }
