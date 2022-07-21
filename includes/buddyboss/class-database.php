@@ -135,6 +135,8 @@ class MPP_Database
     {
         global $wpdb;
 
+        $people = array();
+
         $table_name = $wpdb->prefix . "mpp_messenger";
 
         $results = $wpdb->get_results(
@@ -142,11 +144,24 @@ class MPP_Database
             WHERE 
             ( sender_id=%d
             OR recipient_id=%d )
-            GROUP BY listing_id
-            ORDER BY date_sent ASC", $sender_id, $sender_id)
+            GROUP BY recipient_id, sender_id, listing_id
+            ORDER BY date_sent DESC", $sender_id, $sender_id)
         );
 
-        return $results;
+        if( $results && count($results) > 0 ){
+            foreach( $results as $row ){
+                if( $row->sender_id == $sender_id ){
+                    $people_id = $row->recipient_id;
+                }else{
+                    $people_id = $row->sender_id;
+                }
+                
+                $search_result = $this->search($people, array( 'people' => $people_id, 'listing_id' => $row->listing_id ));
+                if(empty($search_result)) array_push($people, $row);
+            }
+        }
+
+        return $people;
     }
 
     // GET REFERRAL UNREAD MESSAGE LIST
@@ -162,10 +177,31 @@ class MPP_Database
             $wpdb->prepare("SELECT * FROM {$table_name} 
             WHERE `status` = %d
             GROUP BY recipient_id, sender_id
-            ORDER BY date_sent ASC", $status)
+            ORDER BY date_sent DESC", $status)
         );
 
         return $results;
+    }
+
+    // ARRAY SEARCH
+    public function search($array, $search_list) {
+  
+        // Create the result array
+        $result = array();
+      
+        // Iterate over each array element
+        foreach ($array as $key => $value) {
+      
+            if($value->recipient_id == $search_list['people'] || $value->sender_id == $search_list['people'] ){
+                if($value->listing_id == $search_list['listing_id']){
+                    $result[] = $value;
+                }
+            }
+
+        }
+      
+        // Return result 
+        return $result;
     }
 }
 

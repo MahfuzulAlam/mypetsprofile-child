@@ -133,7 +133,7 @@ class MPP_Referral_Notification
                     'component_action'  => 'unread_messages',
                     'date_notified'     => bp_core_current_time(),
                     'is_new'            => 1,
-                    'allow_duplicate'   => true,
+                    'allow_duplicate'   => false,
                 ) );
             }
         }
