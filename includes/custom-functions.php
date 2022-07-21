@@ -2235,3 +2235,7 @@ function mpp_bbapp_app_menu_filter($app_menu, $menu_type)
 }
 
 // APP MENU ISSUE
+
+// add_action('init', function(){
+//     do_action('after_inserting_referral', 1, 1);
+// });

@@ -136,5 +136,6 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-database.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-messenger.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-referral-notification.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-referral-email.php');
 
 endif;
