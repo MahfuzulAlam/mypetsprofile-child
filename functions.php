@@ -125,9 +125,12 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 
 	/****************************** CUSTOM FUNCTIONS ******************************/
 
+	// CUSTOMS
 	require_once(get_stylesheet_directory() . '/includes/custom-functions.php');
 	require_once(get_stylesheet_directory() . '/includes/custom-hooks.php');
 	require_once(get_stylesheet_directory() . '/includes/custom-shortcodes.php');
+
+	// BUDDYBOSS
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-adoption.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-qrcode.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-petalert.php');
@@ -137,5 +140,8 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-messenger.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-referral-notification.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-referral-email.php');
+
+	// DIRECTORIST
+	require_once(get_stylesheet_directory() . '/includes/directorist/class-fields.php');
 
 endif;

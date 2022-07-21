@@ -1094,4 +1094,67 @@ jQuery(document).ready(function ($) {
 
   // INPUT MASK
   $("#phone").inputmask({ mask: "(999)-999-9999" });
+
+  // CHECKBOX VCANCY
+  $("input[name='vacancy[]").on("change", function () {
+    var vacancy_list = [];
+    if ($(this).val() == "none") {
+      if ($(this).is(":checked")) {
+        // DESELECT ALL
+        $("input[name='vacancy[]']").each(function () {
+          if ($(this).val() != "none") {
+            $(this).prop("checked", false);
+            $(this).parents(".directorist-checkbox").hide();
+          }
+        });
+      } else {
+        // SHOW ALL
+        $("input[name='vacancy[]']").each(function () {
+          $(this).parents(".directorist-checkbox").show();
+        });
+      }
+    } else {
+      var parent = $(this).parents(".directorist-checkbox");
+      if ($(this).is(":checked")) {
+        parent.find(".vacancy-number-wrapper").show();
+      } else {
+        parent.find(".vacancy-number-wrapper").hide();
+      }
+    }
+
+    var vacancy = {};
+    $("input[name='vacancy[]']:checked").each(function () {
+      var parent = $(this).parents(".directorist-checkbox");
+      var option_name = $(this).val();
+      var option_number = parent.find('input[type="number"]').val();
+      if (option_number > 0) vacancy[option_name] = parseInt(option_number);
+      if (option_name == "none") vacancy[option_name] = 0;
+    });
+    if ($.isEmptyObject(vacancy)) {
+      $('input[name="mpp-vacancy"]').val("");
+    } else {
+      $('input[name="mpp-vacancy"]').val(JSON.stringify(vacancy));
+    }
+    console.log(vacancy);
+  });
+
+  $(".vacancy-input-wrapper input[type='number']").on("change", function () {
+    var vacancy = {};
+    $("input[name='vacancy[]']:checked").each(function () {
+      var parent = $(this).parents(".directorist-checkbox");
+      var option_name = $(this).val();
+      var option_number = parent.find('input[type="number"]').val();
+      if (option_number > 0) vacancy[option_name] = parseInt(option_number);
+      if (option_name == "none") vacancy[option_name] = 0;
+    });
+    if ($.isEmptyObject(vacancy)) {
+      $('input[name="mpp-vacancy"]').val("");
+    } else {
+      $('input[name="mpp-vacancy"]').val(JSON.stringify(vacancy));
+    }
+
+    console.log(vacancy);
+  });
+
+  // CHECKBOX VACANCY
 });

@@ -1378,3 +1378,17 @@ form.messenger-form {
 .bubble-image.recipient {
   align-self: flex-start;
 }
+
+/* VACANCY STYLES */
+.vacancy-input-wrapper {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.vacancy-input-wrapper .vacancy-number-wrapper {
+  padding-left: 30px;
+}
+
+.vacancy-input-wrapper .vacancy-number-wrapper input {
+  width: 100px;
+}
