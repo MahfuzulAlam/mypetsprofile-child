@@ -133,7 +133,7 @@ class MPP_Referral_Notification
                     'component_action'  => 'unread_messages',
                     'date_notified'     => bp_core_current_time(),
                     'is_new'            => 1,
-                    'allow_duplicate'   => false,
+                    'allow_duplicate'   => true,
                 ) );
             }
         }
@@ -168,7 +168,7 @@ class MPP_Referral_Notification
         {
             $listing = get_the_title($item_id);
             $link = get_permalink($item_id);
-            $text = "You are rejected as a Spokesperson of ". $listing;
+            $text = "You are not approved as a Spokesperson of ". $listing;
             $title = "Spokesperson Accept";
         }
         elseif( $action == 'spokesperson_status_changed_active')

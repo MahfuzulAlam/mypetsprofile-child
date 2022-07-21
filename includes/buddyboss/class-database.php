@@ -156,11 +156,13 @@ class MPP_Database
 
         $table_name = $wpdb->prefix . "mpp_messenger";
 
+        $status = 1;
+
         $results = $wpdb->get_results(
             $wpdb->prepare("SELECT * FROM {$table_name} 
             WHERE `status` = %d
             GROUP BY recipient_id, sender_id
-            ORDER BY date_sent ASC", 2)
+            ORDER BY date_sent ASC", $status)
         );
 
         return $results;
