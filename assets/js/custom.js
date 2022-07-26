@@ -737,7 +737,7 @@ jQuery(document).ready(function ($) {
   }
   // Prepare Messages
 
-  $(".spokespersons-property-name").select2({
+  $(".spokespersons-property-name, #mpp_housing").select2({
     ajax: {
       url: mppChild.ajaxurl,
       dataType: "json",

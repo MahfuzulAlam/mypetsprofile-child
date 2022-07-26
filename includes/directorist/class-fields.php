@@ -21,8 +21,7 @@ class MPP_Directorist_Fields
     {
         $widgets['mpp_vacancy'] = array(
             'label' => 'Vacancy',
-            'icon' => 'uil uil-arrow
-        ',
+            'icon' => 'uil uil-arrow',
             'options' => [
                 'type' => [
                     'type'  => 'hidden',
@@ -111,6 +110,71 @@ class MPP_Directorist_Fields
                 ]
             ]
         );
+
+        $widgets['mpp_housing'] = array(
+            'label' => 'Select Housing',
+            'icon' => 'uil uil-home',
+            'options' => [
+                'type' => [
+                    'type'  => 'hidden',
+                    'value' => 'mpp_housing',
+                ],
+                'label' => [
+                    'type'  => 'text',
+                    'label' => __('Label', 'directorist'),
+                    'value' => 'Housing',
+                ],
+                'field_key' => apply_filters('directorist_custom_field_meta_key_field_args', [
+                    'type'  => 'hidden',
+                    'label' => __('Key', 'directorist'),
+                    'value' => 'mpp-apartment',
+                    'rules' => [
+                        'unique' => true,
+                        'required' => true,
+                    ]
+                ]),
+                'class' => [
+                    'type'  => 'text',
+                    'label' => __('Class', 'directorist'),
+                    'value' => 'directorist-field-housing',
+                ],
+                'placeholder' => [
+                    'type'  => 'text',
+                    'label' => __('Placeholder', 'directorist'),
+                    'value' => '',
+                ],
+                'description' => [
+                    'type'  => 'text',
+                    'label' => __('Description', 'directorist'),
+                    'value' => '',
+                ],
+                'required' => [
+                    'type'  => 'toggle',
+                    'label'  => __('Required', 'directorist'),
+                    'value' => false,
+                ],
+                'only_for_admin' => [
+                    'type'  => 'toggle',
+                    'label'  => __('Only For Admin Use', 'directorist'),
+                    'value' => false,
+                ],
+                'assign_to' => [
+                    'type' => 'radio',
+                    'label' => __('Assign to', 'directorist'),
+                    'value' => 'form',
+                    'options' => [
+                        [
+                            'label' => __('Form', 'directorist'),
+                            'value' => 'form',
+                        ],
+                        [
+                            'label' => __('Category', 'directorist'),
+                            'value' => 'category',
+                        ],
+                    ],
+                ]
+            ]
+        );
         return $widgets;
     }
 
@@ -125,6 +189,17 @@ class MPP_Directorist_Fields
                 ],
             ]
         ];
+
+        // Housing
+        $widgets['mpp_housing'] = [
+            'options' => [
+                'icon' => [
+                    'type'  => 'icon',
+                    'label' => 'Widget Icon',
+                    'value' => 'las la-home',
+                ],
+            ]
+        ];
         return $widgets;
     }
 
@@ -134,6 +209,10 @@ class MPP_Directorist_Fields
             $data = $field_data;
             require(get_stylesheet_directory() . '/includes/directorist/templates/listing-form/vacancy.php');
         }
+        if ('mpp_housing' === $field_data['widget_name']) {
+            $data = $field_data;
+            require(get_stylesheet_directory() . '/includes/directorist/templates/listing-form/housing.php');
+        }
         return $template;
     }
 
@@ -142,6 +221,10 @@ class MPP_Directorist_Fields
         if ('mpp_vacancy' === $field_data['widget_name']) {
             $data = $field_data;
             require(get_stylesheet_directory() . '/includes/directorist/templates/single/vacancy.php');
+        }
+        if ('mpp_housing' === $field_data['widget_name']) {
+            $data = $field_data;
+            require(get_stylesheet_directory() . '/includes/directorist/templates/single/housing.php');
         }
         return $template;
     }
