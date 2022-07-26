@@ -58,7 +58,7 @@ function check_vacancy_number($option, $saved_data)
             <a href="#" class="directorist-custom-field-btn-more"><?php esc_html_e('See More', 'directorist'); ?></a>
 
         <?php endif; ?>
-        <input type="text" name="<?php echo esc_attr($data['field_key']); ?>" value='<?php echo $old_data; ?>' />
+        <input type="hidden" name="<?php echo esc_attr($data['field_key']); ?>" value='<?php echo $old_data; ?>' />
     </div>
     <?php \Directorist\Directorist_Listing_Form::instance()->field_description_template($data); ?>
 
