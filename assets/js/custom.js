@@ -1104,7 +1104,9 @@ jQuery(document).ready(function ($) {
         $("input[name='vacancy[]']").each(function () {
           if ($(this).val() != "none") {
             $(this).prop("checked", false);
-            $(this).parents(".directorist-checkbox").hide();
+            var parent_checkbox = $(this).parents(".directorist-checkbox");
+            parent_checkbox.hide();
+            parent_checkbox.find(".vacancy-number-wrapper").hide();
           }
         });
       } else {

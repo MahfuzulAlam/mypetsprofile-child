@@ -2239,3 +2239,16 @@ function mpp_bbapp_app_menu_filter($app_menu, $menu_type)
 // add_action('init', function(){
 //     do_action('after_inserting_referral', 1, 1);
 // });
+
+
+// Function::GET VACANCY OPTION NAME
+
+function mpp_get_vacancy_option_name($key = '', $options = array())
+{
+    if (!empty($options) && !empty($key)) {
+        foreach ($options as $option) {
+            if ($option['option_value'] == $key) return $option['option_label'];
+        }
+    }
+    return '';
+}
