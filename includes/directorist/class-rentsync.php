@@ -37,6 +37,9 @@ class MPP_Rentsync
     private $company_website = '';
     private $company_logo = '';
 
+    private $property_category = 'apartments';
+    private $directory_type = 'pets-community';
+
     private $apiUrl = 'https://api.theliftsystem.com/v2/feeds/direct/my_pets_profile?auth_token=x2zQ4xmp5ALojxD61ZsA&company=avenueliving';
     private $localUrl = __DIR__ . '/listings.json';
 
@@ -153,6 +156,7 @@ class MPP_Rentsync
     public function set_property_meta_list()
     {
         $this->property_meta_list = array(
+            "id" => "_property_id",
             "url" => "_website",
             "tagline" => "_tagline",
             "buildingType" => "_building_type",
@@ -211,6 +215,56 @@ class MPP_Rentsync
     }
 
     /**
+     * INSERT PROPERTY INTO DB
+     */
+    public function insert_property($property_data)
+    {
+        if (!isset($property_data->id) || empty($property_data->id)) return;
+        $args = $this->prepare_property_args($property_data);
+
+        if (!$this->is_listing_available($property_data->id)) {
+            $listing_id = wp_insert_post($args);
+            return $listing_id;
+        }
+
+        return false;
+    }
+
+    /**
+     * CHECK AVAILABLE LISTING
+     */
+    public function is_listing_available($id = 0)
+    {
+        if ($id) {
+
+            $query = new WP_Query(
+                array(
+                    'post_type' => ATBDP_POST_TYPE,
+                    'meta_query' => array(
+                        'relation' => 'AND',
+                        array(
+                            'key' => '_source',
+                            'value' => 'rentsync',
+                            'compare' => '='
+                        ),
+                        array(
+                            'key' => '_property_id',
+                            'value' => $id,
+                            'compare' => '='
+                        ),
+                    ),
+                    'fields' => 'id'
+                )
+            );
+
+            if ($query) {
+                if (isset($query->posts) && count($query->posts) > 0) return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * PREPARE PROPERTY ARGUMENTS
      */
     public function prepare_property_args($property_info)
@@ -220,11 +274,19 @@ class MPP_Rentsync
         $args['post_content'] = isset($property_info->buildingDescription) && !empty($property_info->buildingDescription) ? $property_info->buildingDescription : '';
         $args['post_type'] = ATBDP_POST_TYPE;
         $args['post_status'] = 'publish';
+        $args['post_author'] = 1;
 
         // DIRECTORY TYPE
         //$directory_type_term = get_term_by('slug', 'units', ATBDP_DIRECTORY_TYPE);
+        // $args['tax_input'] = array(
+        //     ATBDP_DIRECTORY_TYPE => $this->directory_type,,
+        //     ATBDP_LOCATION => $this->get_property_location($property_info),
+        //     ATBDP_CATEGORY => $this->property_category,
+        // );
         $args['tax_input'] = array(
-            ATBDP_DIRECTORY_TYPE => 'pets-community'
+            ATBDP_DIRECTORY_TYPE => $this->directory_type,
+            ATBDP_LOCATION => $this->get_property_locations($property_info),
+            ATBDP_CATEGORY => $this->get_property_categories(),
         );
         // DIRECTORY TYPE
 
@@ -234,7 +296,59 @@ class MPP_Rentsync
         return array_filter($args);
     }
 
-    // PREPARE METADATA
+    /**
+     * GET PROPERTY LOCATION
+     */
+    public function get_property_locations($property)
+    {
+        $locations = [];
+        if (isset($property->location)) {
+            if (isset($property->location->city) && !empty($property->location->city)) {
+                $locations[] = $this->retrive_create_taxonomy($property->location->city, ATBDP_LOCATION);
+            }
+            if (isset($property->location->province) && !empty($property->location->province)) {
+                $locations[] = $this->retrive_create_taxonomy($property->location->province, ATBDP_LOCATION);
+            }
+        }
+        if (count($locations) > 0) {
+            return array_filter($locations);
+        }
+        return '';
+    }
+
+    /**
+     * GET PROPERTY CATEGORIES
+     */
+    public function get_property_categories()
+    {
+        $categories = [];
+        $category_id = $this->retrive_create_taxonomy($this->property_category, ATBDP_CATEGORY, 'slug');
+        if ($category_id) {
+            $categories[] = $category_id;
+            return $categories;
+        }
+        return '';
+    }
+
+    /**
+     * RETRIVE/CREATE TAXONOMY
+     */
+    public function retrive_create_taxonomy($term_name = '', $taxonomy = '', $field = 'title')
+    {
+        if (empty($term_name) || empty($taxonomy)) return;
+        $term = get_term_by($field, $term_name, $taxonomy);
+        if ($term) {
+            return $term->term_id;
+        } else {
+            $new_term = wp_create_term($term_name, $taxonomy);
+            if ($new_term && !is_wp_error($new_term)) return $new_term['term_id'];
+        }
+        return '';
+    }
+
+    /**
+     * PREPARE PROPERTY METADATA
+     */
     public function prepare_property_metadata($values, $mpp_housing = 0)
     {
         if (empty($values)) return;
@@ -247,6 +361,17 @@ class MPP_Rentsync
             $meta_args['_mpp-housing'] = $mpp_housing;
         }
         // MPP HOUSING
+
+        // PRICING PLANS
+        $meta_args['_fm_plans'] = 785;
+        $meta_args['_fm_plans_by_admin'] = 1;
+        // PRICING PLANS
+
+        // POST STATUS
+        $meta_args['_listing_status'] = 'post_status';
+        $meta_args['_never_expire'] = 1;
+        $meta_args['_directory_type'] = $this->directory_type;
+        // POST STATUS
 
         // SOURCE
         $meta_args['_source'] = 'rentsync';
@@ -327,7 +452,10 @@ class MPP_Rentsync
         //$dir = $this->get_form_field_info('units', 'unit_type');
         ob_start();
 
-        e_var_dump($this->prepare_property_args($this->properties[0]));
+        e_var_dump($this->get_property_locations($this->properties[15]));
+        e_var_dump($this->get_property_categories());
+        e_var_dump($this->insert_property($this->properties[15]));
+
 
         return ob_get_clean();
     }
