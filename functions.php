@@ -41,6 +41,10 @@ function buddyboss_theme_child_languages()
 		define('MPP_ADMIN_VERSION', '1.0.0');
 	}
 
+	if (!defined('MPP_CHILD_FILE_URI')) {
+		define('MPP_CHILD_FILE_URI', get_stylesheet_directory_uri() . '/assets/file');
+	}
+
 	// Translate text from the CHILD theme only.
 	// Change 'buddyboss-theme' instances in all child theme files to 'buddyboss-theme-child'.
 	// load_theme_textdomain( 'buddyboss-theme-child', get_stylesheet_directory() . '/languages' );
