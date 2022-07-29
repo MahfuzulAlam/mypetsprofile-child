@@ -24,33 +24,38 @@ function buddyboss_theme_child_languages()
 	// Translate text from the PARENT theme.
 	load_theme_textdomain('buddyboss-theme', get_stylesheet_directory() . '/languages');
 
-	// Global Fixed Valiable - Constants
-	if (!defined('MPP_SITE_URL')) {
-		define('MPP_SITE_URL', get_site_url());
-	}
-
-	if (!defined('MPP_VERSION')) {
-		define('MPP_VERSION', '1.1.10');
-	}
-
-	if (!defined('MPP_MAP_VERSION')) {
-		define('MPP_MAP_VERSION', '1.0.0');
-	}
-
-	if (!defined('MPP_ADMIN_VERSION')) {
-		define('MPP_ADMIN_VERSION', '1.0.0');
-	}
-
-	if (!defined('MPP_CHILD_FILE_URI')) {
-		define('MPP_CHILD_FILE_URI', get_stylesheet_directory_uri() . '/assets/file');
-	}
-
 	// Translate text from the CHILD theme only.
 	// Change 'buddyboss-theme' instances in all child theme files to 'buddyboss-theme-child'.
 	// load_theme_textdomain( 'buddyboss-theme-child', get_stylesheet_directory() . '/languages' );
 
 }
 add_action('after_setup_theme', 'buddyboss_theme_child_languages');
+
+
+/**
+ * DECLARE GLOBAL VARIABLES
+ */
+
+// Global Fixed Valiable - Constants
+if (!defined('MPP_SITE_URL')) {
+	define('MPP_SITE_URL', get_site_url());
+}
+
+if (!defined('MPP_VERSION')) {
+	define('MPP_VERSION', '1.1.10');
+}
+
+if (!defined('MPP_MAP_VERSION')) {
+	define('MPP_MAP_VERSION', '1.0.0');
+}
+
+if (!defined('MPP_ADMIN_VERSION')) {
+	define('MPP_ADMIN_VERSION', '1.0.0');
+}
+
+if (!defined('MPP_CHILD_FILE_DIR')) {
+	define('MPP_CHILD_FILE_DIR', get_stylesheet_directory() . '/assets/file');
+}
 
 /**
  * Enqueues scripts and styles for child theme front-end.

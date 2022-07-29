@@ -8,12 +8,9 @@
 
 class MPP_Rentsync
 {
-
-    public function __construct()
-    {
-        $this->setup();
-        add_shortcode('rentsync', array($this, 'rentsync'));
-    }
+    /**
+     * VARIABLES
+     */
 
     private $properties = array();
     private $units = array();
@@ -26,10 +23,10 @@ class MPP_Rentsync
 
     private $author_id = 0;
 
-    private $building_types = [];
-    private $amenities = [];
-    private $utilities = [];
-    private $unit_types = [];
+    private $building_types = []; // Property
+    private $amenities = []; // Property
+    private $utilities = []; // Property
+    private $unit_types = []; // Units
 
     private $source = 'rentsync';
     private $company_name = '';
@@ -51,13 +48,34 @@ class MPP_Rentsync
     private $apiUrl = '';
     private $localUrl = '';
 
+    /**
+     * CONSTRUCT FUNCTION
+     */
+    public function __construct()
+    {
+        //$this->setup();
+        add_shortcode('rentsync', array($this, 'rentsync'));
 
+        // RENTSYNC API SETUP
+        //add_action('mpp_rentsync_setup_api_data', array($this, 'mpp_rentsync_setup_api_data'));
+    }
 
-    public function setup()
+    /**
+     * SETUP BEFORE SAVE API DATA
+     */
+
+    public function before_save_api_setup()
     {
         $this->set_remote_api_url();
         $this->set_local_file_location();
+    }
 
+    /**
+     * SETUP AFTER SAVE API DATA
+     */
+
+    public function after_save_api_setup()
+    {
         if (!file_exists($this->localUrl)) return;
         $this->set_unit_meta_list();
         $this->set_property_meta_list();
@@ -66,6 +84,33 @@ class MPP_Rentsync
         $this->process_data();
         $this->set_all_information();
         $this->set_author_id();
+        $this->update_all_field_options();
+    }
+
+
+    /**
+     * mpp_rentsync_setup_api_data
+     */
+
+    public function mpp_rentsync_setup_api_data()
+    {
+        $this->before_save_api_setup();
+        $this->save_api_info_to_local();
+        $this->after_save_api_setup();
+        $this->insert_all_properties_units();
+    }
+
+    /**
+     * INSERT ALL PROPERTIES AND UNITS
+     */
+
+    public function insert_all_properties_units()
+    {
+        if ($this->properties && count($this->properties) > 0) {
+            foreach ($this->properties as $property) {
+                $this->create_property_units($property);
+            }
+        }
     }
 
     /**
@@ -84,9 +129,9 @@ class MPP_Rentsync
                     $this->create_unit($unit_data);
                 }
             }
-            do_action('atbdp_after_created_listing', $property_id);
         }
     }
+
     /**
      * SET UNIT META LIST
      */
@@ -137,7 +182,7 @@ class MPP_Rentsync
 
     /**
      * PREPARE UNIT METADATA
-     * */
+     */
     public function prepare_unit_metadata($values)
     {
         if (empty($values)) return;
@@ -198,7 +243,6 @@ class MPP_Rentsync
     /**
      * GET UNIT CATEGORIES
      */
-
     public function get_unit_categories()
     {
         $categories = [];
@@ -218,9 +262,16 @@ class MPP_Rentsync
         if (!isset($unit_data->id) || empty($unit_data->id)) return;
         $args = $this->prepare_unit_args($unit_data);
 
-        if (!$this->is_unit_available($unit_data->id)) {
-            $unit_id = wp_insert_post($args);
-            return $unit_id;
+        $is_unit_available = $this->is_unit_available($unit_data->id);
+
+        if ($is_unit_available) {
+            $args['ID'] = $is_unit_available;
+        }
+
+        $listing_id = wp_insert_post($args);
+
+        if ($listing_id && !is_wp_error($listing_id)) {
+            return $listing_id;
         }
 
         return false;
@@ -298,8 +349,16 @@ class MPP_Rentsync
         if (!isset($property_data->id) || empty($property_data->id)) return;
         $args = $this->prepare_property_args($property_data);
 
-        if (!$this->is_property_available($property_data->id)) {
-            $listing_id = wp_insert_post($args);
+        $is_property_available = $this->is_property_available($property_data->id);
+
+        if ($is_property_available) {
+            $args['ID'] = $is_property_available;
+        }
+
+        $listing_id = wp_insert_post($args);
+
+        if ($listing_id && !is_wp_error($listing_id)) {
+            do_action('atbdp_after_created_listing', $listing_id);
             return $listing_id;
         }
 
@@ -329,12 +388,19 @@ class MPP_Rentsync
                             'compare' => '='
                         ),
                     ),
-                    'fields' => 'id'
+                    'tax_query' => array(
+                        array(
+                            'taxonomy' => ATBDP_DIRECTORY_TYPE,
+                            'field'    => 'slug',
+                            'terms'    => $this->directory_type,
+                        ),
+                    ),
+                    'fields' => 'ids'
                 )
             );
 
             if ($query) {
-                if (isset($query->posts) && count($query->posts) > 0) return true;
+                if (isset($query->posts) && count($query->posts) > 0) return $query->posts[0];
             }
         }
         return false;
@@ -363,12 +429,19 @@ class MPP_Rentsync
                             'compare' => '='
                         ),
                     ),
-                    'fields' => 'id'
+                    'tax_query' => array(
+                        array(
+                            'taxonomy' => ATBDP_DIRECTORY_TYPE,
+                            'field'    => 'slug',
+                            'terms'    => $this->directory_type_unit,
+                        ),
+                    ),
+                    'fields' => 'ids'
                 )
             );
 
             if ($query) {
-                if (isset($query->posts) && count($query->posts) > 0) return true;
+                if (isset($query->posts) && count($query->posts) > 0) return $query->posts[0];
             }
         }
         return false;
@@ -473,7 +546,7 @@ class MPP_Rentsync
         // MPP HOUSING
 
         // PRICING PLANS
-        $meta_args['_fm_plans'] = $this->pricing_plan_unit;
+        $meta_args['_fm_plans'] = $this->pricing_plan_property;
         $meta_args['_fm_plans_by_admin'] = 1;
         // PRICING PLANS
 
@@ -558,9 +631,11 @@ class MPP_Rentsync
     {
 
         //$properties = $this->properties;
-        $this->get_units(693);
+        //$this->get_units(693);
         //$this->get_field('suitTypeName');
-        //$dir = $this->get_form_field_info('units', 'unit_type');
+        //$this->insert_option_to_listing_form_field($this->directory_type, 'building_type', $this->building_types);
+        //$dir = $this->get_form_field_data($this->directory_type, 'building_type');
+        //$this->update_all_field_options();
         ob_start();
 
         //e_var_dump($this->create_unit($this->units[1]));
@@ -575,7 +650,11 @@ class MPP_Rentsync
 
         //e_var_dump($this->import_image('https://s3.amazonaws.com/lws_lift/avenueliving/images/floorplans/1580851631_floorplan_imperial_en-page-002.jpg'));
 
-        e_var_dump($this->author_id);
+        //e_var_dump($this->author_id);
+
+        //e_var_dump($this->is_unit_available(497819));
+
+        //e_var_dump($this->unit_types);
 
 
         return ob_get_clean();
@@ -647,7 +726,7 @@ class MPP_Rentsync
      */
     public function set_local_file_location()
     {
-        $this->localUrl = get_stylesheet_directory() . '/assets/file/rentsync.json';
+        $this->localUrl = MPP_CHILD_FILE_DIR . '/rentsync.json';
     }
 
     /**
@@ -759,9 +838,12 @@ class MPP_Rentsync
         $this->get_field('suitTypeName');
     }
 
-    // GET LISTING FIELD INFO
-    public function get_form_field_info($listing_type = '', $field_key = '')
+    /**
+     * GET LISTING FORM FIELD DATA
+     */
+    public function get_form_field_data($listing_type = '', $field_key = '')
     {
+        if (empty($listing_type) || empty($field_key)) return;
         $dir_type = get_term_by('slug', $listing_type, ATBDP_DIRECTORY_TYPE);
         if ($dir_type && !empty($field_key)) {
             $field_info = get_term_meta($dir_type->term_id, $this->submission_form_fields, true);
@@ -772,6 +854,75 @@ class MPP_Rentsync
             }
         }
         return false;
+    }
+
+    /**
+     * UPDATE LISTING FORM FIELD DATA
+     */
+    public function update_form_field_data($listing_type = '', $field_key = '', $field_value)
+    {
+        if (empty($listing_type) || empty($field_key) || empty($field_value)) return;
+        $dir_type = get_term_by('slug', $listing_type, ATBDP_DIRECTORY_TYPE);
+        if ($dir_type && !empty($field_key)) {
+            $field_info = get_term_meta($dir_type->term_id, $this->submission_form_fields, true);
+            if ($field_info && !empty($field_info)) {
+                foreach ($field_info['fields'] as $key => $field) {
+                    if ($field['field_key'] == $field_key) {
+                        $field_info['fields'][$key] = $field_value;
+                        break;
+                    }
+                }
+            }
+            update_term_meta($dir_type->term_id, $this->submission_form_fields, $field_info);
+        }
+        return false;
+    }
+
+    /**
+     * INSERT A VALUE TO THE OPTION OF A LISTING FORM FILED
+     */
+    public function insert_option_to_listing_form_field($listing_type = '', $field_key = '', $options = [])
+    {
+        if (empty($listing_type) || empty($field_key) || empty($options)) return;
+        $field_data = $this->get_form_field_data($listing_type, $field_key);
+        if (!$field_data) return;
+        $option_data = isset($field_data['options']) && !empty($field_data['options']) ? $field_data['options'] : array();
+        if (!$option_data || empty($option_data)) return;
+        $new_option_data = $option_data;
+        foreach ($options as $key => $option) {
+            if (!$this->is_option_available($key, $new_option_data)) {
+                $new_option_data[] = array(
+                    'option_value' => $key,
+                    'option_label' => $option
+                );
+            }
+        }
+        $field_data['options'] = $new_option_data;
+        $this->update_form_field_data($listing_type, $field_key, $field_data);
+    }
+
+    /**
+     * IS OPTION AVAILABLE
+     */
+
+    public function is_option_available($key = '', $option_data = [])
+    {
+        if (empty($key) || empty($option_data)) return false;
+        foreach ($option_data as $option) {
+            if ($option['option_value'] == $key) return true;
+        }
+        return false;
+    }
+
+    /**
+     * UPDATE ALL FIELD OPTIONS
+     */
+    public function update_all_field_options()
+    {
+        $this->insert_option_to_listing_form_field($this->directory_type_unit, 'unit_type', $this->unit_types);
+        $this->insert_option_to_listing_form_field($this->directory_type, 'building_type', $this->building_types);
+        $this->insert_option_to_listing_form_field($this->directory_type, 'amenities', $this->amenities);
+        $this->insert_option_to_listing_form_field($this->directory_type, 'utilities', $this->utilities);
     }
 
     // GET OPTIONKEY
@@ -843,7 +994,7 @@ class MPP_Rentsync
      * IMPORT IMAGE INTO THE DB
      */
 
-    public function import_image($image_url = '')
+    public function import_image($image_url = '', $image_id = 0)
     {
         if (empty($image_url)) return;
         if (!filter_var($image_url, FILTER_VALIDATE_URL)) {
@@ -868,8 +1019,13 @@ class MPP_Rentsync
         }
         $attachment = array('post_title' => basename($upload['file']), 'post_content' => '', 'post_type' => 'attachment', 'post_mime_type' => $type, 'guid' => $upload['url']);
         $id = wp_insert_attachment($attachment, $upload['file']);
-        wp_update_attachment_metadata($id, wp_generate_attachment_metadata($id, $upload['file']));
-        return $id;
+        if ($id && !is_wp_error($id)) {
+            wp_update_attachment_metadata($id, wp_generate_attachment_metadata($id, $upload['file']));
+            if ($image_id) update_post_meta($id, '_asset_id', $image_id);
+            return $id;
+        } else {
+            return false;
+        }
     }
 
     // SLUGIFY TEXT
