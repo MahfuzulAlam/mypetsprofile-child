@@ -36,7 +36,7 @@ class MPP_Rentsync
     private $company_website = '';
     private $company_logo = '';
 
-    private $property_category = 'apartments';
+    private $property_category = 'apartment';
     private $directory_type = 'pets-community';
 
     private $unit_category = 'apartment-unit';
@@ -70,6 +70,8 @@ class MPP_Rentsync
         add_action('wp_ajax_rentsync_import_all_properties', array($this, 'rentsync_import_all_properties'));
         // WP AJAX - rentsync_count_properties
         add_action('wp_ajax_rentsync_count_properties', array($this, 'rentsync_count_properties'));
+        // WP AJAX - rentsync_download_properties
+        add_action('wp_ajax_rentsync_download_properties', array($this, 'rentsync_download_properties'));
     }
 
     /**
@@ -657,7 +659,7 @@ class MPP_Rentsync
         //$this->update_all_field_options();
         ob_start();
 
-        $this->mpp_rentsync_setup_api_data();
+        //$this->mpp_rentsync_setup_api_data();
 
         //e_var_dump($this->create_unit($this->units[1]));
 
@@ -1113,9 +1115,12 @@ class MPP_Rentsync
         $status = false;
         $count = 0;
         $this->before_save_api_setup();
-        $this->after_save_api_setup();
-        $count = count($this->properties);
-        if ($count > 0) $status = true;
+        if (!file_exists($this->localUrl)) $this->save_api_info_to_local();
+        if (file_exists($this->localUrl)) {
+            $this->after_save_api_setup();
+            $count = count($this->properties);
+            if ($count > 0) $status = true;
+        }
         echo json_encode(array('status' => $status, 'count' => $count));
         die();
     }
@@ -1128,11 +1133,28 @@ class MPP_Rentsync
         $result = false;
         $property_key = isset($_REQUEST['property_key']) ? $_REQUEST['property_key'] : 'none';
         $this->before_save_api_setup();
+        if (!file_exists($this->localUrl)) $this->save_api_info_to_local();
+        if (file_exists($this->localUrl)) {
+            $this->after_save_api_setup();
+            if ($property_key != 'none') :
+                $this->create_property_units($this->properties[$property_key]);
+                $result = true;
+            endif;
+        }
+        echo json_encode(array('result' => $result));
+        die();
+    }
+
+    /**
+     * RENTSYNC AJAX CALL - rentsync_download_properties
+     */
+    public function rentsync_download_properties()
+    {
+        $result = false;
+        $this->before_save_api_setup();
+        $this->save_api_info_to_local();
         $this->after_save_api_setup();
-        if ($property_key != 'none') :
-            $this->create_property_units($this->properties[$property_key]);
-            $result = true;
-        endif;
+        $result = true;
         echo json_encode(array('result' => $result));
         die();
     }

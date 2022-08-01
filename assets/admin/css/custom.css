@@ -79,3 +79,7 @@
 .progress-bar__text {
   display: none;
 }
+
+.rentsync_admin_button {
+  margin-bottom: 10px !important;
+}

@@ -112,6 +112,15 @@ jQuery(document).ready(function ($) {
   }
 
   /**
+   * RentSync - Download the api data
+   */
+  $("#download_all_properties").on("click", function (e) {
+    e.preventDefault();
+    console.log("working");
+    updateRentsyncStatus("Download Startd!");
+    rentsync_download_properties();
+  });
+  /**
    * RentSync - Count Total Properties
    */
   function rentsync_count_properties() {
@@ -163,6 +172,29 @@ jQuery(document).ready(function ($) {
         }
       },
       async: false,
+    });
+    // AJAX CALL
+  }
+
+  /**
+   * RentSync - Download Properties
+   */
+  function rentsync_download_properties() {
+    // AJAX CALL
+    $.ajax({
+      type: "post",
+      dataType: "json",
+      url: mppChild.ajaxurl,
+      data: {
+        action: "rentsync_download_properties",
+      },
+      success: function (response) {
+        if (response.result == true) {
+          updateRentsyncStatus("Downloaded!");
+        } else {
+          updateRentsyncStatus("Sorry, Cannot Downloaded!!");
+        }
+      },
     });
     // AJAX CALL
   }

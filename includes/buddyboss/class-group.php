@@ -43,7 +43,11 @@ class BuddyBoss_Group_Custom
                 $group_id = groups_create_group($args);
                 if (!is_wp_error($group_id) && $group_id) {
                     $this->connect_with_directorist_listing($listing_id, $group_id);
-                    $this->save_category_name_as_group_type($_POST, $group_id);
+                    if (isset($_POST['tax_input']['at_biz_dir-category'])) {
+                        $this->save_category_name_as_group_type($_POST, $group_id);
+                    } else {
+                        $this->save_category_name_as_group_type_listing($listing_id, $group_id);
+                    }
                 }
             }
 
@@ -75,6 +79,17 @@ class BuddyBoss_Group_Custom
         if (!empty($category)) {
             $category_title = get_term($category, ATBDP_CATEGORY)->name;
             $this->set_bb_group_type_from_directorist_category($category_title, $group_id);
+        }
+    }
+
+    public function save_category_name_as_group_type_listing($listing_id = 0, $group_id = 0)
+    {
+        $categories = get_the_terms($listing_id, ATBDP_CATEGORY);
+        if ($categories && !is_wp_error($categories)) {
+            if ($categories && count($categories) > 0) {
+                $category_title = $categories[0]->name;
+                $this->set_bb_group_type_from_directorist_category($category_title, $group_id);
+            }
         }
     }
 
