@@ -36,14 +36,14 @@ class MPP_Rentsync
     private $company_website = '';
     private $company_logo = '';
 
-    private $property_category = 'apartment';
+    private $property_category = 'apartments';
     private $directory_type = 'pets-community';
 
     private $unit_category = 'apartment-unit';
     private $directory_type_unit = 'units';
 
-    private $pricing_plan_property = 785;
-    private $pricing_plan_unit = 807;
+    private $pricing_plan_property = 20379; //20379
+    private $pricing_plan_unit = 20381; //20381
 
     private $apiUrl = '';
     private $localUrl = '';
