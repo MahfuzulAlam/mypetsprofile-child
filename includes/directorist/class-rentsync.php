@@ -1126,7 +1126,7 @@ class MPP_Rentsync
         $this->before_save_api_setup();
         $this->after_save_api_setup();
         if ($property_key != 'none') :
-            //$this->create_property_units($this->properties[$property_key]);
+            $this->create_property_units($this->properties[$property_key]);
             $result = true;
         endif;
         echo json_encode(array('result' => $result));

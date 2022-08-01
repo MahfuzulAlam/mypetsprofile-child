@@ -46,6 +46,7 @@
 */
 
 .progress-bar__container {
+  display: none;
   width: 80%;
   margin: auto;
   margin-top: 50px;

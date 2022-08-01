@@ -78,44 +78,37 @@ jQuery(document).ready(function ($) {
   /**
    * RentSync Admin Options
    */
-  $(document).on("click", "#import_all_properties", function (e) {
+
+  $("#import_all_properties").on("click", function (e) {
     e.preventDefault();
-    //var count = rentsync_count_properties();
+
+    var count = rentsync_count_properties();
     console.log(count);
 
     //Progressbar
+    /*
     var progressbar = $("#rentsync_progressbar");
     var progressbarWidth = 0;
     var count = 2;
-    var props = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    */
     // ADD PROPERTIES
 
-    props.forEach(function (i) {
-      rentsync_add_property(i);
-      updateStatus(progressbarWidth);
-    });
-
     if (count > 0) {
-      var progressbarCluster = 100 / count;
-      for (let i = 0; i < count; i++) {
+      //var progressbarCluster = 100 / count;
+      updateRentsyncStatus(
+        "<span>Importing Data From Rentsync API</span> ....<br><span>This will take a while. Please do not interrupt.</span>"
+      );
+      for (let i = 0; i < 10; i++) {
         console.log(i);
-        //rentsync_add_property(i);
-        progressbarWidth += progressbarCluster;
-        updateStatus(progressbarWidth);
-        //progressbar.animate({ width: progressbarWidth + "%" }, 100);
-        //progressbar.css({ width: progressbarWidth + "%" });
+        rentsync_add_property(i);
       }
-
-      //while loop
-      while (i < 10) {
-        //rentsync_add_property(i);
-        i++;
-      }
+      updateRentsyncStatus('<span class="success">DATA IMPORT COMPLETE</span>');
     }
   });
 
-  function updateStatus(text) {
-    $("#rentsync_api_progress").text(text);
+  function updateRentsyncStatus(html) {
+    console.log(html);
+    $("#rentsync_api_progress").html("<br>" + html);
   }
 
   /**
@@ -152,7 +145,6 @@ jQuery(document).ready(function ($) {
    * RentSync - Add a Property
    */
   function rentsync_add_property(property_key = "") {
-    updateStatus(property_key);
     // AJAX CALL
     $.ajax({
       type: "post",
