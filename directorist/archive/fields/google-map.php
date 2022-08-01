@@ -14,7 +14,8 @@ if (isset($ls_data['cats'][0])) {
 	$term_slug = $ls_data['cats'][0]->slug;
 	$term_image = get_term_meta($term_id, 'image', true);
 	if ($term_image) $term_image_url = wp_get_attachment_image_url($term_image);
-	$icon_class = $term_slug != 'dog-parks' ? 'custom-map-icon-grayscale' : '';
+	//$icon_class = $term_slug != 'dog-parks' ? 'custom-map-icon-grayscale' : '';
+	$icon_class = '';
 }
 
 ?>
@@ -31,10 +32,10 @@ if (isset($ls_data['cats'][0])) {
 					if (!$disable_single_listing) {
 						echo "<a href='" . esc_url(get_the_permalink()) . "'>";
 					}
-					
+
 					$image = mypetsprofile_listing_get_the_thumbnail();
 					echo '<img src="' . esc_url($image['image_src']) . '" alt="' . esc_attr(get_the_title()) . '" width="150">';
-					
+
 					/*
 
 					if (!empty($ls_data['listing_prv_img'])) {

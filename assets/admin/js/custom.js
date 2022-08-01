@@ -98,7 +98,7 @@ jQuery(document).ready(function ($) {
       updateRentsyncStatus(
         "<span>Importing Data From Rentsync API</span> ....<br><span>This will take a while. Please do not interrupt.</span>"
       );
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < count; i++) {
         console.log(i);
         rentsync_add_property(i);
       }

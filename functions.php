@@ -42,7 +42,7 @@ if (!defined('MPP_SITE_URL')) {
 }
 
 if (!defined('MPP_VERSION')) {
-	define('MPP_VERSION', '1.1.11');
+	define('MPP_VERSION', '1.1.12');
 }
 
 if (!defined('MPP_MAP_VERSION')) {
@@ -50,7 +50,7 @@ if (!defined('MPP_MAP_VERSION')) {
 }
 
 if (!defined('MPP_ADMIN_VERSION')) {
-	define('MPP_ADMIN_VERSION', '1.0.1');
+	define('MPP_ADMIN_VERSION', '1.0.2');
 }
 
 if (!defined('MPP_CHILD_FILE_DIR')) {
