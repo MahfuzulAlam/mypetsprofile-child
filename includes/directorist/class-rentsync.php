@@ -48,16 +48,25 @@ class MPP_Rentsync
     private $apiUrl = '';
     private $localUrl = '';
 
+    private $adminPage = '';
+
     /**
      * CONSTRUCT FUNCTION
      */
     public function __construct()
     {
         //$this->setup();
-        add_shortcode('rentsync', array($this, 'rentsync'));
+        //add_shortcode('rentsync', array($this, 'rentsync'));
 
         // RENTSYNC API SETUP
         //add_action('mpp_rentsync_setup_api_data', array($this, 'mpp_rentsync_setup_api_data'));
+
+        // ADMIN MENU LOAD THE API
+        add_action('admin_menu', array($this, 'rentsync_admin_import_from_api'));
+        // WP AJAX - rentsync_import_all_properties
+        add_action('wp_ajax_rentsync_import_all_properties', array($this, 'rentsync_import_all_properties'));
+        // WP AJAX - rentsync_count_properties
+        add_action('wp_ajax_rentsync_count_properties', array($this, 'rentsync_count_properties'));
     }
 
     /**
@@ -95,7 +104,7 @@ class MPP_Rentsync
     public function mpp_rentsync_setup_api_data()
     {
         $this->before_save_api_setup();
-        $this->save_api_info_to_local();
+        //$this->save_api_info_to_local();
         $this->after_save_api_setup();
         $this->insert_all_properties_units();
     }
@@ -106,11 +115,12 @@ class MPP_Rentsync
 
     public function insert_all_properties_units()
     {
-        if ($this->properties && count($this->properties) > 0) {
-            foreach ($this->properties as $property) {
-                $this->create_property_units($property);
-            }
-        }
+        // if ($this->properties && count($this->properties) > 0) {
+        //     foreach ($this->properties as $property) {
+        //         $this->create_property_units($property);
+        //     }
+        // }
+        $this->create_property_units($this->properties[0]);
     }
 
     /**
@@ -123,7 +133,7 @@ class MPP_Rentsync
         $property_id = $this->create_property($property_info);
         if ($property_id) {
             if (isset($property_info->suites) && count($property_info->suites) > 0) {
-                foreach ($property_info->suites as $unit_data) {
+                foreach ($property_info->suites as $unit_key => $unit_data) {
                     $unit_data->mpp_property_id = $property_id;
                     $unit_data->locations = $this->get_property_locations($property_info);
                     $this->create_unit($unit_data);
@@ -161,10 +171,15 @@ class MPP_Rentsync
     public function prepare_unit_args($unit_info)
     {
         $args = [];
-        $args['post_title'] = isset($unit_info->typeName) && !empty($unit_info->typeName) ? $unit_info->typeName : $unit_info->id;
+        $args['post_title'] = isset($unit_info->typeName) && !empty($unit_info->typeName) ? $unit_info->typeName : 'Unit';
         $args['post_content'] = isset($unit_info->description) && !empty($unit_info->description) ? $unit_info->description : '';
         $args['post_type'] = ATBDP_POST_TYPE;
         $args['post_status'] = 'publish';
+
+        // ADD UNIT NUMBER
+        if (isset($unit_info->number) && !empty($unit_info->number)) {
+            $args['post_title'] .= " - " . $unit_info->number;
+        }
 
         // DIRECTORY TYPE
         $args['tax_input'] = array(
@@ -233,7 +248,7 @@ class MPP_Rentsync
             } elseif ($meta_key == 'typeName') {
                 $meta_args[$meta_value] = $this->get_option_key($this->unit_types, $values->$meta_key);
             } else {
-                $meta_args[$meta_value] = $values->$meta_key;
+                $meta_args[$meta_value] = trim($values->$meta_key);
             }
         }
 
@@ -637,6 +652,8 @@ class MPP_Rentsync
         //$dir = $this->get_form_field_data($this->directory_type, 'building_type');
         //$this->update_all_field_options();
         ob_start();
+
+        $this->mpp_rentsync_setup_api_data();
 
         //e_var_dump($this->create_unit($this->units[1]));
 
@@ -1059,6 +1076,61 @@ class MPP_Rentsync
         }
 
         return $text;
+    }
+
+    /**
+     * RENTSYNC IMPORT FROM API OPTIONS
+     */
+    public function rentsync_admin_import_from_api()
+    {
+        add_submenu_page(
+            'edit.php?post_type=at_biz_dir',
+            __('RentSync Import', 'buddyboss-theme'),
+            __('RentSync Import', 'buddyboss-theme'),
+            'manage_options',
+            'rentsync-api',
+            array($this, 'rentsync_admin_import_from_api_template')
+        );
+    }
+
+    /**
+     * RENTSYNC IMPORT FROM API OPTIONS TEMPLATE
+     */
+    public function rentsync_admin_import_from_api_template()
+    {
+        get_template_part('template-parts/admin/content', 'rentsync_api');
+    }
+
+    /**
+     * RENTSYNC AJAX CALL - rentsync_count_properties
+     */
+    public function rentsync_count_properties()
+    {
+        $status = false;
+        $count = 0;
+        $this->before_save_api_setup();
+        $this->after_save_api_setup();
+        $count = count($this->properties);
+        if ($count > 0) $status = true;
+        echo json_encode(array('status' => $status, 'count' => $count));
+        die();
+    }
+
+    /**
+     * RENTSYNC AJAX CALL - rentsync_import_all_properties
+     */
+    public function rentsync_import_all_properties()
+    {
+        $result = false;
+        $property_key = isset($_REQUEST['property_key']) ? $_REQUEST['property_key'] : 'none';
+        $this->before_save_api_setup();
+        $this->after_save_api_setup();
+        if ($property_key != 'none') :
+            //$this->create_property_units($this->properties[$property_key]);
+            $result = true;
+        endif;
+        echo json_encode(array('result' => $result));
+        die();
     }
 }
 

@@ -109,8 +109,9 @@ add_action('wp_enqueue_scripts', 'mpp_custom_google_map_scripts', 0);
 
 function mpp_custom_admin_enqueue_scripts()
 {
-	wp_enqueue_style('custom-admin-css', get_stylesheet_directory_uri() . '/assets/admin/css/custom.css', '', MPP_ADMIN_VERSION);
-	wp_enqueue_script('custom-admin-js', get_stylesheet_directory_uri() . '/assets/admin/js/custom.js', array('jquery'), MPP_ADMIN_VERSION);
+	wp_enqueue_style('mpp-admin-css', get_stylesheet_directory_uri() . '/assets/admin/css/custom.css', '', MPP_ADMIN_VERSION);
+	wp_enqueue_script('mpp-admin-js', get_stylesheet_directory_uri() . '/assets/admin/js/custom.js', array('jquery'), MPP_ADMIN_VERSION);
+	wp_localize_script('mpp-admin-js', 'mppChild', array('ajaxurl' => admin_url('admin-ajax.php')));
 }
 add_action('admin_enqueue_scripts', 'mpp_custom_admin_enqueue_scripts');
 
