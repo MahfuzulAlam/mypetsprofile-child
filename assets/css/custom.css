@@ -1392,3 +1392,82 @@ form.messenger-form {
 .vacancy-input-wrapper .vacancy-number-wrapper input {
   width: 100px;
 }
+
+/* MPP UNITS */
+
+.mpp-avaialble-units {
+}
+.mpp-avaialble-units .mpp-unit {
+  border: 1px solid #cacaca;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.mpp-avaialble-units .mpp-unit-info {
+}
+
+.mpp-avaialble-units .mpp-unit-map {
+  width: 200px;
+}
+
+.mpp-avaialble-units .mpp-unit-map img {
+  border: 1px solid #cacaca;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.mpp-avaialble-units .mpp-unit-name {
+  font-size: 18px;
+  color: #4c4c4c;
+  font-weight: bold;
+}
+
+.mpp-avaialble-units .mpp-unit-price {
+  font-size: 16px;
+  color: #4c4c4c;
+  font-weight: bold;
+}
+
+.mpp-avaialble-units .mpp-unit-title {
+  font-size: 16px;
+  color: #4c4c4c;
+  font-weight: bold;
+}
+
+.mpp-avaialble-units .mpp-unit-features {
+  font-size: 14px;
+  color: #4c4c4c;
+}
+
+.mpp-avaialble-units .mpp-unit-available {
+  font-size: 14px;
+  color: #4c4c4c;
+  font-weight: bold;
+}
+
+.mpp-avaialble-units .mpp-unit-available-date {
+  font-size: 14px;
+  color: #4c4c4c;
+}
+
+@media only screen and (max-width: 767px) {
+  .mpp-avaialble-units .mpp-unit {
+    flex-direction: column;
+  }
+
+  .mpp-avaialble-units .mpp-unit-map {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .mpp-avaialble-units .mpp-unit-name {
+    font-size: 16px;
+  }
+
+  .mpp-avaialble-units .mpp-unit-price {
+    font-size: 14px;
+  }
+}

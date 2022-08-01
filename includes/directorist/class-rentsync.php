@@ -58,6 +58,9 @@ class MPP_Rentsync
         //$this->setup();
         //add_shortcode('rentsync', array($this, 'rentsync'));
 
+        // AVAILABLE UNITS SHORTCODE
+        add_shortcode('mpp-apartment-units', array($this, 'rentsync_mpp_apartment_units'));
+
         // RENTSYNC API SETUP
         //add_action('mpp_rentsync_setup_api_data', array($this, 'mpp_rentsync_setup_api_data'));
 
@@ -246,6 +249,7 @@ class MPP_Rentsync
             } elseif ($meta_key == 'virtualTours') {
                 $meta_args[$meta_value] = $this->get_virtual_tour($values);
             } elseif ($meta_key == 'typeName') {
+                $meta_args['_unit_title'] = trim($values->$meta_key);
                 $meta_args[$meta_value] = $this->get_option_key($this->unit_types, $values->$meta_key);
             } else {
                 $meta_args[$meta_value] = trim($values->$meta_key);
@@ -1131,6 +1135,55 @@ class MPP_Rentsync
         endif;
         echo json_encode(array('result' => $result));
         die();
+    }
+
+    /**
+     * RENTSYNC SHORTCODE - rentsync_mpp_apartment_units
+     */
+    public function rentsync_mpp_apartment_units()
+    {
+        $data = $this->get_units_by_property(get_the_ID());
+        ob_start();
+        if ($data) :
+            require(get_stylesheet_directory() . '/includes/directorist/templates/single/rentsync_units.php');
+        else :
+            echo '<p>Sorry, there are not available units.</p>';
+        endif;
+        return ob_get_clean();
+    }
+
+    /**
+     * GET UNITS OF A PROPERTY
+     */
+    public function get_units_by_property($property_id = 0)
+    {
+        if (!$property_id) return;
+        $units = new wp_query(array(
+            'post_type' => ATBDP_POST_TYPE,
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => '_source',
+                    'value' => 'rentsync',
+                    'compare' => '='
+                ),
+                array(
+                    'key' => '_mpp-housing',
+                    'value' => $property_id,
+                    'compare' => '='
+                ),
+            ),
+            'tax_query' => array(
+                array(
+                    'taxonomy' => ATBDP_DIRECTORY_TYPE,
+                    'field'    => 'slug',
+                    'terms'    => $this->directory_type_unit,
+                ),
+            ),
+        ));
+        return isset($units->posts) ? $units->posts : false;
     }
 }
 
