@@ -684,7 +684,7 @@ class MPP_Rentsync
 
             if ($property_key <= $limit) {
                 if ($range == 1) $property_key = $property_key + 1;
-                $redirect_url = get_permalink(get_the_ID()) . '?property=' . $property_key . '&limit=' . $limit . '&range=' . $range;
+                $redirect_url = home_url('/rentsync-import/') . '?property=' . $property_key . '&limit=' . $limit . '&range=' . $range;
 ?>
                 <script type="text/javascript">
                     window.location.href = "<?php echo $redirect_url; ?>";
