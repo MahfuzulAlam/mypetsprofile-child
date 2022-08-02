@@ -22,7 +22,7 @@ if ($mpp_photos && !empty($mpp_photos)) :
 
 	foreach ($mpp_photos as $key => $mpp_photo) {
 		$new_photos[$key]['alt'] = $mpp_photo->id;
-		$new_photos[$key]['src'] = $mpp_photo->thumbnailUrl; // url
+		$new_photos[$key]['src'] = $mpp_photo->url; // thumbnailUrl
 	}
 
 	if ($new_photos && count($new_photos) > 0) $data['images'] = $new_photos;

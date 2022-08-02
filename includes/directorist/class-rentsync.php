@@ -98,7 +98,7 @@ class MPP_Rentsync
         $this->process_data();
         $this->set_all_information();
         $this->set_author_id();
-        $this->update_all_field_options();
+        //$this->update_all_field_options();
     }
 
 
@@ -1154,6 +1154,7 @@ class MPP_Rentsync
         $this->before_save_api_setup();
         $this->save_api_info_to_local();
         $this->after_save_api_setup();
+        $this->update_all_field_options();
         $result = true;
         echo json_encode(array('result' => $result));
         die();
