@@ -290,10 +290,13 @@ class MPP_Rentsync
             $args['ID'] = $is_unit_available;
         }
 
-        $listing_id = wp_insert_post($args);
+        if (!$is_unit_available) {
 
-        if ($listing_id && !is_wp_error($listing_id)) {
-            return $listing_id;
+            $listing_id = wp_insert_post($args);
+
+            if ($listing_id && !is_wp_error($listing_id)) {
+                return $listing_id;
+            }
         }
 
         return false;
@@ -377,11 +380,13 @@ class MPP_Rentsync
             $args['ID'] = $is_property_available;
         }
 
-        $listing_id = wp_insert_post($args);
+        if (!$is_property_available) {
+            $listing_id = wp_insert_post($args);
 
-        if ($listing_id && !is_wp_error($listing_id)) {
-            do_action('atbdp_after_created_listing', $listing_id);
-            return $listing_id;
+            if ($listing_id && !is_wp_error($listing_id)) {
+                do_action('atbdp_after_created_listing', $listing_id);
+                return $listing_id;
+            }
         }
 
         return false;
