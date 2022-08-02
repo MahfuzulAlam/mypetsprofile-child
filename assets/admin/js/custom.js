@@ -103,7 +103,7 @@ jQuery(document).ready(function ($) {
       function rentSyncAddProperty() {
         console.log(i);
         rentsync_add_property(i);
-        if (i >= 20) abortTimer();
+        if (i >= 10) abortTimer();
         i++;
       }
 
