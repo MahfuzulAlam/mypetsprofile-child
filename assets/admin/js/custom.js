@@ -81,9 +81,7 @@ jQuery(document).ready(function ($) {
 
   $("#import_all_properties").on("click", function (e) {
     e.preventDefault();
-
     var count = rentsync_count_properties();
-    console.log(count);
 
     //Progressbar
     /*
@@ -98,10 +96,22 @@ jQuery(document).ready(function ($) {
       updateRentsyncStatus(
         "<span>Importing Data From Rentsync API</span> ....<br><span>This will take a while. Please do not interrupt.</span>"
       );
-      for (let i = 0; i < 10; i++) {
+      var i = 0;
+
+      var tid = setInterval(rentSyncAddProperty, 10000);
+
+      function rentSyncAddProperty() {
         console.log(i);
         rentsync_add_property(i);
+        if (i >= 20) abortTimer();
+        i++;
       }
+
+      function abortTimer() {
+        // to be called when you want to stop the timer
+        clearInterval(tid);
+      }
+
       updateRentsyncStatus('<span class="success">DATA IMPORT COMPLETE</span>');
     }
   });
@@ -166,12 +176,11 @@ jQuery(document).ready(function ($) {
       success: function (response) {
         console.log(response);
         if (response.result == true) {
-          $("#rentsync_api_result").text("Imported");
+          $("#rentsync_api_result").text("Imported" + property_key);
         } else {
-          $("#rentsync_api_result").text("Sorry, cannot import");
+          $("#rentsync_api_result").text("Sorry, cannot import" + property_key);
         }
       },
-      async: false,
     });
     // AJAX CALL
   }
