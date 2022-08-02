@@ -42,8 +42,8 @@ class MPP_Rentsync
     private $unit_category = 'apartment-unit';
     private $directory_type_unit = 'units';
 
-    private $pricing_plan_property = 20379; //20379
-    private $pricing_plan_unit = 20381; //20381
+    private $pricing_plan_property = 23181; //20379
+    private $pricing_plan_unit = 23183; //20381
 
     private $apiUrl = '';
     private $localUrl = '';
