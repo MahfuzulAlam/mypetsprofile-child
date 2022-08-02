@@ -42,8 +42,8 @@ class MPP_Rentsync
     private $unit_category = 'apartment-unit';
     private $directory_type_unit = 'units';
 
-    private $pricing_plan_property = 23181; //20379
-    private $pricing_plan_unit = 23183; //20381
+    private $pricing_plan_property = 20379; //20379 //23181
+    private $pricing_plan_unit = 20381; //20381 //23183
 
     private $apiUrl = '';
     private $localUrl = '';
@@ -56,7 +56,7 @@ class MPP_Rentsync
     public function __construct()
     {
         //$this->setup();
-        //add_shortcode('rentsync', array($this, 'rentsync'));
+        add_shortcode('rentsync', array($this, 'rentsync_shortcode'));
 
         // AVAILABLE UNITS SHORTCODE
         add_shortcode('mpp-apartment-units', array($this, 'rentsync_mpp_apartment_units'));
@@ -180,6 +180,7 @@ class MPP_Rentsync
         $args['post_content'] = isset($unit_info->description) && !empty($unit_info->description) ? $unit_info->description : '';
         $args['post_type'] = ATBDP_POST_TYPE;
         $args['post_status'] = 'publish';
+        $args['post_author'] = $this->author_id;
 
         // ADD UNIT NUMBER
         if (isset($unit_info->number) && !empty($unit_info->number)) {
@@ -478,7 +479,7 @@ class MPP_Rentsync
         $args['post_content'] = isset($property_info->buildingDescription) && !empty($property_info->buildingDescription) ? $property_info->buildingDescription : '';
         $args['post_type'] = ATBDP_POST_TYPE;
         $args['post_status'] = 'publish';
-        $args['post_author'] = 1;
+        $args['post_author'] = $this->author_id;
 
         // DIRECTORY TYPE
         //$directory_type_term = get_term_by('slug', 'units', ATBDP_DIRECTORY_TYPE);
@@ -648,36 +649,50 @@ class MPP_Rentsync
     }
     // GTE VIRTUAL TOUR
 
-    public function rentsync()
+    public function rentsync_shortcode()
     {
+        if (!is_user_logged_in() || !current_user_can('administrator')) return;
+        $result = false;
+        $property_key = isset($_REQUEST['property']) && !empty($_REQUEST['property']) ? $_REQUEST['property'] : 0;
+        if (!$property_key || empty($property_key)) return;
+        $limit = isset($_REQUEST['limit']) && !empty($_REQUEST['limit']) ? $_REQUEST['limit'] : 10;
+        $range = isset($_REQUEST['range']) && !empty($_REQUEST['range']) ? $_REQUEST['range'] : 1;
+        $this->before_save_api_setup();
+        if (!file_exists($this->localUrl)) $this->save_api_info_to_local();
+        if (file_exists($this->localUrl)) {
+            $this->after_save_api_setup();
+            if ($property_key) :
+                for ($i = 0; $i < $range; $i++) {
+                    if ($property_key <= $limit) {
+                        if (isset($this->properties[$property_key])) {
+                            if ($property_key == 1) $this->create_property_units($this->properties[0]);
+                            $this->create_property_units($this->properties[$property_key]);
+                            if ($range > 1) $property_key = $property_key + 1;
+                            $result = true;
+                        }
+                    } else {
+                        $result = false;
+                    }
+                }
+            endif;
+        }
 
-        //$properties = $this->properties;
-        //$this->get_units(693);
-        //$this->get_field('suitTypeName');
-        //$this->insert_option_to_listing_form_field($this->directory_type, 'building_type', $this->building_types);
-        //$dir = $this->get_form_field_data($this->directory_type, 'building_type');
-        //$this->update_all_field_options();
         ob_start();
 
-        //$this->mpp_rentsync_setup_api_data();
+        if ($result) {
+            echo '<p>Imported Successfully - ' . $property_key . '</p>';
 
-        //e_var_dump($this->create_unit($this->units[1]));
+            if ($property_key <= $limit) {
+                if ($range == 1) $property_key = $property_key + 1;
+                $redirect_url = get_permalink(get_the_ID()) . '?property=' . $property_key . '&limit=' . $limit . '&range=' . $range;
+?>
+                <script type="text/javascript">
+                    window.location.href = "<?php echo $redirect_url; ?>";
+                </script>
+<?php
+            }
+        }
 
-        //e_var_dump($this->prepare_unit_metadata($this->units[0]));
-
-        //$this->save_api_info_to_local();
-
-        //e_var_dump($this->localUrl);
-
-        //e_var_dump($this->create_property_units($this->properties[17]));
-
-        //e_var_dump($this->import_image('https://s3.amazonaws.com/lws_lift/avenueliving/images/floorplans/1580851631_floorplan_imperial_en-page-002.jpg'));
-
-        //e_var_dump($this->author_id);
-
-        //e_var_dump($this->is_unit_available(497819));
-
-        //e_var_dump($this->unit_types);
 
 
         return ob_get_clean();

@@ -193,6 +193,8 @@ class Co_Authors
     public function add_update_coauthors_with_listing($listing_id)
     {
 
+        if (is_page('rentsync-import')) return;
+
         $authors = array(get_current_user_id());
 
         // ADD ADMIN INFO

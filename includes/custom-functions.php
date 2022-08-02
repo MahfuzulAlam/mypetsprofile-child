@@ -2252,3 +2252,23 @@ function mpp_get_vacancy_option_name($key = '', $options = array())
     }
     return '';
 }
+
+// DIRECTORIST QUERY ARGS
+add_filter('atbdp_listing_search_query_argument', function ($args) {
+    unset($args['meta_key']);
+    unset($args['meta_query']['_featured']);
+    return $args;
+});
+
+//atbdp_all_listings_query_arguments
+
+add_filter('atbdp_all_listings_query_arguments', function ($args) {
+    unset($args['meta_key']);
+    unset($args['meta_query']['_featured']);
+    $args['meta_query']['directory_type'] = array(
+        "key" => "_directory_type",
+        "value" => array(200, 1418, 1414),
+        "compare" => "IN"
+    );
+    return $args;
+});
