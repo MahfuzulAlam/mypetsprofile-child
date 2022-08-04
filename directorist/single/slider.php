@@ -11,10 +11,10 @@ if (!defined('ABSPATH')) exit;
 if (!$has_slider) {
 	return;
 }
-//e_var_dump($data['images']);
+
 
 $mpp_photos = get_post_meta(get_the_ID(), '_mpp_photos', true);
-//e_var_dump($mpp_photos);
+
 
 if ($mpp_photos && !empty($mpp_photos)) :
 
@@ -29,7 +29,28 @@ if ($mpp_photos && !empty($mpp_photos)) :
 
 endif;
 
-//e_var_dump($data['images']);
+// UNIT IMAGE
+
+$directory_type = get_the_terms(get_the_ID(), ATBDP_DIRECTORY_TYPE);
+if ($directory_type && $directory_type[0]->slug == 'units') {
+	$floor_plan = get_post_meta(get_the_ID(), '_floor_plan', true);
+	if ($floor_plan) {
+		$data['images'][0]['alt'] = get_the_title();
+		$data['images'][0]['src'] = $floor_plan;
+	} else {
+		$building_id = get_post_meta(get_the_ID(), '_mpp-housing', true);
+		if ($building_id) {
+			$building_image_id = get_post_meta($building_id, '_listing_prv_img', true);
+			if ($building_image_id) {
+				$building_image_url = wp_get_attachment_image_url($building_image_id, 'full');
+				$data['images'][0]['alt'] = get_the_title();
+				$data['images'][0]['src'] = $building_image_url;
+			}
+		}
+	}
+}
+
+// UNIT IMAGE
 
 $img_size_class = ('contain' === $data['background-size']) ? '' : ' plasmaSlider__cover';
 ?>

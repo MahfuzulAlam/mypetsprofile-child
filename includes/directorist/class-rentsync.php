@@ -61,6 +61,9 @@ class MPP_Rentsync
         // AVAILABLE UNITS SHORTCODE
         add_shortcode('mpp-apartment-units', array($this, 'rentsync_mpp_apartment_units'));
 
+        // AVAILABLE UNITS SHORTCODE
+        //add_shortcode('mpp-apartment-units-connection', array($this, 'rentsync_mpp_apartment_units_connection'));
+
         // RENTSYNC API SETUP
         //add_action('mpp_rentsync_setup_api_data', array($this, 'mpp_rentsync_setup_api_data'));
 
@@ -144,6 +147,8 @@ class MPP_Rentsync
                     $unit_data->address = isset($property_info->location->address) ? $property_info->location->address : '';
                     $unit_data->latitude = isset($property_info->location->latitude) ? $property_info->location->latitude : '';
                     $unit_data->longitude = isset($property_info->location->longitude) ? $property_info->location->longitude : '';
+                    // SET DEFAULT IMAGE
+                    $unit_data->property_image = get_post_meta($property_id, '_listing_prv_img', true) ? get_post_meta($property_id, '_listing_prv_img', true) : '';
                     $this->create_unit($unit_data);
                 }
             }
@@ -179,7 +184,7 @@ class MPP_Rentsync
     /**
      * PREPARE UNIT ARGUMENTS
      */
-    public function prepare_unit_args($unit_info)
+    public function prepare_unit_args($unit_info, $is_unit_available = false)
     {
         $args = [];
         $args['post_title'] = isset($unit_info->typeName) && !empty($unit_info->typeName) ? $unit_info->typeName : 'Unit';
@@ -202,7 +207,7 @@ class MPP_Rentsync
         // DIRECTORY TYPE
 
         // SETUP METADATA
-        $args['meta_input'] = $this->prepare_unit_metadata($unit_info);
+        $args['meta_input'] = $this->prepare_unit_metadata($unit_info, $is_unit_available);
         // SETUP METADATA
         return array_filter($args);
     }
@@ -210,7 +215,7 @@ class MPP_Rentsync
     /**
      * PREPARE UNIT METADATA
      */
-    public function prepare_unit_metadata($values)
+    public function prepare_unit_metadata($values, $is_unit_available = false)
     {
         if (empty($values)) return;
 
@@ -239,11 +244,6 @@ class MPP_Rentsync
         $meta_args['_source_company'] = $this->company_name;
         $meta_args['_source_company_id'] = $this->company_id;
         // SOURCE
-
-        // LISTING IMAGE
-        $listing_image = $this->import_image($this->get_floor_plan($values));
-        if ($listing_image) $meta_args['_listing_prv_img'] = $listing_image;
-        // LISTING IMAGE
 
         // PRICING
         $meta_args['_atbd_listing_pricing'] = 'price';
@@ -288,9 +288,10 @@ class MPP_Rentsync
     public function create_unit($unit_data)
     {
         if (!isset($unit_data->id) || empty($unit_data->id)) return;
-        $args = $this->prepare_unit_args($unit_data);
 
         $is_unit_available = $this->is_unit_available($unit_data->id);
+
+        $args = $this->prepare_unit_args($unit_data, $is_unit_available);
 
         if ($is_unit_available) {
             $args['ID'] = $is_unit_available;
@@ -321,7 +322,6 @@ class MPP_Rentsync
      */
     public function update_unit($unit_info)
     {
-        //e_var_dump($unit_info);
         if (!isset($unit_info['ID'])) return;
         // check and update the metas
         if (isset($unit_info['meta_input']) && !empty($unit_info['meta_input'])) :
@@ -680,7 +680,7 @@ class MPP_Rentsync
             $floorplan = $floorplans[0];
             if (isset($floorplan->image) && !empty($floorplan->image)) return $floorplan->image;
         }
-        return '';
+        return false;
     }
     // GET FLOOR PLAN
 
@@ -1234,6 +1234,16 @@ class MPP_Rentsync
         else :
             echo '<p>Sorry, there are not available units.</p>';
         endif;
+        return ob_get_clean();
+    }
+
+    /**
+     * RENTSYNC SHORTCODE - rentsync_mpp_apartment_units_connection
+     */
+    public function rentsync_mpp_apartment_units_connection()
+    {
+        ob_start();
+        require(get_stylesheet_directory() . '/includes/directorist/templates/single/rentsync_units_connection.php');
         return ob_get_clean();
     }
 
