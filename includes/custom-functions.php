@@ -28,6 +28,7 @@ remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_re
 
 function mypetsprofile_loop_get_the_thumbnail($class = '')
 {
+    $image_alt = '';
     $default_image_src = MPP_SITE_URL . "/wp-content/uploads/2020/12/MPP-Transparent-logo-product.jpg";
 
     $id = get_the_ID();
@@ -71,10 +72,25 @@ function mypetsprofile_loop_get_the_thumbnail($class = '')
         }
     }
 
+    // CHECK the unit and get image from the apartments
+    $mpp_housing = get_post_meta(get_the_ID(), '_mpp-housing', true);
+    if ($mpp_housing && !empty($mpp_housing)) {
+        $mpp_images = get_post_meta($mpp_housing, '_mpp_photos', true);
+        if (!empty($mpp_images) && count($mpp_images) > 0) {
+            $mpp_image = $mpp_images[array_rand($mpp_images)];
+            $thumbnail_img = $mpp_image->thumbnailUrl;
+            $image_src = get_the_title();
+        }
+    }
+    // CHECK the unit and get image from the apartments
+
+
     $image_src    = $thumbnail_img;
-    $image_alt = get_post_meta($thumbnail_id, '_wp_attachment_image_alt', true);
-    $image_alt = (!empty($image_alt)) ? esc_attr($image_alt) : esc_html(get_the_title($thumbnail_id));
-    $image_alt = (!empty($image_alt)) ? $image_alt : esc_html(get_the_title());
+    if (empty($image_alt)) {
+        $image_alt = get_post_meta($thumbnail_id, '_wp_attachment_image_alt', true);
+        $image_alt = (!empty($image_alt)) ? esc_attr($image_alt) : esc_html(get_the_title($thumbnail_id));
+        $image_alt = (!empty($image_alt)) ? $image_alt : esc_html(get_the_title());
+    }
 
     return "<img src='$image_src' alt='$image_alt' class='$class' />";
 }
@@ -2257,6 +2273,26 @@ function mpp_get_vacancy_option_name($key = '', $options = array())
 add_filter('atbdp_listing_search_query_argument', function ($args) {
     unset($args['meta_key']);
     unset($args['meta_query']['_featured']);
+
+    if (isset($args['meta_query'][0]['value'])) {
+        unset($args['meta_query']['directory_type']);
+        if ($args['meta_query'][0]['value'] == "apartment-units") {
+            $args['meta_query']['directory_type'] = array(
+                "key" => "_directory_type",
+                "value" => array(1445),
+                "compare" => "IN"
+            );
+        } else {
+            $args['meta_query']['directory_type'] = array(
+                "key" => "_directory_type",
+                "value" => array(1414),
+                "compare" => "IN"
+            );
+        }
+        unset($args['meta_query']['0']);
+    }
+    //e_var_dump($args);
+
     return $args;
 });
 
@@ -2265,10 +2301,13 @@ add_filter('atbdp_listing_search_query_argument', function ($args) {
 add_filter('atbdp_all_listings_query_arguments', function ($args) {
     unset($args['meta_key']);
     unset($args['meta_query']['_featured']);
+    unset($args['meta_query']['directory_type']);
     $args['meta_query']['directory_type'] = array(
         "key" => "_directory_type",
         "value" => array(200, 1418, 1414),
         "compare" => "IN"
     );
+
+    //e_var_dump($args);
     return $args;
 });

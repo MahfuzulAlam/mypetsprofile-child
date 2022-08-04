@@ -141,6 +141,9 @@ class MPP_Rentsync
                 foreach ($property_info->suites as $unit_key => $unit_data) {
                     $unit_data->mpp_property_id = $property_id;
                     $unit_data->locations = $this->get_property_locations($property_info);
+                    $unit_data->address = isset($property_info->location->address) ? $property_info->location->address : '';
+                    $unit_data->latitude = isset($property_info->location->latitude) ? $property_info->location->latitude : '';
+                    $unit_data->longitude = isset($property_info->location->longitude) ? $property_info->location->longitude : '';
                     $this->create_unit($unit_data);
                 }
             }
@@ -166,6 +169,9 @@ class MPP_Rentsync
             "availabilityDate" => '_availability_date',
             "floorplans" => '_floor_plan',
             "virtualTours" => '_virtual_tour',
+            "address" => "_address",
+            "latitude"  => "_manual_lat",
+            "longitude"  => "_manual_lng",
         );
     }
 
@@ -288,6 +294,14 @@ class MPP_Rentsync
 
         if ($is_unit_available) {
             $args['ID'] = $is_unit_available;
+
+            // $listing_id = wp_update_post($args);
+
+            // if ($listing_id && !is_wp_error($listing_id)) {
+            //     return $listing_id;
+            // }
+            $this->update_unit($args);
+            return $is_unit_available;
         }
 
         if (!$is_unit_available) {
@@ -300,6 +314,27 @@ class MPP_Rentsync
         }
 
         return false;
+    }
+
+    /**
+     * Update Units
+     */
+    public function update_unit($unit_info)
+    {
+        //e_var_dump($unit_info);
+        if (!isset($unit_info['ID'])) return;
+        // check and update the metas
+        if (isset($unit_info['meta_input']) && !empty($unit_info['meta_input'])) :
+            foreach ($unit_info['meta_input'] as $meta_key => $meta_value) :
+                if ($meta_key == '_available') update_post_meta($unit_info['ID'], '_available', $meta_value);
+                if ($meta_key == '_price') update_post_meta($unit_info['ID'], '_price', $meta_value);
+                if ($meta_key == '_deposit') update_post_meta($unit_info['ID'], '_deposit', $meta_value);
+                if ($meta_key == '_availability_date') update_post_meta($unit_info['ID'], '_availability_date', $meta_value);
+                if ($meta_key == '_listing_prv_img') update_post_meta($unit_info['ID'], '_listing_prv_img', $meta_value);
+                if ($meta_key == '_manual_lat') update_post_meta($unit_info['ID'], '_manual_lat', $meta_value);
+                if ($meta_key == '_manual_lng') update_post_meta($unit_info['ID'], '_manual_lng', $meta_value);
+            endforeach;
+        endif;
     }
 
     /**
@@ -335,7 +370,7 @@ class MPP_Rentsync
     public function set_property_location_list()
     {
         $this->property_location_list = array(
-            "address" => "_address_line_1",
+            "address" => "_address",
             "city" => "_ca-city",
             "province" => "_ca-province",
             "provinceCode" => "_ca-province-code",
@@ -377,7 +412,14 @@ class MPP_Rentsync
         $is_property_available = $this->is_property_available($property_data->id);
 
         if ($is_property_available) {
-            $args['ID'] = $is_property_available;
+            return $is_property_available;
+            // $args['ID'] = $is_property_available;
+            // $listing_id = wp_update_post($args);
+
+            // if ($listing_id && !is_wp_error($listing_id)) {
+            //     do_action('atbdp_after_created_listing', $listing_id);
+            //     return $listing_id;
+            // }
         }
 
         if (!$is_property_available) {
