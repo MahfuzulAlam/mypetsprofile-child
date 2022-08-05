@@ -1513,3 +1513,7 @@ form.messenger-form {
     flex-direction: column;
   }
 }
+
+#buddypress .component-navigation.members-nav span.count {
+  display: none;
+}
