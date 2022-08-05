@@ -1517,3 +1517,8 @@ form.messenger-form {
 #buddypress .component-navigation.members-nav span.count {
   display: none;
 }
+
+.directorist-single-info__value.virtual_tour a {
+  color: #fff !important;
+  margin-bottom: 5px;
+}
