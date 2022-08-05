@@ -2274,22 +2274,71 @@ add_filter('atbdp_listing_search_query_argument', function ($args) {
     unset($args['meta_key']);
     unset($args['meta_query']['_featured']);
 
-    if (isset($args['meta_query'][0]['value'])) {
+    $custom_fields = isset($_REQUEST['custom_field']) && !empty($_REQUEST['custom_field']) ? $_REQUEST['custom_field'] : array();
+
+    //e_var_dump($custom_fields);
+
+    if (count($custom_fields) > 0 && isset($custom_fields['custom-category'])) {
         unset($args['meta_query']['directory_type']);
-        if ($args['meta_query'][0]['value'] == "apartment-units") {
-            $args['meta_query']['directory_type'] = array(
-                "key" => "_directory_type",
-                "value" => array(1445),
-                "compare" => "IN"
-            );
-        } else {
+        //e_var_dump($custom_fields);
+        if ($custom_fields['custom-category'] == "apartments") {
             $args['meta_query']['directory_type'] = array(
                 "key" => "_directory_type",
                 "value" => array(1414),
                 "compare" => "IN"
             );
+        } elseif ($custom_fields['custom-category'] == "backyard") {
+            $args['meta_query']['directory_type'] = array(
+                "key" => "_directory_type",
+                "value" => array(1414),
+                "compare" => "IN"
+            );
+            $args['tax_query'] = array(
+                array(
+                    'taxonomy' => ATBDP_CATEGORY,
+                    'field'    => 'slug',
+                    'terms'    => 'backyard-dog-parks',
+                ),
+            );
+        } elseif ($custom_fields['custom-category'] == "condos") {
+            $args['meta_query']['directory_type'] = array(
+                "key" => "_directory_type",
+                "value" => array(1414),
+                "compare" => "IN"
+            );
+            $args['tax_query'] = array(
+                array(
+                    'taxonomy' => ATBDP_CATEGORY,
+                    'field'    => 'slug',
+                    'terms'    => 'condos',
+                ),
+            );
+        } elseif ($custom_fields['custom-category'] == "pooprint") {
+            $args['meta_query']['directory_type'] = array(
+                "key" => "_directory_type",
+                "value" => array(1414),
+                "compare" => "IN"
+            );
+            $args['tax_query'] = array(
+                array(
+                    'taxonomy' => ATBDP_CATEGORY,
+                    'field'    => 'slug',
+                    'terms'    => 'pooprints-community',
+                ),
+            );
+        } else {
+            $args['meta_query']['directory_type'] = array(
+                "key" => "_directory_type",
+                "value" => array(1445),
+                "compare" => "IN"
+            );
         }
-        unset($args['meta_query']['0']);
+
+        if ($args['meta_query'] && count($args['meta_query']) > 0) {
+            foreach ($args['meta_query'] as $key => $meta_query) {
+                if ($meta_query['key'] == '_custom-category') unset($args['meta_query'][$key]);
+            }
+        }
     }
     //e_var_dump($args);
 
@@ -2311,3 +2360,21 @@ add_filter('atbdp_all_listings_query_arguments', function ($args) {
     //e_var_dump($args);
     return $args;
 });
+
+
+/**
+ * CUSTOM FUNCTION - mpp_listing_directory_type
+ */
+
+if (!function_exists('mpp_listing_directory_type')) {
+    function mpp_listing_directory_type($listing_id = 0, $return = 'obj')
+    {
+        if (!$listing_id) return;
+        $terms = get_the_terms($listing_id, ATBDP_DIRECTORY_TYPE);
+        if ($terms && count($terms) > 0) {
+            if ($return == 'obj') return $terms[0];
+            if (isset($terms[0]->{$return})) return $terms[0]->{$return};
+        }
+        return false;
+    }
+}

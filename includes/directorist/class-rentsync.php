@@ -61,6 +61,9 @@ class MPP_Rentsync
         // AVAILABLE UNITS SHORTCODE
         add_shortcode('mpp-apartment-units', array($this, 'rentsync_mpp_apartment_units'));
 
+        // CONTACT UNIT OWNER
+        add_shortcode('contact-unit-owner', array($this, 'contact_unit_owner'));
+
         // AVAILABLE UNITS SHORTCODE
         //add_shortcode('mpp-apartment-units-connection', array($this, 'rentsync_mpp_apartment_units_connection'));
 
@@ -1005,6 +1008,7 @@ class MPP_Rentsync
     public function update_all_field_options()
     {
         $this->insert_option_to_listing_form_field($this->directory_type_unit, 'unit_type', $this->unit_types);
+        $this->insert_option_to_listing_form_field($this->directory_type_unit, 'amenities', $this->amenities);
         $this->insert_option_to_listing_form_field($this->directory_type, 'building_type', $this->building_types);
         $this->insert_option_to_listing_form_field($this->directory_type, 'amenities', $this->amenities);
         $this->insert_option_to_listing_form_field($this->directory_type, 'utilities', $this->utilities);
@@ -1118,6 +1122,9 @@ class MPP_Rentsync
     {
         if ($type == 'alt') {
             $text = str_replace($divider, " ", $text);
+            $text = ucwords($text);
+        } else if ($type == 'phone') {
+            $text = str_replace($divider, "", $text);
             $text = ucwords($text);
         } else {
             // replace non letter or digits by divider
@@ -1279,6 +1286,22 @@ class MPP_Rentsync
             ),
         ));
         return isset($units->posts) ? $units->posts : false;
+    }
+
+    /**
+     * SHORTCODE - contact_unit_owner
+     */
+    public function contact_unit_owner()
+    {
+        ob_start();
+        $phone = '';
+        $building  = get_post_meta(get_the_ID(), '_mpp-housing', true);
+        if ($building) $phone = get_post_meta($building, '_ci-phone', true);
+        if (!empty($phone)) :
+            $phone = $this->mpp_slugify_text($phone, '-', 'phone');
+            require(get_stylesheet_directory() . '/includes/directorist/templates/single/rentsync_units_contact.php');
+        endif;
+        return ob_get_clean();
     }
 }
 

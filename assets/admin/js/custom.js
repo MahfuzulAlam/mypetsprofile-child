@@ -98,12 +98,12 @@ jQuery(document).ready(function ($) {
       );
       var i = 0;
 
-      var tid = setInterval(rentSyncAddProperty, 10000);
+      var tid = setInterval(rentSyncAddProperty, 5000);
 
       function rentSyncAddProperty() {
         console.log(i);
         rentsync_add_property(i);
-        if (i >= 10) abortTimer();
+        if (i >= 5) abortTimer();
         i++;
       }
 

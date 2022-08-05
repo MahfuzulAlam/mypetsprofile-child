@@ -1477,3 +1477,39 @@ form.messenger-form {
     margin-left: -20px;
   } */
 }
+
+.mpp-unit-connection-link {
+  color: #fff !important;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.contact_unit_owner {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.contact_unit_owner a {
+  background-color: #e85233;
+  color: #fff !important;
+  margin-bottom: 5px;
+  margin-right: 5px;
+  width: fit-content;
+  border: none;
+}
+
+@media only screen and (max-width: 375px) {
+  .directorist-search-contents
+    .directorist-search-form-top
+    .directorist-search-form-action {
+    flex-direction: row !important;
+  }
+}
+
+@media only screen and (max-width: 676px) {
+  .directorist-single-info-floor_plan {
+    flex-direction: column;
+  }
+}
