@@ -28,6 +28,8 @@ class MPP_Rentsync
     private $utilities = []; // Property
     private $unit_types = []; // Units
 
+    private $locations = [];
+
     private $source = 'rentsync';
     private $company_name = '';
     private $company_id = '';
@@ -586,6 +588,50 @@ class MPP_Rentsync
     }
 
     /**
+     * SET LOCATION LIST
+     */
+    public function set_locations()
+    {
+        $locations = array();
+        if ($this->properties && count($this->properties) > 0) {
+            foreach ($this->properties as $property) {
+                if (isset($property->location->city) && !empty($property->location->city) && !in_array($property->location->city, $locations)) {
+                    $locations[] = $property->location->city;
+                }
+                if (isset($property->location->province) && !empty($property->location->province) && !in_array($property->location->province, $locations)) {
+                    $locations[] = $property->location->province;
+                }
+            }
+        }
+        e_var_dump($locations);
+        if (count($locations) > 0) $this->locations = $locations;
+    }
+
+    /**
+     * INSERT/UPDATE LOCATION TAXONOMY
+     */
+    public function update_location_taxonomy()
+    {
+        $dir_types = array(200, 1414, 1445, 1418);
+        $this->set_locations();
+        if (count($this->locations) < 1) return;
+
+        foreach ($this->locations as $location) {
+            $term = term_exists($location, ATBDP_LOCATION);
+            if ($term && !empty($term['term_id'])) {
+                // UPDATE LOCATION FOR ALL DIR TYPE
+                update_term_meta($term['term_id'], '_directory_type', $dir_types);
+                e_var_dump($term['term_id']);
+            } else {
+                // ADD LOCATION FOR ALL DIR TYPE
+                $new_term = wp_insert_term($location, ATBDP_LOCATION);
+                if ($new_term) update_term_meta($new_term, '_directory_type', $dir_types);
+                e_var_dump($new_term);
+            }
+        }
+    }
+
+    /**
      * RETRIVE/CREATE TAXONOMY
      */
     public function retrive_create_taxonomy($term_name = '', $taxonomy = '', $field = 'title')
@@ -704,27 +750,38 @@ class MPP_Rentsync
         if (!is_user_logged_in() || !current_user_can('administrator')) return;
         $result = false;
         $property_key = isset($_REQUEST['property']) && !empty($_REQUEST['property']) ? $_REQUEST['property'] : 0;
-        if (!$property_key || empty($property_key)) return;
-        $limit = isset($_REQUEST['limit']) && !empty($_REQUEST['limit']) ? $_REQUEST['limit'] : 10;
-        $range = isset($_REQUEST['range']) && !empty($_REQUEST['range']) ? $_REQUEST['range'] : 1;
-        $this->before_save_api_setup();
-        if (!file_exists($this->localUrl)) $this->save_api_info_to_local();
-        if (file_exists($this->localUrl)) {
-            $this->after_save_api_setup();
-            if ($property_key) :
-                for ($i = 0; $i < $range; $i++) {
-                    if ($property_key <= $limit) {
-                        if (isset($this->properties[$property_key])) {
-                            if ($property_key == 1) $this->create_property_units($this->properties[0]);
-                            $this->create_property_units($this->properties[$property_key]);
-                            if ($range > 1) $property_key = $property_key + 1;
-                            $result = true;
+        $taxonomy_update = isset($_REQUEST['taxonomy']) && !empty($_REQUEST['taxonomy']) ? $_REQUEST['taxonomy'] : '';
+
+        if ($taxonomy_update && !empty($taxonomy_update)) {
+            $this->before_save_api_setup();
+            if (!file_exists($this->localUrl)) $this->save_api_info_to_local();
+            if (file_exists($this->localUrl)) {
+                $this->after_save_api_setup();
+                if ($taxonomy_update == 'location') $this->update_location_taxonomy();
+            }
+        } else {
+            if (!$property_key || empty($property_key)) return;
+            $limit = isset($_REQUEST['limit']) && !empty($_REQUEST['limit']) ? $_REQUEST['limit'] : 10;
+            $range = isset($_REQUEST['range']) && !empty($_REQUEST['range']) ? $_REQUEST['range'] : 1;
+            $this->before_save_api_setup();
+            if (!file_exists($this->localUrl)) $this->save_api_info_to_local();
+            if (file_exists($this->localUrl)) {
+                $this->after_save_api_setup();
+                if ($property_key) :
+                    for ($i = 0; $i < $range; $i++) {
+                        if ($property_key <= $limit) {
+                            if (isset($this->properties[$property_key])) {
+                                if ($property_key == 1) $this->create_property_units($this->properties[0]);
+                                $this->create_property_units($this->properties[$property_key]);
+                                if ($range > 1) $property_key = $property_key + 1;
+                                $result = true;
+                            }
+                        } else {
+                            $result = false;
                         }
-                    } else {
-                        $result = false;
                     }
-                }
-            endif;
+                endif;
+            }
         }
 
         ob_start();
