@@ -714,7 +714,7 @@ jQuery(document).ready(function ($) {
           message_position = "single";
 
         var profile_image = profile_images[owner];
-        if (message_position == "first") {
+        if (message_position == "first" || message_position == "single") {
           html +=
             '<img src="' +
             profile_image +

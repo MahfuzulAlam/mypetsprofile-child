@@ -660,7 +660,7 @@ class Referral_Messenger
                                                     if ($next_sender !== $message->sender_id) $message_position = 'last';
                                                     if ($next_sender !== $message->sender_id && $prev_sender !== $message->sender_id) $message_position = 'single';
 
-                                                    if ($message_position == 'first') {
+                                                    if ($message_position == 'first' || $message_position == 'single') {
                                                         $profile_image = $message->sender_id == $chat_client_id ? $sender_avatar_url : $recipient_avatar_url;
                                             ?>
                                                         <img src="<?php echo $profile_image; ?>" class="bubble-image <?php echo $owner; ?>" />
