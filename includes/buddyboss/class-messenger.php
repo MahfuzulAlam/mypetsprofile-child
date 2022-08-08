@@ -183,7 +183,8 @@ class Referral_Messenger
                                 )
                             ); ?>
                         </td>
-                        <!-- <td class="username"><?php //echo $user->data->display_name . " (" . $user->data->user_nicename . ")"; ?></td> -->
+                        <!-- <td class="username"><?php //echo $user->data->display_name . " (" . $user->data->user_nicename . ")"; 
+                                                    ?></td> -->
                         <td class="username"><?php echo $user->data->display_name; ?></td>
                         <td>
                             <a class="btn button mpp-start-chatting" data-sender="<?php echo bp_loggedin_user_id(); ?>" data-recipient="<?php echo $user_id; ?>" data-listing="<?php echo $listing_id; ?>" data-type="accept">Start Chatting</a>
@@ -246,9 +247,9 @@ class Referral_Messenger
                 );
 
                 $inserted  = $this->mpp_apply_as_referral_listing($property_id, $args);
-                if ($inserted) { 
+                if ($inserted) {
                     echo '<p>You have successfully submitted the application. We will inform you within 24 hours.<p>';
-                    $post = get_post( $inserted );
+                    $post = get_post($inserted);
                     do_action('after_inserting_referral', $inserted, $post->post_author);
                 }
             } else {
@@ -357,20 +358,20 @@ class Referral_Messenger
             <?php foreach ($properties as $property) : ?>
                 <div class="mpp-property">
                     <h4 class="property-title"><?php echo $property['title']; ?></h4>
-                    <?php $mpp_sref = get_post_meta($property['id'], 'mpp_spokesperson_ref', true);?>
-                    <?php $mpp_sreg = get_post_meta($property['id'], 'mpp_spokesperson_reg', true);?>
+                    <?php $mpp_sref = get_post_meta($property['id'], 'mpp_spokesperson_ref', true); ?>
+                    <?php $mpp_sreg = get_post_meta($property['id'], 'mpp_spokesperson_reg', true); ?>
                     <div class="spokesperson_reff_system">
                         <label>Referral Program</label>
                         <select class="spokesperson_ref_system" name="spokesperson_ref_system" data-listing="<?php echo $property['id']; ?>">
-                            <option value="enabled" <?php selected($mpp_sref, 'enabled', true); ?>>Enabled</option>   
-                            <option value="disabled" <?php selected($mpp_sref, 'disabled', true); ?>>Disabled</option>    
+                            <option value="enabled" <?php selected($mpp_sref, 'enabled', true); ?>>Enabled</option>
+                            <option value="disabled" <?php selected($mpp_sref, 'disabled', true); ?>>Disabled</option>
                         </select>
                     </div>
                     <div class="spokesperson_switch">
                         <label>Registering Spokesperson</label>
                         <select class="spokesperson_reg_status" name="spokesperson_reg_status" data-listing="<?php echo $property['id']; ?>">
-                            <option value="enabled" <?php selected($mpp_sreg, 'enabled', true); ?>>Enabled</option>   
-                            <option value="disabled" <?php selected($mpp_sreg, 'disabled', true); ?>>Disabled</option>    
+                            <option value="enabled" <?php selected($mpp_sreg, 'enabled', true); ?>>Enabled</option>
+                            <option value="disabled" <?php selected($mpp_sreg, 'disabled', true); ?>>Disabled</option>
                         </select>
                     </div>
                     <div class="property-spokepersons">
@@ -381,66 +382,67 @@ class Referral_Messenger
                             ?>
                                 <div class="mpp-applied-speaker">
                                     <?php
-                                        foreach ($property['spokespersons'] as $speaker) :
-                                            $user = get_user_by('id', $speaker['user_id']);
-                                            $first_name = isset($speaker['first_name']) ? $speaker['first_name']: '';
-                                            $last_name = isset($speaker['last_name']) ? $speaker['last_name']: '';
-                                            $full_name = '';
-                                            if(!empty($first_name) || !empty($last_name)){
-                                                $full_name = $first_name.' '.$last_name;
-                                            }else{
-                                                $full_name = $user->data->display_name . " (" . $user->data->user_nicename . ")";
-                                            }
+                                    foreach ($property['spokespersons'] as $speaker) :
+                                        $user = get_user_by('id', $speaker['user_id']);
+                                        $first_name = isset($speaker['first_name']) ? $speaker['first_name'] : '';
+                                        $last_name = isset($speaker['last_name']) ? $speaker['last_name'] : '';
+                                        $full_name = '';
+                                        if (!empty($first_name) || !empty($last_name)) {
+                                            $full_name = $first_name . ' ' . $last_name;
+                                        } else {
+                                            $full_name = $user->data->display_name . " (" . $user->data->user_nicename . ")";
+                                        }
                                     ?>
-                                            <div class="spokesperson-wrapper">
-                                                <div class="spokesperson-image spokeperson-section">
-                                                    <?php 
-                                                        echo bp_core_fetch_avatar(
-                                                            array(
-                                                                'item_id' => $speaker['user_id'], // id of user for desired avatar
-                                                                'type'    => 'thumb',
-                                                                'html'   => true     // FALSE = return url, TRUE (default) = return img html
-                                                            )
-                                                        ); 
-                                                    ?>
-                                                </div>
-                                                <div class="spokesperson-info spokeperson-section">
-                                                    <?php if(!empty($full_name)): ?>
-                                                        <div><span class="label">Name:</span> <?php echo $full_name; ?></div>
-                                                    <?php endif; ?>
-                                                    <?php if(isset($speaker['status']) && !empty($speaker['status'])): ?>
-                                                        <div><span class="label">Status:</span> <span class="spokesperson-status"><?php echo $speaker['status'] == 'active' ? 'Active': 'Inactive'; ?></span></div>
-                                                    <?php endif; ?>
-                                                    <?php if(isset($speaker['unit_number']) && !empty($speaker['unit_number'])): ?>
-                                                        <div><span class="label">Unit number:</span> <?php echo $speaker['unit_number']; ?></div>
-                                                    <?php endif; ?>
-                                                    <?php if(isset($speaker['lease_start']) && !empty($speaker['lease_start'])): ?>
-                                                        <div><span class="label">Lease Start:</span> <?php echo $speaker['lease_start']; ?></div>
-                                                    <?php endif; ?>
-                                                    <?php if(isset($speaker['lease_end']) && !empty($speaker['lease_end'])): ?>
-                                                        <div><span class="label">Lease End:</span> <?php echo $speaker['lease_end']; ?></div>
-                                                    <?php endif; ?>
-                                                    <?php if(isset($speaker['phone']) && !empty($speaker['phone'])): ?>
-                                                        <div><span class="label">Phone:</span> <?php echo $speaker['phone']; ?></div>
-                                                    <?php endif; ?>
-                                                    <?php if(isset($speaker['message']) && !empty($speaker['message'])): ?>
-                                                        <div><span class="label">Message:</span> <?php echo $speaker['message']; ?></div>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div class="spokesperson-actions spokeperson-section">
-                                                    <!-- <input type="hidden" class="spokeperson_info" value='<?php //echo json_encode( $speaker ); ?>'/> -->
-                                                    <a class="btn button mpp-referral-reports" href="<?php echo home_url('/chat-module/') . '?chatclient=' . $speaker['user_id']; ?>" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="reports">Reports</a>
-                                                    <a class="btn button mpp-referral-remove" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="remove">Remove</a>
-                                                    <?php if(isset($speaker['status']) && $speaker['status'] == 'active'): ?>
-                                                    <a class="btn button mpp-referral-status" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="deactivate">Deactivate</a>
-                                                    <?php endif; ?>
-                                                    <?php if(isset($speaker['status']) && $speaker['status'] == 'inactive'): ?>
-                                                    <a class="btn button mpp-referral-status" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="activate">Activate</a>
-                                                    <?php endif; ?>
-                                                </div>
+                                        <div class="spokesperson-wrapper">
+                                            <div class="spokesperson-image spokeperson-section">
+                                                <?php
+                                                echo bp_core_fetch_avatar(
+                                                    array(
+                                                        'item_id' => $speaker['user_id'], // id of user for desired avatar
+                                                        'type'    => 'thumb',
+                                                        'html'   => true     // FALSE = return url, TRUE (default) = return img html
+                                                    )
+                                                );
+                                                ?>
                                             </div>
-                                    <?php  
-                                        endforeach; 
+                                            <div class="spokesperson-info spokeperson-section">
+                                                <?php if (!empty($full_name)) : ?>
+                                                    <div><span class="label">Name:</span> <?php echo $full_name; ?></div>
+                                                <?php endif; ?>
+                                                <?php if (isset($speaker['status']) && !empty($speaker['status'])) : ?>
+                                                    <div><span class="label">Status:</span> <span class="spokesperson-status"><?php echo $speaker['status'] == 'active' ? 'Active' : 'Inactive'; ?></span></div>
+                                                <?php endif; ?>
+                                                <?php if (isset($speaker['unit_number']) && !empty($speaker['unit_number'])) : ?>
+                                                    <div><span class="label">Unit number:</span> <?php echo $speaker['unit_number']; ?></div>
+                                                <?php endif; ?>
+                                                <?php if (isset($speaker['lease_start']) && !empty($speaker['lease_start'])) : ?>
+                                                    <div><span class="label">Lease Start:</span> <?php echo $speaker['lease_start']; ?></div>
+                                                <?php endif; ?>
+                                                <?php if (isset($speaker['lease_end']) && !empty($speaker['lease_end'])) : ?>
+                                                    <div><span class="label">Lease End:</span> <?php echo $speaker['lease_end']; ?></div>
+                                                <?php endif; ?>
+                                                <?php if (isset($speaker['phone']) && !empty($speaker['phone'])) : ?>
+                                                    <div><span class="label">Phone:</span> <?php echo $speaker['phone']; ?></div>
+                                                <?php endif; ?>
+                                                <?php if (isset($speaker['message']) && !empty($speaker['message'])) : ?>
+                                                    <div><span class="label">Message:</span> <?php echo $speaker['message']; ?></div>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="spokesperson-actions spokeperson-section">
+                                                <!-- <input type="hidden" class="spokeperson_info" value='<?php //echo json_encode( $speaker ); 
+                                                                                                            ?>'/> -->
+                                                <a class="btn button mpp-referral-reports" href="<?php echo home_url('/chat-module/') . '?chatclient=' . $speaker['user_id']; ?>" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="reports">Reports</a>
+                                                <a class="btn button mpp-referral-remove" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="remove">Remove</a>
+                                                <?php if (isset($speaker['status']) && $speaker['status'] == 'active') : ?>
+                                                    <a class="btn button mpp-referral-status" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="deactivate">Deactivate</a>
+                                                <?php endif; ?>
+                                                <?php if (isset($speaker['status']) && $speaker['status'] == 'inactive') : ?>
+                                                    <a class="btn button mpp-referral-status" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="activate">Activate</a>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    <?php
+                                    endforeach;
                                     ?>
                                 </div>
                             <?php
@@ -460,57 +462,57 @@ class Referral_Messenger
                             ?>
                                 <div class="mpp-applied-speaker">
                                     <?php
-                                        foreach ($property['applied_speakers'] as $speaker) :
-                                            $user = get_user_by('id', $speaker['user_id']);
-                                            $first_name = isset($speaker['first_name']) ? $speaker['first_name']: '';
-                                            $last_name = isset($speaker['last_name']) ? $speaker['last_name']: '';
-                                            $full_name = '';
-                                            if(!empty($first_name) || !empty($last_name)){
-                                                $full_name = $first_name.' '.$last_name;
-                                            }else{
-                                                $full_name = $user->data->display_name . " (" . $user->data->user_nicename . ")";
-                                            }
+                                    foreach ($property['applied_speakers'] as $speaker) :
+                                        $user = get_user_by('id', $speaker['user_id']);
+                                        $first_name = isset($speaker['first_name']) ? $speaker['first_name'] : '';
+                                        $last_name = isset($speaker['last_name']) ? $speaker['last_name'] : '';
+                                        $full_name = '';
+                                        if (!empty($first_name) || !empty($last_name)) {
+                                            $full_name = $first_name . ' ' . $last_name;
+                                        } else {
+                                            $full_name = $user->data->display_name . " (" . $user->data->user_nicename . ")";
+                                        }
                                     ?>
-                                            <div class="spokesperson-wrapper">
-                                                <div class="spokesperson-image spokeperson-section">
-                                                    <?php 
-                                                        echo bp_core_fetch_avatar(
-                                                            array(
-                                                                'item_id' => $speaker['user_id'], // id of user for desired avatar
-                                                                'type'    => 'thumb',
-                                                                'html'   => true     // FALSE = return url, TRUE (default) = return img html
-                                                            )
-                                                        ); 
-                                                    ?>
-                                                </div>
-                                                <div class="spokesperson-info spokeperson-section">
-                                                    <?php if(!empty($full_name)): ?>
-                                                        <div><span class="label">Name:</span> <?php echo $full_name; ?></div>
-                                                    <?php endif; ?>
-                                                    <?php if(isset($speaker['unit_number']) && !empty($speaker['unit_number'])): ?>
-                                                        <div><span class="label">Unit number:</span> <?php echo $speaker['unit_number']; ?></div>
-                                                    <?php endif; ?>
-                                                    <?php if(isset($speaker['lease_start']) && !empty($speaker['lease_start'])): ?>
-                                                        <div><span class="label">Lease Start:</span> <?php echo $speaker['lease_start']; ?></div>
-                                                    <?php endif; ?>
-                                                    <?php if(isset($speaker['lease_end']) && !empty($speaker['lease_end'])): ?>
-                                                        <div><span class="label">Lease End:</span> <?php echo $speaker['lease_end']; ?></div>
-                                                    <?php endif; ?>
-                                                    <?php if(isset($speaker['phone']) && !empty($speaker['phone'])): ?>
-                                                        <div><span class="label">Phone:</span> <?php echo $speaker['phone']; ?></div>
-                                                    <?php endif; ?>
-                                                    <?php if(isset($speaker['message']) && !empty($speaker['message'])): ?>
-                                                        <div><span class="label">Message:</span> <?php echo $speaker['message']; ?></div>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div class="spokesperson-actions spokeperson-section">
-                                                    <input type="hidden" class="spokeperson_info" value='<?php echo json_encode( $speaker ); ?>'/>
-                                                    <a class="btn button mpp-referral-approval-listing" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="accept">Accept</a>
-                                                    <a class="btn button mpp-referral-approval-listing" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="reject">Reject</a>
-                                                </div>
+                                        <div class="spokesperson-wrapper">
+                                            <div class="spokesperson-image spokeperson-section">
+                                                <?php
+                                                echo bp_core_fetch_avatar(
+                                                    array(
+                                                        'item_id' => $speaker['user_id'], // id of user for desired avatar
+                                                        'type'    => 'thumb',
+                                                        'html'   => true     // FALSE = return url, TRUE (default) = return img html
+                                                    )
+                                                );
+                                                ?>
                                             </div>
-                                    <?php  
-                                        endforeach; 
+                                            <div class="spokesperson-info spokeperson-section">
+                                                <?php if (!empty($full_name)) : ?>
+                                                    <div><span class="label">Name:</span> <?php echo $full_name; ?></div>
+                                                <?php endif; ?>
+                                                <?php if (isset($speaker['unit_number']) && !empty($speaker['unit_number'])) : ?>
+                                                    <div><span class="label">Unit number:</span> <?php echo $speaker['unit_number']; ?></div>
+                                                <?php endif; ?>
+                                                <?php if (isset($speaker['lease_start']) && !empty($speaker['lease_start'])) : ?>
+                                                    <div><span class="label">Lease Start:</span> <?php echo $speaker['lease_start']; ?></div>
+                                                <?php endif; ?>
+                                                <?php if (isset($speaker['lease_end']) && !empty($speaker['lease_end'])) : ?>
+                                                    <div><span class="label">Lease End:</span> <?php echo $speaker['lease_end']; ?></div>
+                                                <?php endif; ?>
+                                                <?php if (isset($speaker['phone']) && !empty($speaker['phone'])) : ?>
+                                                    <div><span class="label">Phone:</span> <?php echo $speaker['phone']; ?></div>
+                                                <?php endif; ?>
+                                                <?php if (isset($speaker['message']) && !empty($speaker['message'])) : ?>
+                                                    <div><span class="label">Message:</span> <?php echo $speaker['message']; ?></div>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="spokesperson-actions spokeperson-section">
+                                                <input type="hidden" class="spokeperson_info" value='<?php echo json_encode($speaker); ?>' />
+                                                <a class="btn button mpp-referral-approval-listing" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="accept">Accept</a>
+                                                <a class="btn button mpp-referral-approval-listing" data-user="<?php echo $speaker['user_id']; ?>" data-listing="<?php echo $speaker['property_id']; ?>" data-type="reject">Reject</a>
+                                            </div>
+                                        </div>
+                                    <?php
+                                    endforeach;
                                     ?>
                                 </div>
                             <?php
@@ -602,10 +604,15 @@ class Referral_Messenger
                             <?php if (!empty($first_info)) : ?>
                                 <div class="chat">
                                     <div class="chat-header clearfix">
-                                        <div class="row">
+                                        <div class="row clearfix">
+                                            <div class="col-lg-6 chat-logo">
+                                                <img src="<?php echo get_stylesheet_directory_uri() . '/assets/img/logo-simple.png'; ?>" width="200" alt="PETCHATR" />
+                                            </div>
+                                        </div>
+                                        <div class="row clearfix">
                                             <div class="col-lg-6">
                                                 <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
-                                                    <img src="<?php echo $first_info['avatar']; ?>" alt="avatar">
+                                                    <img class="avatar-image" src="<?php echo $first_info['avatar']; ?>" alt="avatar">
                                                 </a>
                                                 <div class="chat-about">
                                                     <h6 class="m-b-0"><?php echo $first_info['name']; ?></h6>
@@ -652,15 +659,15 @@ class Referral_Messenger
                                                     if ($prev_sender == $message->sender_id) $message_position = 'middle';
                                                     if ($next_sender !== $message->sender_id) $message_position = 'last';
                                                     if ($next_sender !== $message->sender_id && $prev_sender !== $message->sender_id) $message_position = 'single';
-                                            
-                                                    if($message_position == 'first'){
+
+                                                    if ($message_position == 'first') {
                                                         $profile_image = $message->sender_id == $chat_client_id ? $sender_avatar_url : $recipient_avatar_url;
                                             ?>
-                                                    <img src="<?php echo $profile_image; ?>" class="bubble-image <?php echo $owner; ?>"/>
-                                            <?php
+                                                        <img src="<?php echo $profile_image; ?>" class="bubble-image <?php echo $owner; ?>" />
+                                                    <?php
                                                     }
-                                            
-                                            ?>
+
+                                                    ?>
                                                     <div class="bubble <?php echo $owner; ?> <?php echo $message_position; ?>"><?php echo $message->message; ?></div>
                                             <?php
 
@@ -1040,9 +1047,9 @@ class Referral_Messenger
         $listing_id = isset($_REQUEST['listing']) ? $_REQUEST['listing'] : 0;
         if (!empty($listing_id) && !empty($status)) {
             $r = update_post_meta($listing_id, 'mpp_spokesperson_ref', $status);
-            if($r) $result = true;
+            if ($r) $result = true;
         }
-        echo json_encode(array('result' => $result, 'r'=> $r));
+        echo json_encode(array('result' => $result, 'r' => $r));
         die();
     }
 
@@ -1055,9 +1062,9 @@ class Referral_Messenger
         $listing_id = isset($_REQUEST['listing']) ? $_REQUEST['listing'] : 0;
         if (!empty($listing_id) && !empty($status)) {
             $r = update_post_meta($listing_id, 'mpp_spokesperson_reg', $status);
-            if($r) $result = true;
+            if ($r) $result = true;
         }
-        echo json_encode(array('result' => $result, 'r'=> $r));
+        echo json_encode(array('result' => $result, 'r' => $r));
         die();
     }
 }
