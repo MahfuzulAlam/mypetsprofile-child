@@ -2378,3 +2378,56 @@ if (!function_exists('mpp_listing_directory_type')) {
         return false;
     }
 }
+
+
+/**
+ * QRCODE REDIRECT
+ */
+
+add_shortcode('mpp-app-qrcode-redirect', function () {
+    //Detect special conditions devices
+    /*
+    $iPod    = stripos($_SERVER['HTTP_USER_AGENT'],"iPod");
+    $iPhone  = stripos($_SERVER['HTTP_USER_AGENT'],"iPhone");
+    $iPad    = stripos($_SERVER['HTTP_USER_AGENT'],"iPad");
+    $android = stripos($_SERVER['HTTP_USER_AGENT'],"Android");
+    $webOS   = stripos($_SERVER['HTTP_USER_AGENT'],"webOS");
+    
+    $link = "";
+    e_var_dump($_SERVER['HTTP_USER_AGENT']);
+    if($iPod || $iPhone || $iPad){
+        echo $link = "https://apps.apple.com/us/app/mypetsprofile/id1565456057";
+    }else if($android){
+        echo $link = "https://play.google.com/store/apps/details?id=com.mypetsprofile.mypetsprofile";
+    }else{
+        echo $link = "http://mypetsprofile.com";
+    }
+    */
+    ob_start();
+
+?>
+    <p>Redirecting to other site...</p>
+    <script type="text/javascript">
+        var userAgent = window.navigator.userAgent,
+            platform = window.navigator?.userAgentData?.platform || window.navigator.platform,
+            macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'],
+            windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'],
+            iosPlatforms = ['iPhone', 'iPad', 'iPod'],
+            link = "https://mypetsprofile.com";
+
+        if (macosPlatforms.indexOf(platform) !== -1) {
+            link = 'https://apps.apple.com/us/app/mypetsprofile/id1565456057';
+        } else if (iosPlatforms.indexOf(platform) !== -1) {
+            link = 'https://apps.apple.com/us/app/mypetsprofile/id1565456057';
+        } else if (windowsPlatforms.indexOf(platform) !== -1) {
+            link = 'https://mypetsprofile.com';
+        } else if (/Android/.test(userAgent)) {
+            link = 'https://play.google.com/store/apps/details?id=com.mypetsprofile.mypetsprofile';
+        } else if (/Linux/.test(platform)) {
+            link = 'https://mypetsprofile.com';
+        }
+        window.location = link;
+    </script>
+<?php
+    return ob_get_clean();
+});
