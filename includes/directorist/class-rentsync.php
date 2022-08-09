@@ -1356,6 +1356,7 @@ class MPP_Rentsync
         if ($building) $phone = get_post_meta($building, '_ci-phone', true);
         if (!empty($phone)) :
             $phone = $this->mpp_slugify_text($phone, '-', 'phone');
+            $email = get_post_meta($building, '_ci-email', true);
             require(get_stylesheet_directory() . '/includes/directorist/templates/single/rentsync_units_contact.php');
         endif;
         return ob_get_clean();
