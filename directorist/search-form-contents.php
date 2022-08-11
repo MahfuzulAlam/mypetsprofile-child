@@ -57,6 +57,8 @@ if (!defined('ABSPATH')) exit;
 
         $top_categories = [];
 
+        $listing_type_id    = $searchform->listing_type;
+
         $args = array(
             'type'          => ATBDP_POST_TYPE,
             'parent'        => 0,
@@ -66,19 +68,22 @@ if (!defined('ABSPATH')) exit;
             'number'        => 5,
             'taxonomy'      => ATBDP_CATEGORY,
             'no_found_rows' => true,
+            'meta_query'    => array(
+                'relation'  => 'OR',
+                array(
+                    'key'   =>  '_directory_type',
+                    'value' =>  $listing_type_id . ';',
+                    'compare' => 'LIKE'
+                ),
+                array(
+                    'key'   =>  '_directory_type',
+                    'value' =>  '"' . $listing_type_id . '"',
+                    'compare' => 'LIKE'
+                ),
+            ),
         );
 
-        $cats = get_categories($args);
-
-        foreach ($cats as $cat) {
-            $directory_type      = get_term_meta($cat->term_id, '_directory_type', true);
-            $directory_type      = !empty($directory_type) ? $directory_type : array();
-            $listing_type_id     = $searchform->listing_type;
-
-            if (in_array($listing_type_id, $directory_type)) {
-                $top_categories[] = $cat;
-            }
-        }
+        $top_categories = get_categories($args);
 
         if (!empty($top_categories)) {
             $title = get_directorist_option('popular_cat_title', __('Browse by popular categories', 'directorist'));

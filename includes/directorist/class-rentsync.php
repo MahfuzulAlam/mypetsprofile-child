@@ -1,5 +1,7 @@
 <?php
 
+use Mpdf\Tag\A;
+
 /**
  * @author  mahfuz
  * @since   1.0
@@ -65,6 +67,9 @@ class MPP_Rentsync
 
         // CONTACT UNIT OWNER
         add_shortcode('contact-unit-owner', array($this, 'contact_unit_owner'));
+
+        // SEARCH PAGE FILTER
+        add_filter('atbdp_listing_search_query_argument', array($this, 'atbdp_listing_search_query_argument'));
 
         // AVAILABLE UNITS SHORTCODE
         //add_shortcode('mpp-apartment-units-connection', array($this, 'rentsync_mpp_apartment_units_connection'));
@@ -1355,11 +1360,146 @@ class MPP_Rentsync
         $building  = get_post_meta(get_the_ID(), '_mpp-housing', true);
         if ($building) $phone = get_post_meta($building, '_ci-phone', true);
         if (!empty($phone)) :
-            $phone = $this->mpp_slugify_text($phone, '-', 'phone');
+            $phone_formatted = $this->mpp_slugify_text($phone, '-', 'phone');
             $email = get_post_meta($building, '_ci-email', true);
             require(get_stylesheet_directory() . '/includes/directorist/templates/single/rentsync_units_contact.php');
         endif;
         return ob_get_clean();
+    }
+
+    /**
+     * SEARCH PAGE FILTER
+     */
+    public function atbdp_listing_search_query_argument($args)
+    {
+        unset($args['meta_key']);
+        unset($args['meta_query']['_featured']);
+
+        $custom_fields = isset($_REQUEST['custom_field']) && !empty($_REQUEST['custom_field']) ? $_REQUEST['custom_field'] : array();
+
+        if (count($custom_fields) > 0 && isset($custom_fields['custom-category'])) {
+            unset($args['meta_query']['directory_type']);
+            if ($custom_fields['custom-category'] == "apartments") {
+                $args['meta_query']['directory_type'] = array(
+                    "key" => "_directory_type",
+                    "value" => array(1414),
+                    "compare" => "IN"
+                );
+            } elseif ($custom_fields['custom-category'] == "backyard") {
+                $args['meta_query']['directory_type'] = array(
+                    "key" => "_directory_type",
+                    "value" => array(1414),
+                    "compare" => "IN"
+                );
+                $args['tax_query'] = array(
+                    array(
+                        'taxonomy' => ATBDP_CATEGORY,
+                        'field'    => 'slug',
+                        'terms'    => 'backyard-dog-parks',
+                    ),
+                );
+            } elseif ($custom_fields['custom-category'] == "condos") {
+                $args['meta_query']['directory_type'] = array(
+                    "key" => "_directory_type",
+                    "value" => array(1414),
+                    "compare" => "IN"
+                );
+                $args['tax_query'] = array(
+                    array(
+                        'taxonomy' => ATBDP_CATEGORY,
+                        'field'    => 'slug',
+                        'terms'    => 'condos',
+                    ),
+                );
+            } elseif ($custom_fields['custom-category'] == "pooprint") {
+                $args['meta_query']['directory_type'] = array(
+                    "key" => "_directory_type",
+                    "value" => array(1414),
+                    "compare" => "IN"
+                );
+                $args['tax_query'] = array(
+                    array(
+                        'taxonomy' => ATBDP_CATEGORY,
+                        'field'    => 'slug',
+                        'terms'    => 'pooprints-community',
+                    ),
+                );
+            } elseif ($custom_fields['custom-category'] == "apartment-units") {
+                $args['meta_query']['directory_type'] = array(
+                    "key" => "_directory_type",
+                    "value" => array(1445),
+                    "compare" => "IN"
+                );
+            } else {
+                $args['meta_query']['directory_type'] = array(
+                    "key" => "_directory_type",
+                    "value" => array(1445),
+                    "compare" => "IN"
+                );
+            }
+
+            if ($args['meta_query'] && count($args['meta_query']) > 0) {
+                foreach ($args['meta_query'] as $key => $meta_query) {
+                    if ($meta_query['key'] == '_custom-category') unset($args['meta_query'][$key]);
+                }
+            }
+        }
+
+        return $args;
+    }
+
+    /**
+     * GET PROPERTIES BY AMENITIES
+     */
+    public function mpp_get_properties_by_amenities($amenities = array())
+    {
+        if ($amenities && count($amenities) > 0) {
+            $amenities_query = array();
+            $amenities_query['relation'] = 'OR';
+
+            foreach ($amenities as $amenity) {
+                $amenities_query[] = array(
+                    'relation'  => 'OR',
+                    array(
+                        'key'   =>  '_amenities',
+                        'value' =>  $amenity . ';',
+                        'compare' => 'LIKE'
+                    ),
+                    array(
+                        'key'   =>  '_amenities',
+                        'value' =>  '"' . $amenity . '"',
+                        'compare' => 'LIKE'
+                    ),
+                );
+            }
+
+            $args = array(
+                'post_type' => ATBDP_POST_TYPE,
+                'post_status' => 'publish',
+                'post_per_page' => -1,
+                'fields' => 'ids',
+                'meta_query' => array(
+                    'relation' => 'AND',
+                    array(
+                        "key" => "_directory_type",
+                        "value" => array(193), //1414
+                        "compare" => "IN"
+                    ),
+                    $amenities_query
+                ),
+                'tax_query' => array(
+                    array(
+                        'taxonomy' => ATBDP_CATEGORY,
+                        'field'    => 'slug',
+                        'terms'    => 'apartments',
+                    ),
+                )
+            );
+
+            //$properties = new WP_Query($args);
+
+            e_var_dump($args);
+        }
     }
 }
 

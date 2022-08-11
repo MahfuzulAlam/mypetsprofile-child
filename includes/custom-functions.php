@@ -2270,6 +2270,8 @@ function mpp_get_vacancy_option_name($key = '', $options = array())
 }
 
 // DIRECTORIST QUERY ARGS
+
+/*
 add_filter('atbdp_listing_search_query_argument', function ($args) {
     unset($args['meta_key']);
     unset($args['meta_query']['_featured']);
@@ -2340,10 +2342,11 @@ add_filter('atbdp_listing_search_query_argument', function ($args) {
             }
         }
     }
-    //e_var_dump($args);
 
     return $args;
 });
+
+*/
 
 //atbdp_all_listings_query_arguments
 

@@ -439,6 +439,7 @@ class MPP_Child_Hooks
                     'compare' => 'NOT EXISTS',
                 )
             ));
+            $query->set('post__not_in', array(19368, 18062, 18063));
             $query->set('orderby', array('rank_position' => 'ASC'));
         }
         return $query;

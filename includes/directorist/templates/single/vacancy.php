@@ -7,7 +7,7 @@
  */
 
 $values = isset($data['value']) && !empty($data['value']) ? json_decode($data['value']) : array();
-//e_var_dump($data);
+if (empty($values)) return;
 ?>
 
 <div class="directorist-single-info directorist-single-info-checkbox <?php echo $data['form_data']['class']; ?>">
