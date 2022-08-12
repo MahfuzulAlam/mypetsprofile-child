@@ -505,7 +505,7 @@ class MPP_Child_Hooks
                     WC()->cart->apply_coupon($coupon_code);
                 }
             } else {
-                WC()->cart->apply_coupon('ADMINPROMO2022RC');
+                WC()->cart->apply_coupon('100discount');
             }
         }
         // if product in the cart
