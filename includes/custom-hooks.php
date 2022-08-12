@@ -462,6 +462,18 @@ class MPP_Child_Hooks
             }
             return '<span class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $product->get_price() . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $sign_up_fee . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></ins> <span class="subscription-details"><small class="woocommerce-price-suffix"> +Tax</small> / year</span></span>';
         }
+
+        $trial_length = get_post_meta($product->get_id(), '_subscription_trial_length', true);
+        $trial_period = get_post_meta($product->get_id(), '_subscription_trial_period', true);
+
+        if ($trial_length && $trial_period) {
+            $mpp_coupon_offer = get_post_meta($product->get_id(), 'mpp_coupon_offer', true);
+            if ($mpp_coupon_offer) {
+                $string = '<p class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $product->get_price() . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $mpp_coupon_offer . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></ins> <span class="subscription-details"><small class="woocommerce-price-suffix"> +Tax</small> / year</span>';
+                $string .= ' <span>with ' . $trial_length . ' ' . $trial_period . 's free trial</span></p>';
+            }
+        }
+
         return $string;
     }
 
@@ -533,13 +545,23 @@ class MPP_Child_Hooks
                 'desc_tip' => 'true'
             )
         );
+        woocommerce_wp_text_input(
+            array(
+                'id' => 'mpp_coupon_offer',
+                'placeholder' => 'Enter the offer amount',
+                'label' => __('Offer Amount', 'woocommerce'),
+                'desc_tip' => 'true'
+            )
+        );
     }
 
     public function woocommerce_product_custom_fields_save($post_id)
     {
         // Custom Product Text Field
         $mpp_coupon = isset($_POST['mpp_coupon']) && !empty($_POST['mpp_coupon']) ? $_POST['mpp_coupon'] : "";
+        $mpp_coupon_offer = isset($_POST['mpp_coupon_offer']) && !empty($_POST['mpp_coupon_offer']) ? $_POST['mpp_coupon_offer'] : "";
         update_post_meta($post_id, 'mpp_coupon', esc_attr($mpp_coupon));
+        update_post_meta($post_id, 'mpp_coupon_offer', esc_attr($mpp_coupon_offer));
     }
 }
 
