@@ -351,6 +351,41 @@ function mpp_get_active_pricing_plan_from_all_orders()
     return false;
 }
 
+// GET acive apartment pricing plan from all orders
+function mpp_get_active_apartment_pricing_plan_from_all_orders()
+{
+    $args = [
+        'post_type'   => 'shop_order',
+        'post_status' => ["wc-completed"],
+        'numberposts' => -1,
+        'meta_query'  => [
+            'relation' => 'AND',
+            [
+                'key'     => '_customer_user',
+                'value'   => get_current_user_id(),
+                'compare' => '=',
+            ],
+        ],
+    ];
+
+    $active_orders = new WP_Query($args);
+
+    //e_var_dump($active_orders);
+
+    while ($active_orders->have_posts()) : $active_orders->the_post();
+        $order = wc_get_order(get_the_ID());
+        foreach ($order->get_items() as $item_key => $item) :
+            $item_id = $item->get_product_id();
+            if ($item_id == 598) {
+                $plan_id = get_post_meta($item_id, '_linked_pricing_plan', true) ? get_post_meta($item_id, '_linked_pricing_plan', true) : $item_id;
+                if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans')  return $plan_id;
+            }
+        endforeach;
+    endwhile;
+
+    return false;
+}
+
 //add_action('woocommerce_payment_complete', 'wpp_assign_role_after_payment_complete');
 
 function wpp_assign_role_after_payment_complete($order_id)
@@ -631,6 +666,8 @@ function mpp_is_android_or_ios()
 
 add_action('atbdp_before_plan_page_loaded', function () {
     $active_plan = mpp_get_active_pricing_plan_from_all_orders();
+    //$active_apartment_plan = mpp_get_active_apartment_pricing_plan_from_all_orders();
+
     if ($active_plan) :
         $directory_type = get_post_meta($active_plan, '_assign_to_directory', true) ? get_post_meta($active_plan, '_assign_to_directory', true) : default_directory_type();
         $url = MPP_SITE_URL . '/add-listing/?directory_type=' . $directory_type . '&plan=' . $active_plan;

@@ -685,6 +685,10 @@ class MPP_Rentsync
         $meta_args['_source_company_id'] = $this->company_id;
         // SOURCE
 
+        // UNIT TYPES
+        //$meta_args['_unit_type'] = $this->get_property_unit_types($values);
+        // UNIT TYPES
+
         $meta_list = $this->property_meta_list;
         $location_list = $this->property_location_list;
         $contact_list = $this->property_contact_list;
@@ -725,6 +729,15 @@ class MPP_Rentsync
         return array_filter($meta_args);
     }
     // PREPARE METADATA
+
+    /**
+     * GET PROPERTY UNIT TYPES
+     */
+    public function get_property_unit_types($values)
+    {
+        //e_var_dump($values);
+        return array('bedroom');
+    }
 
     // GET FLOOR PLAN
     public function get_floor_plan($values)

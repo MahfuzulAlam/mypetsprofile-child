@@ -36,6 +36,13 @@ class MPP_Child_Hooks
         add_action('woocommerce_product_quick_edit_start', array($this, 'mpp_custom_field_bulk_edit_input'));
         // WooCommerce Quick Action Custom Field Save
         add_action('woocommerce_product_quick_edit_save', array($this, 'mpp_custom_field_bulk_edit_save'));
+        // Auto Add Coupon
+        add_action('woocommerce_before_cart', array($this, 'mpp_apply_coupon_if_specific_product'));
+        add_action('woocommerce_before_checkout_form', array($this, 'mpp_apply_coupon_if_specific_product'));
+        // PRODUCT PAGE FIELD
+        add_action('woocommerce_product_options_general_product_data', array($this, 'mpp_product_page_coupon_field'));
+        // Save Fields
+        add_action('woocommerce_process_product_meta', array($this, 'woocommerce_product_custom_fields_save'));
     }
 
     // Change the pricing plan url for mobile
@@ -480,6 +487,59 @@ class MPP_Child_Hooks
             $rank_position = $_REQUEST['rank_position'];
             update_post_meta($post_id, 'rank_position', wc_clean($rank_position));
         }
+    }
+
+    /**
+     * ADD COUPON AUTOMATICALLY
+     */
+    public function mpp_apply_coupon_if_specific_product()
+    {
+        // foreach (WC()->cart->get_coupons() as $code => $coupon) {
+        //     WC()->cart->remove_coupon($code);
+        // }
+
+        foreach (WC()->cart->get_cart() as $product) {
+            $coupon_code = get_post_meta($product['product_id'], 'mpp_coupon', true) ? get_post_meta($product['product_id'], 'mpp_coupon', true) : '';
+            if (!empty($coupon_code)) {
+                if ($coupon_code != 'none') {
+                    WC()->cart->apply_coupon($coupon_code);
+                }
+            } else {
+                WC()->cart->apply_coupon('ADMINPROMO2022RC');
+            }
+        }
+        // if product in the cart
+        // if (in_array($product_id, array_column(WC()->cart->get_cart(), 'product_id'))) {
+        //     if (!WC()->cart->has_discount($coupon_code)) {
+        //         WC()->cart->apply_coupon($coupon_code);
+        //     }
+        // } else { // if product removed from cart we remove the coupon
+        //     WC()->cart->remove_coupon($coupon_code);
+        //     WC()->cart->calculate_totals();
+        // }
+    }
+
+    /**
+     * PRODUCT PAGE COUPON FIELD
+     */
+    public function mpp_product_page_coupon_field()
+    {
+        global $woocommerce, $post;
+        woocommerce_wp_text_input(
+            array(
+                'id' => 'mpp_coupon',
+                'placeholder' => 'Enter related coupon code',
+                'label' => __('Related Coupon', 'woocommerce'),
+                'desc_tip' => 'true'
+            )
+        );
+    }
+
+    public function woocommerce_product_custom_fields_save($post_id)
+    {
+        // Custom Product Text Field
+        $mpp_coupon = isset($_POST['mpp_coupon']) && !empty($_POST['mpp_coupon']) ? $_POST['mpp_coupon'] : "";
+        update_post_meta($post_id, 'mpp_coupon', esc_attr($mpp_coupon));
     }
 }
 
