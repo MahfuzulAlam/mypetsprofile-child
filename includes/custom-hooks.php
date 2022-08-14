@@ -43,6 +43,8 @@ class MPP_Child_Hooks
         add_action('woocommerce_product_options_general_product_data', array($this, 'mpp_product_page_coupon_field'));
         // Save Fields
         add_action('woocommerce_process_product_meta', array($this, 'woocommerce_product_custom_fields_save'));
+        // WOOCOMMERCE PAYMENT COMPLETE - woocommerce_checkout_order_processed
+        add_action('woocommerce_checkout_order_processed', array($this, 'mpp_wc_payment_complete'));
     }
 
     // Change the pricing plan url for mobile
@@ -132,6 +134,13 @@ class MPP_Child_Hooks
             $response->data['avatar_urls']['is_default'] = false;
         }
 
+        // Custom Cover
+        $custom_cover = $this->bp_process_group_cover($item->id);
+        if (!empty($custom_cover)) {
+            $response->data['cover_url'] = $custom_cover;
+            $response->data['cover_is_default'] = false;
+        }
+
         return $response;
     }
 
@@ -139,7 +148,7 @@ class MPP_Child_Hooks
     public function bp_process_group_icon($group_id = 0, $image_type = 'image')
     {
         $custom_avatars = array();
-        if ($group_id == 0) return $custom_avatar;
+        if ($group_id == 0) return $custom_avatars;
         $directorist_category = groups_get_groupmeta($group_id, 'directorist_category', true);
         if (!$directorist_category || empty($directorist_category)) {
             $group_type = bp_groups_get_group_type($group_id);
@@ -160,6 +169,32 @@ class MPP_Child_Hooks
             }
         }
         return $custom_avatars;
+    }
+
+    /**
+     * BP PROCESS GROUP COVER
+     */
+    public function bp_process_group_cover($group_id = 0)
+    {
+        $cover_url = '';
+        if ($group_id == 0) return $cover_url;
+
+        $mpp_listings = groups_get_groupmeta($group_id, 'directorist_listings_ids', true);
+
+        if ($mpp_listings && count($mpp_listings) > 0) {
+            $listing_prv_img   = get_post_meta($mpp_listings[0], '_listing_prv_img', true);
+            $listing_img       = get_post_meta($mpp_listings[0], '_listing_img', true);
+
+            if (is_array($listing_img) && !empty($listing_img)) {
+                $cover_url = atbdp_get_image_source($listing_img[0], 'large');
+            }
+
+            if (!empty($listing_prv_img)) {
+                $cover_url = atbdp_get_image_source($listing_prv_img, 'large');
+            }
+        }
+
+        return $cover_url;
     }
 
     // Edit Custom Category Fields
@@ -361,6 +396,67 @@ class MPP_Child_Hooks
             update_post_meta($listing_id, '_claim_fee', 'claim_approved');
             update_post_meta($listing_id, '_never_expire', 0);
             update_post_meta($listing_id, '_expiry_date', date('Y-m-d H:i:s', strtotime('+1 year')));
+        }
+    }
+
+    /**
+     * Wocommerce Payment Complete Hook
+     */
+    public function mpp_wc_payment_complete($order_id)
+    {
+        // ADD AUTO ORDER
+        $cart_items = array();
+        if ($order_id) {
+            $order = wc_get_order($order_id);
+            foreach ($order->get_items() as $item_key => $item) :
+                $cart_items[] = $item->get_product_id();
+            endforeach;
+        }
+
+        if (in_array(19554, $cart_items)) $this->mpp_another_order_on_order_complete(27261);
+        if (in_array(27265, $cart_items)) $this->mpp_another_order_on_order_complete(27262);
+        // ADD AUTO ORDER
+    }
+
+    /**
+     * AUTO ORDER
+     */
+    public function mpp_another_order_on_order_complete($plan_id = 0)
+    {
+        $user_id = get_current_user_id();
+
+        if (!empty($user_id)) {
+
+            $address = array(
+                'first_name' => get_user_meta($user_id, 'first_name', true),
+                'last_name'  => get_user_meta($user_id, 'last_name', true),
+                'company'    => get_user_meta($user_id, 'billing_company', true),
+                'email'      => get_user_meta($user_id, 'billing_email', true) ? get_user_meta($user_id, 'billing_email', true) : $iap_order->user_email,
+                'phone'      => get_user_meta($user_id, 'billing_phone', true),
+                'address_1'  => get_user_meta($user_id, 'billing_address_1', true),
+                'address_2'  => get_user_meta($user_id, 'billing_address_2', true),
+                'city'       => get_user_meta($user_id, 'billing_city', true),
+                'state'      => get_user_meta($user_id, 'billing_state', true),
+                'postcode'   => get_user_meta($user_id, 'billing_postcode', true),
+                'country'    => get_user_meta($user_id, 'billing_country', true),
+            );
+
+            // Now we create the order
+            $order = wc_create_order();
+
+            // The add_product() function below is located in /plugins/woocommerce/includes/abstracts/abstract_wc_order.php
+            $order->add_product(get_product($plan_id), 1); // This is an existing SIMPLE product
+            $order->set_address($address, 'billing');
+
+            $order->calculate_totals();
+            $order->update_status("wc-completed", "Automatic Process", TRUE);
+
+            $order_id = $order->get_id();
+
+            // save required data as order post meta
+            update_post_meta($order_id, '_fm_plan_ordered', $plan_id);
+            update_post_meta($order_id, '_customer_user', $user_id);
+            update_post_meta($order_id, '_listing_id', '');
         }
     }
 

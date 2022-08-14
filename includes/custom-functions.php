@@ -300,6 +300,64 @@ function mpp_event_id_in_the_order($order_id)
     return false;
 }
 
+// GET acive pricing plan from all orders list
+function mpp_get_active_pricing_plans_from_all_orders()
+{
+    $args = [
+        'post_type'   => 'shop_order',
+        'post_status' => ["wc-completed"],
+        'numberposts' => -1,
+        'fields'      => 'ids',
+        'meta_query'  => [
+            'relation' => 'AND',
+            [
+                'key'     => '_customer_user',
+                'value'   => get_current_user_id(),
+                'compare' => '=',
+            ],
+            [
+                'relation' => 'OR',
+                [
+                    'key'     => '_listing_id',
+                    'value'   => '0',
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => '_listing_id',
+                    'value'   => '',
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => '_listing_id',
+                    'compare' => 'NOT EXISTS',
+                ],
+            ],
+        ],
+    ];
+
+    $pricing_plans = array();
+
+    $active_orders = new WP_Query($args);
+
+    if ($active_orders) {
+        if (isset($active_orders->posts) && count($active_orders->posts) > 0) {
+            foreach ($active_orders->posts as $order_id) {
+                $order = wc_get_order($order_id);
+                foreach ($order->get_items() as $item_key => $item) :
+                    $item_id = $item->get_product_id();
+                    // Exceptions
+                    if ($item_id == 20139) $pricing_plans[] = 20140;
+                    // Subcsription check else use plan ID
+                    $plan_id = get_post_meta($item_id, '_linked_pricing_plan', true) ? get_post_meta($item_id, '_linked_pricing_plan', true) : $item_id;
+                    if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans' && !in_array($plan_id, array(18059, 18242)))  $pricing_plans[] = $plan_id;
+                endforeach;
+            }
+        }
+    }
+
+    return $pricing_plans;
+}
+
 // GET acive pricing plan from all orders
 function mpp_get_active_pricing_plan_from_all_orders()
 {
