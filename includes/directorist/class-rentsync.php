@@ -15,6 +15,7 @@ class MPP_Rentsync
      */
 
     private $properties = array();
+    private $property_list = array();
     private $units = array();
     private $field = array();
     private $submission_form_fields = 'submission_form_fields';
@@ -85,6 +86,8 @@ class MPP_Rentsync
         add_action('wp_ajax_rentsync_count_properties', array($this, 'rentsync_count_properties'));
         // WP AJAX - rentsync_download_properties
         add_action('wp_ajax_rentsync_download_properties', array($this, 'rentsync_download_properties'));
+        // WP AJAX - rentsync_cleanup_properties
+        add_action('wp_ajax_rentsync_cleanup_properties', array($this, 'rentsync_cleanup_properties'));
     }
 
     /**
@@ -432,14 +435,14 @@ class MPP_Rentsync
             // }
         }
 
-        if (!$is_property_available) {
-            $listing_id = wp_insert_post($args);
+        // if (!$is_property_available) {
+        //     $listing_id = wp_insert_post($args);
 
-            if ($listing_id && !is_wp_error($listing_id)) {
-                do_action('atbdp_after_created_listing', $listing_id);
-                return $listing_id;
-            }
-        }
+        //     if ($listing_id && !is_wp_error($listing_id)) {
+        //         do_action('atbdp_after_created_listing', $listing_id);
+        //         return $listing_id;
+        //     }
+        // }
 
         return false;
     }
@@ -555,6 +558,7 @@ class MPP_Rentsync
         // SETUP METADATA
         $args['meta_input'] = $this->prepare_property_metadata($property_info, 999);
         // SETUP METADATA
+        e_var_dump($args);
         return array_filter($args);
     }
 
@@ -722,7 +726,12 @@ class MPP_Rentsync
 
         // LISTING IMAGE
         if (isset($values->photos) && count($values->photos) > 0) {
-            $listing_image = $this->import_image($values->photos[0]->url);
+            $check_image = $this->check_image($values->photos[0]->url, $values->photos[0]->id);
+            if ($check_image) {
+                $listing_image = $check_image;
+            } else {
+                $listing_image = $this->import_image($values->photos[0]->url, $values->photos[0]->id);
+            }
             if ($listing_image) $meta_args['_listing_prv_img'] = $listing_image;
         }
 
@@ -812,7 +821,7 @@ class MPP_Rentsync
                 $redirect_url = home_url('/rentsync-import/') . '?property=' . $property_key . '&limit=' . $limit . '&range=' . $range;
 ?>
                 <script type="text/javascript">
-                    window.location.href = "<?php echo $redirect_url; ?>";
+                    //window.location.href = "<?php echo $redirect_url; ?>";
                 </script>
 <?php
             }
@@ -850,8 +859,12 @@ class MPP_Rentsync
         $utility_list = [];
         $building_types = [];
         $unit_types = [];
+        $property_list = [];
 
         foreach ($this->properties as $property) {
+
+            // SET PRORTIES IN AN ARRAY
+            if (isset($property->id)) $property_list[] = $property->id;
 
             // BUILDING TYPES
             if (!in_array($property->buildingType, $building_types))  $building_types[$property->buildingType] = $this->mpp_slugify_text($property->buildingType, '-', 'alt');
@@ -882,6 +895,7 @@ class MPP_Rentsync
         $this->utilities = $utility_list;
         $this->building_types = $building_types;
         $this->unit_types = $unit_types;
+        $this->property_list = $property_list;
     }
 
     /**
@@ -1155,6 +1169,15 @@ class MPP_Rentsync
     }
 
     /**
+     * CHECK IMAGE BEFORE IMPORT
+     */
+
+    public function check_image($image_url = '', $image_id = 0)
+    {
+        return true;
+    }
+
+    /**
      * IMPORT IMAGE INTO THE DB
      */
 
@@ -1186,6 +1209,7 @@ class MPP_Rentsync
         if ($id && !is_wp_error($id)) {
             wp_update_attachment_metadata($id, wp_generate_attachment_metadata($id, $upload['file']));
             if ($image_id) update_post_meta($id, '_asset_id', $image_id);
+            if ($image_url) update_post_meta($id, '_asset_url', $image_url);
             return $id;
         } else {
             return false;
@@ -1275,17 +1299,28 @@ class MPP_Rentsync
     public function rentsync_import_all_properties()
     {
         $result = false;
+        $start = 0;
+        $end = 0;
         $property_key = isset($_REQUEST['property_key']) ? $_REQUEST['property_key'] : 'none';
+        $range = isset($_REQUEST['range']) ? $_REQUEST['range'] : 1;
+        $limit = isset($_REQUEST['limit']) ? $_REQUEST['limit'] : 1;
+
+        $start = $property_key;
         $this->before_save_api_setup();
         if (!file_exists($this->localUrl)) $this->save_api_info_to_local();
         if (file_exists($this->localUrl)) {
             $this->after_save_api_setup();
             if ($property_key != 'none') :
-                $this->create_property_units($this->properties[$property_key]);
+                $range = $range + $property_key;
+                for ($x = $property_key; $x < $range; $x++) {
+                    $this->create_property_units($this->properties[$x]);
+                    $end = $x;
+                    if ($limit <= $x) break;
+                }
                 $result = true;
             endif;
         }
-        echo json_encode(array('result' => $result));
+        echo json_encode(array('result' => $result, 'start' => $start, 'end' => $end));
         die();
     }
 
@@ -1513,6 +1548,152 @@ class MPP_Rentsync
 
             e_var_dump($args);
         }
+    }
+
+    /**
+     * RENTSYNC CLEANUP PROPERTIES
+     */
+    public function rentsync_cleanup_properties()
+    {
+        $result = false;
+        $update_props = [];
+        $props = [];
+        $this->before_save_api_setup();
+        if (!file_exists($this->localUrl)) $this->save_api_info_to_local();
+        if (file_exists($this->localUrl)) {
+            $this->after_save_api_setup();
+            $props = $this->get_available_properties();
+
+            if ($props && count($props) > 0 && count($this->property_list) > 0) {
+                foreach ($props as $prop) {
+                    $property_id = get_post_meta($prop, '_property_id', true);
+                    if ($property_id) {
+                        if (!in_array($property_id, $this->property_list)) {
+                            $u = $this->unset_hold_property($prop);
+                            if ($u) $update_props[] = $prop;
+                        }
+                    } else {
+                        $u = $this->unset_hold_property($prop);
+                        if ($u) $update_props[] = $prop;
+                    }
+                }
+            }
+
+            $result = true;
+        }
+        echo json_encode(array('result' => $result, 'props' => $update_props));
+        die();
+    }
+
+    /**
+     * GET ALL EXISTING PROPERTIES
+     */
+    public function get_available_properties()
+    {
+        $args = array(
+            'post_type' => ATBDP_POST_TYPE,
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'fields'    => 'ids',
+            'meta_query' => array(
+                array(
+                    'key' => '_source',
+                    'value' => 'rentsync',
+                    'compare' => '='
+                )
+            ),
+            'tax_query' => array(
+                'relation' => 'AND',
+                array(
+                    'taxonomy' => ATBDP_DIRECTORY_TYPE,
+                    'field' => 'slug',
+                    'terms' => $this->directory_type
+                ),
+                array(
+                    'taxonomy' => ATBDP_CATEGORY,
+                    'field' => 'slug',
+                    'terms' => 'apartments'
+                )
+            )
+        );
+
+        $result = new WP_Query($args);
+
+        if ($result) {
+            if ($result->posts && count($result->posts) > 0) return $result->posts;
+        }
+
+        return false;
+    }
+
+    /**
+     * GET ALL EXISTING UNITS BY PROPERTY
+     */
+    public function get_available_units_by_property($apartment_id = 0)
+    {
+        if (!$apartment_id) return;
+        $args = array(
+            'post_type' => ATBDP_POST_TYPE,
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'fields'    => 'ids',
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => '_source',
+                    'value' => 'rentsync',
+                    'compare' => '='
+                ),
+                array(
+                    'key' => '_mpp-housing',
+                    'value' => $apartment_id,
+                    'compare' => '='
+                ),
+            ),
+            'tax_query' => array(
+                'relation' => 'AND',
+                array(
+                    'taxonomy' => ATBDP_DIRECTORY_TYPE,
+                    'field' => 'slug',
+                    'terms' => $this->directory_type_unit
+                ),
+                array(
+                    'taxonomy' => ATBDP_CATEGORY,
+                    'field' => 'slug',
+                    'terms' => $this->unit_category
+                )
+            )
+        );
+
+        $result = new WP_Query($args);
+
+        if ($result) {
+            if ($result->posts && count($result->posts) > 0) return $result->posts;
+        }
+
+        return false;
+    }
+
+    /**
+     * UNSET/HOLD A PROPERTY
+     */
+    public function unset_hold_property($property_id = 0)
+    {
+        if (!$property_id) return;
+        $u_property = wp_update_post(array(
+            'ID'    =>  $property_id,
+            'post_status'   =>  'pending'
+        ));
+        $units = $this->get_available_units_by_property($property_id);
+        if ($units && count($units) > 0) {
+            foreach ($units as $unit) {
+                wp_update_post(array(
+                    'ID'    =>  $unit,
+                    'post_status'   =>  'pending'
+                ));
+            }
+        }
+        return $u_property;
     }
 }
 

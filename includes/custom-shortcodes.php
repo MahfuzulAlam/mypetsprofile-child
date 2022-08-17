@@ -611,7 +611,7 @@ class MPP_Child_Shortcode
     {
         $group_id = bp_get_current_group_id();
         $listings = groups_get_groupmeta($group_id, 'directorist_listings_ids', true);
-        if (!$listings && count($listings) > 0) {
+        if ($listings && count($listings) > 0) {
             $url = get_the_permalink($listings[0])
         ?>
             <script type="text/javascript">

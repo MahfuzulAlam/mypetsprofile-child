@@ -93,32 +93,34 @@ jQuery(document).ready(function ($) {
 
     if (count > 0) {
       //var progressbarCluster = 100 / count;
+      //count = 142;
+      //var clusters = Math.ceil(count / 10);
       updateRentsyncStatus(
         "<span>Importing Data From Rentsync API</span> ....<br><span>This will take a while. Please do not interrupt.</span>"
       );
       var i = 0;
+      var range = 10;
+      var limit = count;
 
-      var tid = setInterval(rentSyncAddProperty, 5000);
+      var tid = setInterval(rentSyncAddProperty, 10000);
 
       function rentSyncAddProperty() {
         console.log(i);
-        rentsync_add_property(i);
-        if (i >= 5) abortTimer();
-        i++;
+        rentsync_add_property(i, limit, range);
+        i = i + range;
+        if (i >= limit) abortTimer();
       }
 
       function abortTimer() {
         // to be called when you want to stop the timer
         clearInterval(tid);
       }
-
-      updateRentsyncStatus('<span class="success">DATA IMPORT COMPLETE</span>');
     }
   });
 
   function updateRentsyncStatus(html) {
-    console.log(html);
-    $("#rentsync_api_progress").html("<br>" + html);
+    //console.log(html);
+    $("#rentsync_api_progress").append("<p>" + html + "</p>");
   }
 
   /**
@@ -163,7 +165,7 @@ jQuery(document).ready(function ($) {
   /**
    * RentSync - Add a Property
    */
-  function rentsync_add_property(property_key = "") {
+  function rentsync_add_property(property_key = "", limit = 1, range = 1) {
     // AJAX CALL
     $.ajax({
       type: "post",
@@ -172,13 +174,22 @@ jQuery(document).ready(function ($) {
       data: {
         action: "rentsync_import_all_properties",
         property_key: property_key,
+        range: range,
+        limit: limit,
       },
       success: function (response) {
         console.log(response);
         if (response.result == true) {
-          $("#rentsync_api_result").text("Imported" + property_key);
+          updateRentsyncStatus(
+            "Imported ( from " + response.start + " to " + response.end + " )"
+          );
+          if (response.end >= limit) {
+            updateRentsyncStatus(
+              '<span class="success">DATA IMPORT COMPLETE</span>'
+            );
+          }
         } else {
-          $("#rentsync_api_result").text("Sorry, cannot import" + property_key);
+          updateRentsyncStatus("Sorry, cannot import " + property_key);
         }
       },
     });
@@ -202,6 +213,39 @@ jQuery(document).ready(function ($) {
           updateRentsyncStatus("Downloaded!");
         } else {
           updateRentsyncStatus("Sorry, Cannot Downloaded!!");
+        }
+      },
+    });
+    // AJAX CALL
+  }
+
+  /**
+   * Rentsync - Cleanup Properties
+   */
+  $("#cleanup_properties").on("click", function (e) {
+    e.preventDefault();
+    rentsync_cleanup_properties();
+  });
+
+  /**
+   * Function - CLeanup Properties
+   */
+  function rentsync_cleanup_properties() {
+    updateRentsyncStatus("Cleanup Started!");
+    // AJAX CALL
+    $.ajax({
+      type: "post",
+      dataType: "json",
+      url: mppChild.ajaxurl,
+      data: {
+        action: "rentsync_cleanup_properties",
+      },
+      success: function (response) {
+        if (response.result == true) {
+          console.log(response.props);
+          updateRentsyncStatus("Cleanup Completed!");
+        } else {
+          updateRentsyncStatus("Sorry, Cannot Cleanup!!");
         }
       },
     });
