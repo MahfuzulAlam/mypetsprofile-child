@@ -153,6 +153,7 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 
 	// DIRECTORIST
 	require_once(get_stylesheet_directory() . '/includes/directorist/class-fields.php');
+	require_once(get_stylesheet_directory() . '/includes/directorist/class-import.php');
 
 	// RENTSYNC
 	require_once(get_stylesheet_directory() . '/includes/directorist/class-rentsync.php');
