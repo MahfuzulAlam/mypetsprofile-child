@@ -119,8 +119,37 @@ class Directorist_Import
                 );
                 update_post_meta($listing, '_registration_detail', $email_info);
                 update_post_meta($listing, '_new_registration', 1);
+
+                $this->update_user_role($user_id);
+
                 return $user_id;
             }
+        }
+        return false;
+    }
+
+    /**
+     * UPDATE USER ROLE
+     */
+    public function update_user_role($user_id = 0)
+    {
+        if (!$user_id) return;
+        // update member type
+        if (function_exists('bp_set_member_type')) bp_set_member_type($user_id, 'pet-friendly-biz-member');
+        // update user role
+        if ($this->user_role_exists('pet_friendly_biz')) {
+            $user = new \WP_User($user_id);
+            $user->set_role('pet_friendly_biz');
+        }
+    }
+
+    /**
+     * USER ROLE EXISTS
+     */
+    public function user_role_exists($role)
+    {
+        if (!empty($role)) {
+            return $GLOBALS['wp_roles']->is_role($role);
         }
         return false;
     }
