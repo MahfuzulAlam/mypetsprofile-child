@@ -139,8 +139,8 @@ if ($listing) {
                                     <tr>
                                         <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;" valign="top">
                                             <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Welcome PooPrints Registered Community,</p>
-                                            <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">You’re receiving this email as a new activation notice for your community listing on the MyPetsProfile™ platform.</p>
-                                            <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Your MyPetsProfile™ (MPP) platform listing is now directly linked to your PooPrints Pet Registration process. You control all aspects of your community listing, and group on the MPP Platform, with the admin access provided.</p>
+                                            <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">You’re receiving this email as a new activation notice for your community listing on the MyPetsProfile&trade; platform.</p>
+                                            <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Your MyPetsProfile&trade; (MPP) platform listing is now directly linked to your PooPrints Pet Registration process. You control all aspects of your community listing, and group on the MPP Platform, with the admin access provided.</p>
                                             <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Now, residents with pets have their own Personal Pet Profile with your community as they register for PooPrints.</p>
                                             <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Download the Apple or Google App: <a href="www.MyPetsProfile.com" target="_blank">www.MyPetsProfile.com</a> (login with your user ID and Password).</p>
 
@@ -174,12 +174,12 @@ if ($listing) {
                                                 <li class="li1">Pet Photos and Videos</li>
                                                 <li class="li1">Health and medical records</li>
                                                 <li class="li1">MyPetsAlert – Lost n found services</li>
-                                                <li class="li1">PetChatR™ with other pet parents</li>
-                                                <li class="li1">MyPetsPoints™ - collect and redeem</li>
+                                                <li class="li1">PetChatR&trade; with other pet parents</li>
+                                                <li class="li1">MyPetsPoints&trade; - collect and redeem</li>
                                                 <li class="li1">Find local pet products and services
                                                     <ul class="ul1">
                                                         <li class="li1">12,000+ listings and growing</li>
-                                                        <li class="li1">PetChatR™ with existing customers</li>
+                                                        <li class="li1">PetChatR&trade; with existing customers</li>
                                                     </ul>
                                                 </li>
                                                 <li class="li1">Find Pet-friendly places</li>
@@ -198,13 +198,13 @@ if ($listing) {
                                                 <li class="li1">And more…</li>
                                             </ul>
 
-                                            <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">We thank everyone for your patience as we developed the MyPetsProfile™ Web and App Platform, and hope you and your residents enjoy it as much as we have enjoyed developing it.</p>
+                                            <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">We thank everyone for your patience as we developed the MyPetsProfile&trade; Web and App Platform, and hope you and your residents enjoy it as much as we have enjoyed developing it.</p>
                                             <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Please feel free to email me or give me a call if you have any questions?</p>
                                             <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px; margin-top: 15px;">
-                                                Best Regards</br>
-                                                Garry Bradamore</br>
-                                                Hello@MyPetsProfile.com</br>
-                                                Tel: 647-202-9877
+                                                <span style="display:block">Best Regards</span>
+                                                <span style="display:block">Garry Bradamore</span>
+                                                <span style="display:block">Hello@MyPetsProfile.com</span>
+                                                <span style="display:block">Tel: 647-202-9877</sp>
                                             </p>
                                         </td>
                                     </tr>
@@ -226,7 +226,7 @@ if ($listing) {
                             </tr>
                             <tr>
                                 <td class="content-block powered-by" style="font-family: sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; color: #999999; font-size: 12px; text-align: center;" valign="top" align="center">
-                                    Powered by <a href="http://mypetsprofile.com" style="color: #999999; font-size: 12px; text-align: center; text-decoration: none;">MyPetsProfile™</a>.
+                                    Powered by <a href="http://mypetsprofile.com" style="color: #999999; font-size: 12px; text-align: center; text-decoration: none;">MyPetsProfile&trade;</a>.
                                 </td>
                             </tr>
                         </table>
