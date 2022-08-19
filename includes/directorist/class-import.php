@@ -13,8 +13,10 @@ class Directorist_Import
     {
         // AFTER IMPORT A LISTING HOOK
         add_action('directorist_listing_imported', array($this, 'mpp_directorist_listing_imported'), 10, 2);
-        // AFTER IMPORT A LISTING HOOK
+        // AFTER IMPORT A LISTING HOOK - SEND EMAIL TO NEW USER
         add_action('directorist_listing_imported', array($this, 'mpp_directorist_listing_imported_send_email'), 30, 2);
+        // AFTER IMPORT A LISTING HOOK - SEND EMAIL TO EXISTING USER
+        add_action('directorist_listing_imported', array($this, 'mpp_directorist_listing_imported_send_email_existing_user'), 30, 2);
     }
 
     /**
@@ -83,6 +85,7 @@ class Directorist_Import
             if ($author_exists) {
                 update_post_meta($post_id, '_registration_detail', '');
                 update_post_meta($post_id, '_new_registration', 0);
+                update_post_meta($post_id, '_user_exists', 1);
                 return $author_exists->ID;
             } else {
                 // CREATE A USER SEND A EMAIL
@@ -189,6 +192,29 @@ class Directorist_Import
         if (!$info || empty($info)) return;
         // ...
         $email = isset($info['email']) & !empty($info['email']) ? $info['email'] : '';
+        $title = 'Welcome PooPrints Registered Community';
+        ob_start();
+        require(get_stylesheet_directory() . '/includes/directorist/templates/email/user-registration.php');
+        $content = ob_get_clean();
+        // ...
+        if (!empty($email)) wp_mail($email, $title, $content, "Content-Type: text/html; charset=UTF-8");
+    }
+
+    /**
+     * SEND REGISTRATION EMAIL - EXISTING USER
+     */
+    public function mpp_directorist_listing_imported_send_email_existing_user($post_id, $post)
+    {
+        if (!$post_id) return;
+        $user_exists = get_post_meta($post_id, '_user_exists', true);
+        if (!$user_exists) return;
+        $info = array(
+            'email' => isset($post['email']) && !empty($post['email']) ? $post['email'] : '',
+            'listing' => $post_id
+        );
+        // ...
+        $email = isset($info['email']) & !empty($info['email']) ? $info['email'] : '';
+        if (empty($email)) return;
         $title = 'Welcome PooPrints Registered Community';
         ob_start();
         require(get_stylesheet_directory() . '/includes/directorist/templates/email/user-registration.php');

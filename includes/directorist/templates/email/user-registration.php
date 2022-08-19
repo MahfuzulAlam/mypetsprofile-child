@@ -144,9 +144,11 @@ if ($listing) {
                                             <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Now, residents with pets have their own Personal Pet Profile with your community as they register for PooPrints.</p>
                                             <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Download the Apple or Google App: <a href="www.MyPetsProfile.com" target="_blank">www.MyPetsProfile.com</a> (login with your user ID and Password).</p>
 
-                                            <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Username: <?php echo $info['email']; ?></p>
+                                            <?php if (isset($info['password']) && !empty($info['password'])) : ?>
+                                                <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Username: <?php echo $info['email']; ?></p>
 
-                                            <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Password: <?php echo $info['password']; ?></p>
+                                                <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Password: <?php echo $info['password']; ?></p>
+                                            <?php endif; ?>
 
                                             <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; box-sizing: border-box; width: 100%;" width="100%">
                                                 <tbody>

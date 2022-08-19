@@ -83,7 +83,7 @@ endif;
 
 $img_size_class = ('contain' === $data['background-size']) ? '' : ' plasmaSlider__cover';
 ?>
-<div id="directorist-single-listing-sliders" class="plasmaSlider" data-width="<?php echo esc_attr($data['width']); ?>" data-height="<?php echo esc_attr($data['height']); ?>" data-rtl="<?php echo esc_attr($data['rtl']); ?>" data-show-thumbnails="<?php echo esc_attr($data['show-thumbnails']); ?>" data-background-size="<?php echo esc_attr($data['background-size']); ?>" data-blur-background="<?php echo esc_attr($data['blur-background']); ?>" data-background-color="<?php echo esc_attr($data['background-color']); ?>" data-thumbnail-background-color="<?php echo esc_attr($data['thumbnail-bg-color']); ?>">
+<div id="directorist-single-listing-slider" class="plasmaSlider" data-width="<?php echo esc_attr($data['width']); ?>" data-height="<?php echo esc_attr($data['height']); ?>" data-rtl="<?php echo esc_attr($data['rtl']); ?>" data-show-thumbnails="<?php echo esc_attr($data['show-thumbnails']); ?>" data-background-size="<?php echo esc_attr($data['background-size']); ?>" data-blur-background="<?php echo esc_attr($data['blur-background']); ?>" data-background-color="<?php echo esc_attr($data['background-color']); ?>" data-thumbnail-background-color="<?php echo esc_attr($data['thumbnail-bg-color']); ?>">
 
 	<div class="plasmaSliderTempImage" style="padding-top: <?php echo $data['padding-top'] . "%;" ?>">
 		<?php
