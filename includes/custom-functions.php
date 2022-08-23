@@ -157,11 +157,13 @@ add_action('init', function () {
     $tools->importable_fields['social_facebook'] = "Facebook Url";
 });
 
-function mpp_bbd_inspect_scripts()
-{
-    if (!is_singular('at_biz_dir') && !is_admin()) wp_dequeue_script('directorist-google-map');
-}
-add_action('wp_print_scripts', 'mpp_bbd_inspect_scripts');
+// function mpp_bbd_inspect_scripts()
+// {
+//     if (!is_singular('at_biz_dir') && !is_admin()) wp_dequeue_script('directorist-google-map');
+//     wp_dequeue_script('directorist-google-map');
+//     wp_deregister_script('directorist-google-map');
+// }
+//add_action('wp_print_scripts', 'mpp_bbd_inspect_scripts');
 
 function bbd_get_option_data()
 {
