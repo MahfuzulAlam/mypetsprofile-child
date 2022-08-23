@@ -159,7 +159,7 @@ add_action('init', function () {
 
 function mpp_bbd_inspect_scripts()
 {
-    if (!is_singular('at_biz_dir') && !is_admin()) wp_dequeue_script('directorist-global-script');
+    if (!is_singular('at_biz_dir') && !is_admin()) wp_dequeue_script('directorist-google-map');
 }
 add_action('wp_print_scripts', 'mpp_bbd_inspect_scripts');
 

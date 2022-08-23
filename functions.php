@@ -46,7 +46,7 @@ if (!defined('MPP_VERSION')) {
 }
 
 if (!defined('MPP_MAP_VERSION')) {
-	define('MPP_MAP_VERSION', '1.0.0');
+	define('MPP_MAP_VERSION', '1.0.2');
 }
 
 if (!defined('MPP_ADMIN_VERSION')) {
@@ -100,7 +100,7 @@ add_image_size('bb-app-group-avatar', 150, 150, true);
 function mpp_custom_google_map_scripts()
 {
 	//wp_enqueue_style('custom-css', get_stylesheet_directory_uri() . '/assets/css/custom.css');
-	wp_enqueue_script('bbd-custom-google', get_stylesheet_directory_uri() . '/assets/js/custom-google.js', array('directorist-google-map'), MPP_MAP_VERSION, true);
+	wp_enqueue_script('bbd-custom-google', get_stylesheet_directory_uri() . '/assets/js/custom-google.js', array('jQuery'), MPP_MAP_VERSION, true);
 	wp_localize_script('bbd-custom-google', 'directorist_options', bbd_get_option_data());
 }
 add_action('wp_enqueue_scripts', 'mpp_custom_google_map_scripts', 0);
