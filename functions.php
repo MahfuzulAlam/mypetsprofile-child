@@ -46,7 +46,7 @@ if (!defined('MPP_VERSION')) {
 }
 
 if (!defined('MPP_MAP_VERSION')) {
-	define('MPP_MAP_VERSION', '1.0.2');
+	define('MPP_MAP_VERSION', '1.0.3');
 }
 
 if (!defined('MPP_ADMIN_VERSION')) {
@@ -98,9 +98,10 @@ add_image_size('bb-app-group-avatar', 150, 150, true);
 /****************************** CUSTOM ENQUEUES ******************************/
 function mpp_bbd_inspect_scripts()
 {
-	if (!is_singular('at_biz_dir') && !is_admin()) wp_dequeue_script('directorist-google-map');
-	wp_dequeue_script('directorist-google-map');
-	wp_deregister_script('directorist-google-map');
+	if (!is_admin()) {
+		wp_dequeue_script('directorist-google-map');
+		wp_deregister_script('directorist-google-map');
+	}
 }
 add_action('wp_print_scripts', 'mpp_bbd_inspect_scripts');
 

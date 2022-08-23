@@ -1121,6 +1121,10 @@
                     var map, info_window, saved_lat_lng, info_content; // Localized Data
 
                     var mapData = JSON.parse(mapElm.getAttribute("data-map"));
+                    var iconImage = $(".directorist-single-map").attr(
+                      "data-iconimage"
+                    );
+
                     var loc_default_latitude = parseFloat(
                       mapData.default_latitude
                     );
@@ -1164,6 +1168,19 @@
                 map: map,
                 position: saved_lat_lng
             });*/
+                      var mapIcon = "";
+                      if (iconImage != "") {
+                        mapIcon =
+                          '<img class="custom-map-icon ' +
+                          ' " height="40" width="40" src=' +
+                          iconImage +
+                          " />";
+                      } else {
+                        mapIcon =
+                          '<div class="atbd_map_shape"><i class="' +
+                          cat_icon +
+                          '"></i></div>';
+                      }
 
                       var marker = new Marker({
                         position: saved_lat_lng,
@@ -1175,10 +1192,7 @@
                           strokeColor: "",
                           strokeWeight: 0,
                         },
-                        map_icon_label:
-                          '<div class="atbd_map_shape"><i class="' +
-                          cat_icon +
-                          '"></i></div>',
+                        map_icon_label: mapIcon,
                       });
 
                       if (display_map_info) {
