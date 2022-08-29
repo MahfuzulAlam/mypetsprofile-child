@@ -91,8 +91,8 @@ $img_size_class = ('contain' === $data['background-size']) ? '' : ' plasmaSlider
 		$image = $data['images'][0];
 
 		if (!empty($image)) :
-			$img_src = $image['image_src'];
-			$img_alt = $image['image_alt'];
+			$img_src = $image['src'];
+			$img_alt = $image['alt'];
 			if ('contain' === $data['background-size'] && $data['blur-background']) {
 				echo "<img class='plasmaSliderTempImgBlur' src='{$img_src}' alt='{$img_alt}'>";
 			}
