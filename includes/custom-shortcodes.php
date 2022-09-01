@@ -638,7 +638,7 @@ class MPP_Child_Shortcode
         $listing_id = get_the_ID();
         ?>
         <a href="#" data-listing="<?php echo get_the_permalink(get_the_ID()); ?>" class="copy_listing_link button">Copy Link</a>
-        <div class="copy_listing_link_msg"></div>
+        <span class="copy_listing_link_msg"></span>
 <?php
         return ob_get_clean();
     }
