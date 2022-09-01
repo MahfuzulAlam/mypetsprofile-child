@@ -29,6 +29,8 @@ class MPP_Child_Shortcode
         add_shortcode('test-shortcode', array($this, 'test_shortcode'));
         // GROUP Listing - Directorist
         add_shortcode('mpp-group-listings', array($this, 'mpp_group_listings'));
+        // Copy the link
+        add_shortcode('mpp-copy-listing-link', array($this, 'mpp_copy_listing_link'));
     }
 
     // BuddyBoss Group Link on Linsting Page
@@ -622,9 +624,23 @@ class MPP_Child_Shortcode
             ob_start();
         ?>
             <p>No biz listing found!</p>
-<?php
+        <?php
             return ob_get_clean();
         }
+    }
+
+    /**
+     * MPP COPY LISIGN LINK
+     */
+    public function mpp_copy_listing_link()
+    {
+        ob_start();
+        $listing_id = get_the_ID();
+        ?>
+        <a href="#" data-listing="<?php echo get_the_permalink(get_the_ID()); ?>" class="copy_listing_link button">Copy Link</a>
+        <div class="copy_listing_link_msg"></div>
+<?php
+        return ob_get_clean();
     }
 }
 

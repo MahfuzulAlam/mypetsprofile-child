@@ -1159,4 +1159,16 @@ jQuery(document).ready(function ($) {
   });
 
   // CHECKBOX VACANCY
+
+  // COPY LISTING LINK
+  $(".copy_listing_link").on("click", function (e) {
+    e.preventDefault();
+    var link = $(this).attr("data-listing");
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val(link).select();
+    document.execCommand("copy");
+    $temp.remove();
+    $(".copy_listing_link_msg").text("Link Copied!");
+  });
 });
