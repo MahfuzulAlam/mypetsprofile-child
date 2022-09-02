@@ -129,7 +129,7 @@ jQuery(document).ready(function ($) {
   $("#download_all_properties").on("click", function (e) {
     e.preventDefault();
     console.log("working");
-    updateRentsyncStatus("Download Startd!");
+    updateRentsyncStatus("Download Started!");
     rentsync_download_properties();
   });
   /**
@@ -211,6 +211,9 @@ jQuery(document).ready(function ($) {
       success: function (response) {
         if (response.result == true) {
           updateRentsyncStatus("Downloaded!");
+          updateRentsyncStatus(
+            "Total Properties Downloaded - " + response.count
+          );
         } else {
           updateRentsyncStatus("Sorry, Cannot Downloaded!!");
         }

@@ -558,7 +558,7 @@ class MPP_Rentsync
         // SETUP METADATA
         $args['meta_input'] = $this->prepare_property_metadata($property_info, 999);
         // SETUP METADATA
-        e_var_dump($args);
+        //e_var_dump($args);
         return array_filter($args);
     }
 
@@ -621,6 +621,7 @@ class MPP_Rentsync
      */
     public function update_location_taxonomy()
     {
+        //$dir_types = array(192, 193, 214, 24, 159);
         $dir_types = array(200, 1414, 1445, 1418);
         $this->set_locations();
         if (count($this->locations) < 1) return;
@@ -800,6 +801,7 @@ class MPP_Rentsync
                             if (isset($this->properties[$property_key])) {
                                 if ($property_key == 1) $this->create_property_units($this->properties[0]);
                                 $this->create_property_units($this->properties[$property_key]);
+                                echo "<p>Property Inserted - " . $this->properties[$property_key]->name . "</p>";
                                 if ($range > 1) $property_key = $property_key + 1;
                                 $result = true;
                             }
@@ -821,7 +823,7 @@ class MPP_Rentsync
                 $redirect_url = home_url('/rentsync-import/') . '?property=' . $property_key . '&limit=' . $limit . '&range=' . $range;
 ?>
                 <script type="text/javascript">
-                    //window.location.href = "<?php echo $redirect_url; ?>";
+                    window.location.href = "<?php echo $redirect_url; ?>";
                 </script>
 <?php
             }
@@ -1334,8 +1336,9 @@ class MPP_Rentsync
         $this->save_api_info_to_local();
         $this->after_save_api_setup();
         $this->update_all_field_options();
+        $count = count($this->properties);
         $result = true;
-        echo json_encode(array('result' => $result));
+        echo json_encode(array('result' => $result, 'count' => $count));
         die();
     }
 
