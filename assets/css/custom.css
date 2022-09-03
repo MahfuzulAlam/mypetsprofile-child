@@ -1527,3 +1527,32 @@ form.messenger-form {
   color: #fff !important;
   margin-bottom: 5px;
 }
+
+.pooprint-register-page {
+  max-width: 450px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pooprint-register-page select,
+.pooprint-register-page input:not([type="submit"]),
+.pooprint-register-page textarea {
+  display: inline-block;
+  width: 100%;
+  font-family: inherit;
+  font-size: 15px;
+  height: 41px;
+  outline: 0;
+  vertical-align: middle;
+  background-color: var(--bb-content-background-color);
+  border: 1px solid var(--bb-content-border-color);
+  border-radius: var(--bb-input-radius);
+  box-shadow: none;
+  padding: 0 12px;
+  margin-bottom: 0;
+}
+
+.pooprint-register-page .signup-form .editfield fieldset {
+  margin: 0;
+}
