@@ -42,7 +42,7 @@ if (!defined('MPP_SITE_URL')) {
 }
 
 if (!defined('MPP_VERSION')) {
-	define('MPP_VERSION', '1.1.18');
+	define('MPP_VERSION', '1.1.19');
 }
 
 if (!defined('MPP_MAP_VERSION')) {
@@ -87,7 +87,7 @@ function buddyboss_theme_child_scripts_styles()
 	}
 	wp_enqueue_script('input-mask', 'https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js', array('jquery'));
 	wp_enqueue_script('buddyboss-child-js', get_stylesheet_directory_uri() . '/assets/js/custom.js', array('jquery'), MPP_VERSION);
-	wp_localize_script('buddyboss-child-js', 'mppChild', array('ajaxurl' => admin_url('admin-ajax.php'), 'chatInterval' => 20000));
+	wp_localize_script('buddyboss-child-js', 'mppChild', array('ajaxurl' => admin_url('admin-ajax.php'), 'chatInterval' => 20000, 'isLogin' => is_user_logged_in()));
 }
 add_action('wp_enqueue_scripts', 'buddyboss_theme_child_scripts_styles', 9999);
 

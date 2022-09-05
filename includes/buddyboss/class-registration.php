@@ -11,8 +11,22 @@ class MPP_Registration
 
     public function __construct()
     {
+        // LISTING SELECTION FORM
+        add_shortcode('pooprints-listing-selection-form', array($this, 'pooprints_listing_selection_form'));
+
         // REGISTRATION FORM
         add_shortcode('pooprints-registration-form', array($this, 'pooprint_registration_form'));
+    }
+
+    /**
+     * LISTING SELECTION FORM
+     */
+    public function pooprints_listing_selection_form()
+    {
+        ob_start();
+        $args = [];
+        get_template_part('template-parts/content', 'pooprint_listing_selection_form', $args);
+        return ob_get_clean();
     }
 
     /**
@@ -22,7 +36,7 @@ class MPP_Registration
     {
         ob_start();
         $listing_id = isset($_REQUEST['listing']) && !empty($_REQUEST['listing']) ? $_REQUEST['listing'] : 0;
-        if (!$listing_id) {
+        if (!$listing_id || is_user_logged_in()) {
             echo '<p>Sorry! This page is not available right now.</p>';
             return ob_get_clean();
         }

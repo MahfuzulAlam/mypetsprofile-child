@@ -1171,4 +1171,33 @@ jQuery(document).ready(function ($) {
     $temp.remove();
     $(".copy_listing_link_msg").text("Link Copied!");
   });
+
+  // SELECT 2 - pooprint_select_listing
+  $("#pooprint_select_listing").select2();
+
+  // SET POOPRINT FORM LINK ON CHANGE
+  // $("#pooprint_select_listing").on('change', function(e){
+  //   e.preventDefault();
+
+  // });
+
+  // POOPRINTS LISTING SELECTION BUTTONS
+  $("#pooprint_select_listing_button").on("click", function (e) {
+    e.preventDefault();
+    var listing = $("#pooprint_select_listing").val();
+    var link = $("#pooprint_page_link").val();
+    var formLink = $("#pooprint_select_listing")
+      .find(":selected")
+      .attr("data-pooprint-link");
+    if (listing != "" && listing != 0) {
+      $("#pooprint_select_listing_msg").text("Loading Registration Page");
+      if (mppChild.isLogin) {
+        if (formLink != "") window.location.href = formLink;
+      } else {
+        window.location.href = link + "?listing=" + listing;
+      }
+    } else {
+      $("#pooprint_select_listing_msg").text("Please select a listing first");
+    }
+  });
 });

@@ -1556,3 +1556,15 @@ form.messenger-form {
 .pooprint-register-page .signup-form .editfield fieldset {
   margin: 0;
 }
+
+.pooprint_select_listing_wrapper {
+  padding: 10px 0;
+}
+
+.pooprint_select_listing_wrapper .select2-container {
+  max-width: 100%;
+}
+
+#pooprint_select_listing_msg {
+  margin: 10px 0;
+}
