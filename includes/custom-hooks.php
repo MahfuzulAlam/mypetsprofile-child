@@ -207,6 +207,9 @@ class MPP_Child_Hooks
         // App Image Cover
         $image_cover_id = get_term_meta($term->term_id, 'app_image_cover', true);
         $image_cover_src = ($image_cover_id) ? wp_get_attachment_url((int)$image_cover_id) : '';
+
+        // APP Url
+        $cat_app_url = get_term_meta($term->term_id, 'cat_app_url', true);
 ?>
         <tr class="form-field term-group-wrap">
             <th scope="row">
@@ -244,6 +247,13 @@ class MPP_Child_Hooks
                 </p>
             </td>
         </tr>
+        <tr class="form-field term-cat-url-wrap">
+            <th scope="row"><label for="cat_app_url">APP Custom URL</label></th>
+            <td>
+                <input name="cat_app_url" id="cat_app_url" type="text" value="<?php echo $cat_app_url; ?>">
+                <p class="description">Enter the custom URL to redirect in the APP.</p>
+            </td>
+        </tr>
     <?php
     }
 
@@ -262,6 +272,13 @@ class MPP_Child_Hooks
             update_term_meta($term_id, 'app_image_cover', (int)$_POST['app_image_cover']);
         } else {
             update_term_meta($term_id, 'app_image_cover', '');
+        }
+
+        //UPDATED CATEGORY APP URL
+        if (isset($_POST['cat_app_url']) && '' !== $_POST['cat_app_url']) {
+            update_term_meta($term_id, 'cat_app_url', $_POST['cat_app_url']);
+        } else {
+            update_term_meta($term_id, 'cat_app_url', '');
         }
     }
 
