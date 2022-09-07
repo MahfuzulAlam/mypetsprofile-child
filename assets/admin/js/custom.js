@@ -1,5 +1,6 @@
 /* This is your custom Javascript */
 jQuery(document).ready(function ($) {
+  // RENDER APP CATEGORY IMAGE
   function atbdp_render_media_uploader_for_app(page) {
     var file_frame;
     var image_data;
@@ -63,9 +64,51 @@ jQuery(document).ready(function ($) {
     file_frame.open();
   } // Display the media uploader when "Upload Image" button clicked in the custom taxonomy "atbdp_categories"
 
+  // RENDER APP CATEGORY IMAGE COVER
+  function atbdp_render_media_uploader_for_app_cover(page) {
+    var file_frame;
+    var image_data;
+    var json; // If an instance of file_frame already exists, then we can open it rather than creating a new instance
+
+    if (undefined !== file_frame) {
+      file_frame.open();
+      return;
+    } // Here, use the wp.media library to define the settings of the media uploader
+
+    file_frame = wp.media.frames.file_frame = wp.media({
+      frame: "post",
+      state: "insert",
+      multiple: false,
+    }); // Setup an event handler for what to do when an image has been selected
+
+    file_frame.on("insert", function () {
+      // Read the JSON data returned from the media uploader
+      json = file_frame.state().get("selection").first().toJSON(); // First, make sure that we have the URL of an image to display
+
+      if ($.trim(json.url.length) < 0) {
+        return;
+      } // After that, set the properties of the image and display it
+
+      $("#atbdp-categories-app-image-cover-id").val(json.id);
+      $("#atbdp-categories-app-image-cover-wrapper").html(
+        '<img src="'.concat(
+          json.url,
+          '" /><a href="" class="remove_cat_app_img_cover"><span class="fa fa-times" title="Remove it"></span></a>'
+        )
+      );
+    }); // Now display the actual file_frame
+
+    file_frame.open();
+  } // Display the media uploader when "Upload Image" button clicked in the custom taxonomy "atbdp_categories"
+
   $("#atbdp-categories-upload-app-image").on("click", function (e) {
     e.preventDefault();
     atbdp_render_media_uploader_for_app("categories");
+  });
+
+  $("#atbdp-categories-upload-app-image-cover").on("click", function (e) {
+    e.preventDefault();
+    atbdp_render_media_uploader_for_app_cover("categories");
   });
 
   $(document).on("click", ".remove_cat_app_img", function (e) {
@@ -73,6 +116,13 @@ jQuery(document).ready(function ($) {
     $(this).hide();
     $(this).prev("img").remove();
     $("#atbdp-categories-app-image-id").attr("value", "");
+  });
+
+  $(document).on("click", ".remove_cat_app_img_cover", function (e) {
+    e.preventDefault();
+    $(this).hide();
+    $(this).prev("img").remove();
+    $("#atbdp-categories-app-image-cover-id").attr("value", "");
   });
 
   /**

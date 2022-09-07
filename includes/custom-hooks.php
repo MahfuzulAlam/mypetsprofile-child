@@ -200,12 +200,17 @@ class MPP_Child_Hooks
     // Edit Custom Category Fields
     public function edit_category_icon_field($term, $taxonomy)
     {
+        // App Image
         $image_id = get_term_meta($term->term_id, 'app_image', true);
         $image_src = ($image_id) ? wp_get_attachment_url((int)$image_id) : '';
+
+        // App Image Cover
+        $image_cover_id = get_term_meta($term->term_id, 'app_image_cover', true);
+        $image_cover_src = ($image_cover_id) ? wp_get_attachment_url((int)$image_cover_id) : '';
 ?>
         <tr class="form-field term-group-wrap">
             <th scope="row">
-                <label for="atbdp-categories-app-image-id"><?php _e('App Image', 'directorist'); ?></label>
+                <label for="atbdp-categories-app-image-id"><?php _e('App Image Icon', 'directorist'); ?></label>
             </th>
             <td>
                 <input type="hidden" id="atbdp-categories-app-image-id" name="app_image" value="<?php echo $image_id; ?>" />
@@ -221,6 +226,24 @@ class MPP_Child_Hooks
                 </p>
             </td>
         </tr>
+        <tr class="form-field term-group-wrap">
+            <th scope="row">
+                <label for="atbdp-categories-app-image-cover-id"><?php _e('App Image Cover', 'directorist'); ?></label>
+            </th>
+            <td>
+                <input type="hidden" id="atbdp-categories-app-image-cover-id" name="app_image_cover" value="<?php echo $image_cover_id; ?>" />
+                <div id="atbdp-categories-app-image-cover-wrapper">
+                    <?php
+                    if ($image_cover_src) : ?>
+                        <img src="<?php echo $image_cover_src; ?>" />
+                        <a href="" class="remove_cat_app_img_cover"><span class="fa fa-times" title="Remove it"></span></a>
+                    <?php endif; ?>
+                </div>
+                <p>
+                    <input type="button" class="button button-secondary" id="atbdp-categories-upload-app-image-cover" value="<?php _e('Add Image', 'directorist'); ?>" />
+                </p>
+            </td>
+        </tr>
     <?php
     }
 
@@ -232,6 +255,13 @@ class MPP_Child_Hooks
             update_term_meta($term_id, 'app_image', (int)$_POST['app_image']);
         } else {
             update_term_meta($term_id, 'app_image', '');
+        }
+
+        //UPDATED CATEGORY COVER IMAGE
+        if (isset($_POST['app_image_cover']) && '' !== $_POST['app_image_cover']) {
+            update_term_meta($term_id, 'app_image_cover', (int)$_POST['app_image_cover']);
+        } else {
+            update_term_meta($term_id, 'app_image_cover', '');
         }
     }
 
