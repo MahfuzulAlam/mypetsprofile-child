@@ -50,7 +50,7 @@ if (!defined('MPP_MAP_VERSION')) {
 }
 
 if (!defined('MPP_ADMIN_VERSION')) {
-	define('MPP_ADMIN_VERSION', '1.0.4');
+	define('MPP_ADMIN_VERSION', '1.0.5');
 }
 
 if (!defined('MPP_CHILD_FILE_DIR')) {
