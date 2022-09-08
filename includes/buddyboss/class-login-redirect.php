@@ -29,7 +29,7 @@ class BuddyBoss_Login_Redirect
                 $welcome_message = get_user_meta($user->ID, 'welcome_message', true);
                 if (!$welcome_message || empty($welcome_message)) {
                     $message = '<p>Just a standard Welcome to MyPetsProfile&#x2122;&#xfe0f;. Please look around, meet other pet parents, upload your pets profile and more.</p><p>Enjoy.</p><p>Let us know if you have any questions?</p><p>Hello@mypetsprofile.com</p>';
-                    messages_new_message(
+                    $sent = messages_new_message(
                         array(
                             'sender_id'     =>  311,
                             'recipients'    =>  array($user->ID),
@@ -37,7 +37,7 @@ class BuddyBoss_Login_Redirect
                             'content'       =>  $message,
                         )
                     );
-                    update_user_meta($user->ID, 'welcome_message', 'completed');
+                    if ($sent) update_user_meta($user->ID, 'welcome_message', 'completed');
                 }
             }
         }
