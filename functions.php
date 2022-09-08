@@ -161,6 +161,7 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-referral-notification.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-referral-email.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-registration.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-login-redirect.php');
 
 	// DIRECTORIST
 	require_once(get_stylesheet_directory() . '/includes/directorist/class-fields.php');

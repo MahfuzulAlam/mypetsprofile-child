@@ -2269,55 +2269,6 @@ function mpp_facility_option_list($options)
     return $new_options;
 }
 
-// After Login
-/*
-add_action('bp_core_activated_user', function ($user_id) {
-    if ($user_id) :
-        $welcome_msg_status = get_user_meta($user_id, 'welcome_msg_status', true);
-        $user = get_user_by('id', $user_id);
-
-        if (!$welcome_msg_status || empty($welcome_msg_status)) {
-            $username = $user->data->user_login;
-            $content = '';
-            $content .= '<p>Hey ' . $username . '<br />';
-            $content .= 'Welcome to MyPetsProfile™️</p>';
-            $content .= '<p>Meet, share & chat with neighboring pet parents and local pet businesses and service.</p>';
-            $content .= '<p>We love seeing photos as well.</p>';
-            $content .= '<p>Enjoy<br />MyPetsProfile™️ Team</p>';
-            $result = messages_new_message(
-                array(
-                    'sender_id' => 1,
-                    'recipients' => array($user_id),
-                    'content'   => $content,
-                    'subject' => 'Welcome to MyPetsProfile™️',
-                )
-            );
-            if ($result) update_user_meta($user_id, 'welcome_msg_status', true);
-        }
-    endif;
-    file_put_contents(dirname(__FILE__) . '/file.json', json_encode(array($user)));
-});
-*/
-
-// Login Redirect
-
-function mpp_login_redirect_first_time($url, $req, $user)
-{
-    if ($user && is_object($user) && is_a($user, 'WP_User')) {
-        if (!$user->has_cap('administrator')) {
-            $first_login = get_user_meta($user->ID, 'first_login', true);
-            if (!$first_login || empty($first_login)) {
-                update_user_meta($user->ID, 'first_login', 'completed');
-                return home_url('/search-directory/');
-            }
-        }
-    }
-    return $url;
-}
-add_filter('login_redirect', 'mpp_login_redirect_first_time', 10, 3);
-
-// Login Redirect
-
 // APP MENU ISSUE
 
 add_filter('bbapp_app_menu_filter', 'mpp_bbapp_app_menu_filter', 10, 2);
