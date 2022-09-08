@@ -13,7 +13,7 @@ class BuddyBoss_Login_Redirect
     public function __construct()
     {
         // MPP SEND MESSAGE ON LOGIN FIRST TIME
-        add_filter('login_redirect', array($this, 'mpp_send_message_on_login_first_time'), 10, 3);
+        add_action('wp_login', array($this, 'mpp_send_message_on_login_first_time'), 10, 2);
 
         // LOGIN REDIRECT TO SEARCH PAGE
         add_filter('login_redirect', array($this, 'mpp_login_redirect_first_time'), 20, 3);
@@ -22,12 +22,12 @@ class BuddyBoss_Login_Redirect
     /**
      * MPP SEND MESSAGE ON LOGIN FIRST TIME
      */
-    public function mpp_send_message_on_login_first_time($url, $req, $user)
+    public function mpp_send_message_on_login_first_time($user_login, $user)
     {
         if ($user && is_object($user) && is_a($user, 'WP_User')) {
             if (!$user->has_cap('administrator')) {
                 $welcome_message = get_user_meta($user->ID, 'welcome_message', true);
-                if (!$welcome_message || empty($welcome_message)) {
+                if (!$welcome_message || empty($welcome_message || $welcome_message != 'completed')) {
                     $message = '<p>Just a standard Welcome to MyPetsProfile&#x2122;&#xfe0f;. Please look around, meet other pet parents, upload your pets profile and more.</p><p>Enjoy.</p><p>Let us know if you have any questions?</p><p>Hello@mypetsprofile.com</p>';
                     $sent = messages_new_message(
                         array(
@@ -37,11 +37,10 @@ class BuddyBoss_Login_Redirect
                             'content'       =>  $message,
                         )
                     );
-                    if ($sent) update_user_meta($user->ID, 'welcome_message', 'completed');
+                    if ($sent && !is_wp_error($sent)) update_user_meta($user->ID, 'welcome_message', 'completed');
                 }
             }
         }
-        return $url;
     }
 
     /**
