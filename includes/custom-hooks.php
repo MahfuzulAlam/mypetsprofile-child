@@ -545,6 +545,8 @@ class MPP_Child_Hooks
         if (is_checkout()) {
             if (isset($wp->query_vars['order-received']) && !empty($wp->query_vars['order-received'])) {
                 $order_id = $wp->query_vars['order-received'];
+                // DNA KIT
+                $this->dna_kit_redirection($order_id);
                 // EVENT
                 if (mpp_event_id_in_the_order($order_id)) {
                     exit(wp_redirect(MPP_SITE_URL . '/add-edit-pet-friendly-event'));
@@ -562,6 +564,20 @@ class MPP_Child_Hooks
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * DNA KIT REDIRECTION
+     */
+    public function dna_kit_redirection($order_id = 0)
+    {
+        if ($order_id) {
+            $order = wc_get_order($order_id);
+            foreach ($order->get_items() as $item) :
+                if ($item->get_product_id() == 21118) exit(wp_redirect(MPP_SITE_URL . '/pooprint-dna-property-selection'));
+            endforeach;
+            return false;
         }
     }
 

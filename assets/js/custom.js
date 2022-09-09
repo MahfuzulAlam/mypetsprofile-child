@@ -1200,4 +1200,22 @@ jQuery(document).ready(function ($) {
       $("#pooprint_select_listing_msg").text("Please select a listing first");
     }
   });
+
+  // POOPRINTS DNA PROPERTY BUTTONS
+  $("#pooprint_dna_property_button").on("click", function (e) {
+    e.preventDefault();
+    var formLink = $("#pooprint_select_listing")
+      .find(":selected")
+      .attr("data-pooprint-link");
+    if (mppChild.isLogin) {
+      $("#pooprint_select_listing_msg").text(
+        "Loading PooPrint Registration Page"
+      );
+      if (formLink != "") window.location.href = formLink;
+    } else {
+      $("#pooprint_select_listing_msg").text("Sorry, you are not loggedin.");
+    }
+  });
+
+  // END SCRIPT
 });

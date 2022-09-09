@@ -42,7 +42,7 @@ if (!defined('MPP_SITE_URL')) {
 }
 
 if (!defined('MPP_VERSION')) {
-	define('MPP_VERSION', '1.1.20');
+	define('MPP_VERSION', '1.1.21');
 }
 
 if (!defined('MPP_MAP_VERSION')) {

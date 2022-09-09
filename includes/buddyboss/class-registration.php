@@ -16,6 +16,9 @@ class MPP_Registration
 
         // REGISTRATION FORM
         add_shortcode('pooprints-registration-form', array($this, 'pooprint_registration_form'));
+
+        // LISTING DNA PROPERTY SELECTION FORM
+        add_shortcode('pooprints-dna-property-selection-form', array($this, 'pooprints_dna_property_selection_form'));
     }
 
     /**
@@ -26,6 +29,18 @@ class MPP_Registration
         ob_start();
         $args = [];
         get_template_part('template-parts/content', 'pooprint_listing_selection_form', $args);
+        return ob_get_clean();
+    }
+
+    /**
+     * LISTING SELECTION FORM
+     * pooprints_dna_property_selection_form
+     */
+    public function pooprints_dna_property_selection_form()
+    {
+        ob_start();
+        $args = [];
+        get_template_part('template-parts/content', 'pooprints_dna_property_selection_form', $args);
         return ob_get_clean();
     }
 
