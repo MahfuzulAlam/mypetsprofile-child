@@ -575,7 +575,7 @@ class MPP_Child_Hooks
         if ($order_id) {
             $order = wc_get_order($order_id);
             foreach ($order->get_items() as $item) :
-                if ($item->get_product_id() == 21118) exit(wp_redirect(MPP_SITE_URL . '/pooprint-dna-property-selection'));
+                if ($item->get_product_id() == 28323) exit(wp_redirect(MPP_SITE_URL . '/pooprint-dna-property-selection'));
             endforeach;
             return false;
         }
