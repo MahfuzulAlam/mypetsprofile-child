@@ -36,6 +36,15 @@ class MPP_Child_Hooks
         add_action('woocommerce_product_quick_edit_start', array($this, 'mpp_custom_field_bulk_edit_input'));
         // WooCommerce Quick Action Custom Field Save
         add_action('woocommerce_product_quick_edit_save', array($this, 'mpp_custom_field_bulk_edit_save'));
+        // Auto Add Coupon
+        add_action('woocommerce_before_cart', array($this, 'mpp_apply_coupon_if_specific_product'));
+        add_action('woocommerce_before_checkout_form', array($this, 'mpp_apply_coupon_if_specific_product'));
+        // PRODUCT PAGE FIELD
+        add_action('woocommerce_product_options_general_product_data', array($this, 'mpp_product_page_coupon_field'));
+        // Save Fields
+        add_action('woocommerce_process_product_meta', array($this, 'woocommerce_product_custom_fields_save'));
+        // WOOCOMMERCE PAYMENT COMPLETE - woocommerce_checkout_order_processed
+        add_action('woocommerce_checkout_order_processed', array($this, 'mpp_wc_payment_complete'));
     }
 
     // Change the pricing plan url for mobile
@@ -125,6 +134,13 @@ class MPP_Child_Hooks
             $response->data['avatar_urls']['is_default'] = false;
         }
 
+        // Custom Cover
+        $custom_cover = $this->bp_process_group_cover($item->id);
+        if (!empty($custom_cover)) {
+            $response->data['cover_url'] = $custom_cover;
+            $response->data['cover_is_default'] = false;
+        }
+
         return $response;
     }
 
@@ -132,7 +148,7 @@ class MPP_Child_Hooks
     public function bp_process_group_icon($group_id = 0, $image_type = 'image')
     {
         $custom_avatars = array();
-        if ($group_id == 0) return $custom_avatar;
+        if ($group_id == 0) return $custom_avatars;
         $directorist_category = groups_get_groupmeta($group_id, 'directorist_category', true);
         if (!$directorist_category || empty($directorist_category)) {
             $group_type = bp_groups_get_group_type($group_id);
@@ -155,15 +171,49 @@ class MPP_Child_Hooks
         return $custom_avatars;
     }
 
+    /**
+     * BP PROCESS GROUP COVER
+     */
+    public function bp_process_group_cover($group_id = 0)
+    {
+        $cover_url = '';
+        if ($group_id == 0) return $cover_url;
+
+        $mpp_listings = groups_get_groupmeta($group_id, 'directorist_listings_ids', true);
+
+        if ($mpp_listings && count($mpp_listings) > 0) {
+            $listing_prv_img   = get_post_meta($mpp_listings[0], '_listing_prv_img', true);
+            $listing_img       = get_post_meta($mpp_listings[0], '_listing_img', true);
+
+            if (is_array($listing_img) && !empty($listing_img)) {
+                $cover_url = atbdp_get_image_source($listing_img[0], 'large');
+            }
+
+            if (!empty($listing_prv_img)) {
+                $cover_url = atbdp_get_image_source($listing_prv_img, 'large');
+            }
+        }
+
+        return $cover_url;
+    }
+
     // Edit Custom Category Fields
     public function edit_category_icon_field($term, $taxonomy)
     {
+        // App Image
         $image_id = get_term_meta($term->term_id, 'app_image', true);
         $image_src = ($image_id) ? wp_get_attachment_url((int)$image_id) : '';
+
+        // App Image Cover
+        $image_cover_id = get_term_meta($term->term_id, 'app_image_cover', true);
+        $image_cover_src = ($image_cover_id) ? wp_get_attachment_url((int)$image_cover_id) : '';
+
+        // APP Url
+        $cat_app_url = get_term_meta($term->term_id, 'cat_app_url', true);
 ?>
         <tr class="form-field term-group-wrap">
             <th scope="row">
-                <label for="atbdp-categories-app-image-id"><?php _e('App Image', 'directorist'); ?></label>
+                <label for="atbdp-categories-app-image-id"><?php _e('App Image Icon', 'directorist'); ?></label>
             </th>
             <td>
                 <input type="hidden" id="atbdp-categories-app-image-id" name="app_image" value="<?php echo $image_id; ?>" />
@@ -179,6 +229,31 @@ class MPP_Child_Hooks
                 </p>
             </td>
         </tr>
+        <tr class="form-field term-group-wrap">
+            <th scope="row">
+                <label for="atbdp-categories-app-image-cover-id"><?php _e('App Image Cover', 'directorist'); ?></label>
+            </th>
+            <td>
+                <input type="hidden" id="atbdp-categories-app-image-cover-id" name="app_image_cover" value="<?php echo $image_cover_id; ?>" />
+                <div id="atbdp-categories-app-image-cover-wrapper">
+                    <?php
+                    if ($image_cover_src) : ?>
+                        <img src="<?php echo $image_cover_src; ?>" />
+                        <a href="" class="remove_cat_app_img_cover"><span class="fa fa-times" title="Remove it"></span></a>
+                    <?php endif; ?>
+                </div>
+                <p>
+                    <input type="button" class="button button-secondary" id="atbdp-categories-upload-app-image-cover" value="<?php _e('Add Image', 'directorist'); ?>" />
+                </p>
+            </td>
+        </tr>
+        <tr class="form-field term-cat-url-wrap">
+            <th scope="row"><label for="cat_app_url">APP Custom URL</label></th>
+            <td>
+                <input name="cat_app_url" id="cat_app_url" type="text" value="<?php echo $cat_app_url; ?>">
+                <p class="description">Enter the custom URL to redirect in the APP.</p>
+            </td>
+        </tr>
     <?php
     }
 
@@ -190,6 +265,20 @@ class MPP_Child_Hooks
             update_term_meta($term_id, 'app_image', (int)$_POST['app_image']);
         } else {
             update_term_meta($term_id, 'app_image', '');
+        }
+
+        //UPDATED CATEGORY COVER IMAGE
+        if (isset($_POST['app_image_cover']) && '' !== $_POST['app_image_cover']) {
+            update_term_meta($term_id, 'app_image_cover', (int)$_POST['app_image_cover']);
+        } else {
+            update_term_meta($term_id, 'app_image_cover', '');
+        }
+
+        //UPDATED CATEGORY APP URL
+        if (isset($_POST['cat_app_url']) && '' !== $_POST['cat_app_url']) {
+            update_term_meta($term_id, 'cat_app_url', $_POST['cat_app_url']);
+        } else {
+            update_term_meta($term_id, 'cat_app_url', '');
         }
     }
 
@@ -357,6 +446,67 @@ class MPP_Child_Hooks
         }
     }
 
+    /**
+     * Wocommerce Payment Complete Hook
+     */
+    public function mpp_wc_payment_complete($order_id)
+    {
+        // ADD AUTO ORDER
+        $cart_items = array();
+        if ($order_id) {
+            $order = wc_get_order($order_id);
+            foreach ($order->get_items() as $item_key => $item) :
+                $cart_items[] = $item->get_product_id();
+            endforeach;
+        }
+
+        if (in_array(19554, $cart_items)) $this->mpp_another_order_on_order_complete(27261);
+        if (in_array(27265, $cart_items)) $this->mpp_another_order_on_order_complete(27262);
+        // ADD AUTO ORDER
+    }
+
+    /**
+     * AUTO ORDER
+     */
+    public function mpp_another_order_on_order_complete($plan_id = 0)
+    {
+        $user_id = get_current_user_id();
+
+        if (!empty($user_id)) {
+
+            $address = array(
+                'first_name' => get_user_meta($user_id, 'first_name', true),
+                'last_name'  => get_user_meta($user_id, 'last_name', true),
+                'company'    => get_user_meta($user_id, 'billing_company', true),
+                'email'      => get_user_meta($user_id, 'billing_email', true) ? get_user_meta($user_id, 'billing_email', true) : $iap_order->user_email,
+                'phone'      => get_user_meta($user_id, 'billing_phone', true),
+                'address_1'  => get_user_meta($user_id, 'billing_address_1', true),
+                'address_2'  => get_user_meta($user_id, 'billing_address_2', true),
+                'city'       => get_user_meta($user_id, 'billing_city', true),
+                'state'      => get_user_meta($user_id, 'billing_state', true),
+                'postcode'   => get_user_meta($user_id, 'billing_postcode', true),
+                'country'    => get_user_meta($user_id, 'billing_country', true),
+            );
+
+            // Now we create the order
+            $order = wc_create_order();
+
+            // The add_product() function below is located in /plugins/woocommerce/includes/abstracts/abstract_wc_order.php
+            $order->add_product(get_product($plan_id), 1); // This is an existing SIMPLE product
+            $order->set_address($address, 'billing');
+
+            $order->calculate_totals();
+            $order->update_status("wc-completed", "Automatic Process", TRUE);
+
+            $order_id = $order->get_id();
+
+            // save required data as order post meta
+            update_post_meta($order_id, '_fm_plan_ordered', $plan_id);
+            update_post_meta($order_id, '_customer_user', $user_id);
+            update_post_meta($order_id, '_listing_id', '');
+        }
+    }
+
     // Template Redirects
     public function template_redirect()
     {
@@ -395,6 +545,8 @@ class MPP_Child_Hooks
         if (is_checkout()) {
             if (isset($wp->query_vars['order-received']) && !empty($wp->query_vars['order-received'])) {
                 $order_id = $wp->query_vars['order-received'];
+                // DNA KIT
+                $this->dna_kit_redirection($order_id);
                 // EVENT
                 if (mpp_event_id_in_the_order($order_id)) {
                     exit(wp_redirect(MPP_SITE_URL . '/add-edit-pet-friendly-event'));
@@ -412,6 +564,20 @@ class MPP_Child_Hooks
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * DNA KIT REDIRECTION
+     */
+    public function dna_kit_redirection($order_id = 0)
+    {
+        if ($order_id) {
+            $order = wc_get_order($order_id);
+            foreach ($order->get_items() as $item) :
+                if ($item->get_product_id() == 28323) exit(wp_redirect(MPP_SITE_URL . '/pooprint-dna-property-selection'));
+            endforeach;
+            return false;
         }
     }
 
@@ -439,6 +605,7 @@ class MPP_Child_Hooks
                     'compare' => 'NOT EXISTS',
                 )
             ));
+            $query->set('post__not_in', array(19368, 18062, 18063));
             $query->set('orderby', array('rank_position' => 'ASC'));
         }
         return $query;
@@ -454,6 +621,18 @@ class MPP_Child_Hooks
             }
             return '<span class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $product->get_price() . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $sign_up_fee . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></ins> <span class="subscription-details"><small class="woocommerce-price-suffix"> +Tax</small> / year</span></span>';
         }
+
+        $trial_length = get_post_meta($product->get_id(), '_subscription_trial_length', true);
+        $trial_period = get_post_meta($product->get_id(), '_subscription_trial_period', true);
+
+        if ($trial_length && $trial_period) {
+            $mpp_coupon_offer = get_post_meta($product->get_id(), 'mpp_coupon_offer', true);
+            if ($mpp_coupon_offer) {
+                $string = '<p class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $product->get_price() . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $mpp_coupon_offer . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></ins> <span class="subscription-details"><small class="woocommerce-price-suffix"> +Tax</small> / year</span>';
+                $string .= ' <span>with ' . $trial_length . ' ' . $trial_period . 's free trial</span></p>';
+            }
+        }
+
         return $string;
     }
 
@@ -479,6 +658,69 @@ class MPP_Child_Hooks
             $rank_position = $_REQUEST['rank_position'];
             update_post_meta($post_id, 'rank_position', wc_clean($rank_position));
         }
+    }
+
+    /**
+     * ADD COUPON AUTOMATICALLY
+     */
+    public function mpp_apply_coupon_if_specific_product()
+    {
+        // foreach (WC()->cart->get_coupons() as $code => $coupon) {
+        //     WC()->cart->remove_coupon($code);
+        // }
+
+        foreach (WC()->cart->get_cart() as $product) {
+            $coupon_code = get_post_meta($product['product_id'], 'mpp_coupon', true) ? get_post_meta($product['product_id'], 'mpp_coupon', true) : '';
+            if (!empty($coupon_code)) {
+                if ($coupon_code != 'none') {
+                    WC()->cart->apply_coupon($coupon_code);
+                }
+            } else {
+                WC()->cart->apply_coupon('100discount');
+            }
+        }
+        // if product in the cart
+        // if (in_array($product_id, array_column(WC()->cart->get_cart(), 'product_id'))) {
+        //     if (!WC()->cart->has_discount($coupon_code)) {
+        //         WC()->cart->apply_coupon($coupon_code);
+        //     }
+        // } else { // if product removed from cart we remove the coupon
+        //     WC()->cart->remove_coupon($coupon_code);
+        //     WC()->cart->calculate_totals();
+        // }
+    }
+
+    /**
+     * PRODUCT PAGE COUPON FIELD
+     */
+    public function mpp_product_page_coupon_field()
+    {
+        global $woocommerce, $post;
+        woocommerce_wp_text_input(
+            array(
+                'id' => 'mpp_coupon',
+                'placeholder' => 'Enter related coupon code',
+                'label' => __('Related Coupon', 'woocommerce'),
+                'desc_tip' => 'true'
+            )
+        );
+        woocommerce_wp_text_input(
+            array(
+                'id' => 'mpp_coupon_offer',
+                'placeholder' => 'Enter the offer amount',
+                'label' => __('Offer Amount', 'woocommerce'),
+                'desc_tip' => 'true'
+            )
+        );
+    }
+
+    public function woocommerce_product_custom_fields_save($post_id)
+    {
+        // Custom Product Text Field
+        $mpp_coupon = isset($_POST['mpp_coupon']) && !empty($_POST['mpp_coupon']) ? $_POST['mpp_coupon'] : "";
+        $mpp_coupon_offer = isset($_POST['mpp_coupon_offer']) && !empty($_POST['mpp_coupon_offer']) ? $_POST['mpp_coupon_offer'] : "";
+        update_post_meta($post_id, 'mpp_coupon', esc_attr($mpp_coupon));
+        update_post_meta($post_id, 'mpp_coupon_offer', esc_attr($mpp_coupon_offer));
     }
 }
 

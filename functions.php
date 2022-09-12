@@ -24,29 +24,38 @@ function buddyboss_theme_child_languages()
 	// Translate text from the PARENT theme.
 	load_theme_textdomain('buddyboss-theme', get_stylesheet_directory() . '/languages');
 
-	// Global Fixed Valiable - Constants
-	if (!defined('MPP_SITE_URL')) {
-		define('MPP_SITE_URL', get_site_url());
-	}
-
-	if (!defined('MPP_VERSION')) {
-		define('MPP_VERSION', '1.1.1');
-	}
-
-	if (!defined('MPP_MAP_VERSION')) {
-		define('MPP_MAP_VERSION', '1.0.0');
-	}
-
-	if (!defined('MPP_ADMIN_VERSION')) {
-		define('MPP_ADMIN_VERSION', '1.0.0');
-	}
-
 	// Translate text from the CHILD theme only.
 	// Change 'buddyboss-theme' instances in all child theme files to 'buddyboss-theme-child'.
 	// load_theme_textdomain( 'buddyboss-theme-child', get_stylesheet_directory() . '/languages' );
 
 }
 add_action('after_setup_theme', 'buddyboss_theme_child_languages');
+
+
+/**
+ * DECLARE GLOBAL VARIABLES
+ */
+
+// Global Fixed Valiable - Constants
+if (!defined('MPP_SITE_URL')) {
+	define('MPP_SITE_URL', get_site_url());
+}
+
+if (!defined('MPP_VERSION')) {
+	define('MPP_VERSION', '1.1.21');
+}
+
+if (!defined('MPP_MAP_VERSION')) {
+	define('MPP_MAP_VERSION', '1.0.3');
+}
+
+if (!defined('MPP_ADMIN_VERSION')) {
+	define('MPP_ADMIN_VERSION', '1.0.5');
+}
+
+if (!defined('MPP_CHILD_FILE_DIR')) {
+	define('MPP_CHILD_FILE_DIR', get_stylesheet_directory() . '/assets/file');
+}
 
 /**
  * Enqueues scripts and styles for child theme front-end.
@@ -76,8 +85,9 @@ function buddyboss_theme_child_scripts_styles()
 		wp_enqueue_script('download', get_stylesheet_directory_uri() . '/assets/js/download.js');
 		wp_enqueue_script('pdf-gen', get_stylesheet_directory_uri() . '/assets/js/pdf-gen.js', array('jquery', 'pdf-lib', 'download'), '1.0.0');
 	}
+	wp_enqueue_script('input-mask', 'https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js', array('jquery'));
 	wp_enqueue_script('buddyboss-child-js', get_stylesheet_directory_uri() . '/assets/js/custom.js', array('jquery'), MPP_VERSION);
-	wp_localize_script('buddyboss-child-js', 'mppChild', array('ajaxurl' => admin_url('admin-ajax.php')));
+	wp_localize_script('buddyboss-child-js', 'mppChild', array('ajaxurl' => admin_url('admin-ajax.php'), 'chatInterval' => 20000, 'isLogin' => is_user_logged_in()));
 }
 add_action('wp_enqueue_scripts', 'buddyboss_theme_child_scripts_styles', 9999);
 
@@ -86,11 +96,21 @@ add_theme_support('post-thumbnails');
 add_image_size('bb-app-group-avatar', 150, 150, true);
 
 /****************************** CUSTOM ENQUEUES ******************************/
+function mpp_bbd_inspect_scripts()
+{
+	if (!is_admin()) {
+		wp_dequeue_script('directorist-google-map');
+		wp_deregister_script('directorist-google-map');
+	}
+}
+add_action('wp_print_scripts', 'mpp_bbd_inspect_scripts');
 
 function mpp_custom_google_map_scripts()
 {
 	//wp_enqueue_style('custom-css', get_stylesheet_directory_uri() . '/assets/css/custom.css');
-	wp_enqueue_script('bbd-custom-google', get_stylesheet_directory_uri() . '/assets/js/custom-google.js', array('directorist-google-map'), MPP_MAP_VERSION, true);
+	wp_enqueue_script('google-map-api');
+	wp_enqueue_script('directorist-markerclusterer');
+	wp_enqueue_script('bbd-custom-google', get_stylesheet_directory_uri() . '/assets/js/custom-google.js', array('google-map-api'), MPP_MAP_VERSION, true);
 	wp_localize_script('bbd-custom-google', 'directorist_options', bbd_get_option_data());
 }
 add_action('wp_enqueue_scripts', 'mpp_custom_google_map_scripts', 0);
@@ -99,8 +119,9 @@ add_action('wp_enqueue_scripts', 'mpp_custom_google_map_scripts', 0);
 
 function mpp_custom_admin_enqueue_scripts()
 {
-	wp_enqueue_style('custom-admin-css', get_stylesheet_directory_uri() . '/assets/admin/css/custom.css', '', MPP_ADMIN_VERSION);
-	wp_enqueue_script('custom-admin-js', get_stylesheet_directory_uri() . '/assets/admin/js/custom.js', array('jquery'), MPP_ADMIN_VERSION);
+	wp_enqueue_style('mpp-admin-css', get_stylesheet_directory_uri() . '/assets/admin/css/custom.css', '', MPP_ADMIN_VERSION);
+	wp_enqueue_script('mpp-admin-js', get_stylesheet_directory_uri() . '/assets/admin/js/custom.js', array('jquery'), MPP_ADMIN_VERSION);
+	wp_localize_script('mpp-admin-js', 'mppChild', array('ajaxurl' => admin_url('admin-ajax.php')));
 }
 add_action('admin_enqueue_scripts', 'mpp_custom_admin_enqueue_scripts');
 
@@ -124,13 +145,30 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 
 	/****************************** CUSTOM FUNCTIONS ******************************/
 
+	// CUSTOMS
 	require_once(get_stylesheet_directory() . '/includes/custom-functions.php');
 	require_once(get_stylesheet_directory() . '/includes/custom-hooks.php');
 	require_once(get_stylesheet_directory() . '/includes/custom-shortcodes.php');
+
+	// BUDDYBOSS
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-adoption.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-qrcode.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-petalert.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-coauthors.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-profile-forms.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-database.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-messenger.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-referral-notification.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-referral-email.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-registration.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-login-redirect.php');
+
+	// DIRECTORIST
+	require_once(get_stylesheet_directory() . '/includes/directorist/class-fields.php');
+	require_once(get_stylesheet_directory() . '/includes/directorist/class-shortcodes.php');
+	//require_once(get_stylesheet_directory() . '/includes/directorist/class-import.php');
+
+	// RENTSYNC
+	require_once(get_stylesheet_directory() . '/includes/directorist/class-rentsync.php');
 
 endif;

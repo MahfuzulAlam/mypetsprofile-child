@@ -17,16 +17,18 @@ class BuddyBoss_Group_Custom
         // Update a group on update a listing with listing details
         add_action('atbdp_listing_updated', array($this, 'buddyboss_group_on_directorist_listing_creation'), 20);
         // Custom import hooks
-        add_action('directorist_listing_imported', array($this, 'buddyboss_create_group_after_import_listing'), 10, 2);
+        add_action('directorist_listing_imported', array($this, 'buddyboss_create_group_after_import_listing'), 20, 2);
     }
 
     public function buddyboss_group_on_directorist_listing_creation($listing_id = 0)
     {
         if ($listing_id) {
 
+            $author_id = get_post_field('post_author', $listing_id);
+
             $args = array(
                 'name'          => get_the_title($listing_id),
-                'creator_id'    => get_current_user_id(),
+                'creator_id'    => $author_id,
                 'description'   => get_post_meta($listing_id, '_excerpt', true),
                 'enable_forum'  => true,
                 'status'        => 'public'
@@ -43,7 +45,11 @@ class BuddyBoss_Group_Custom
                 $group_id = groups_create_group($args);
                 if (!is_wp_error($group_id) && $group_id) {
                     $this->connect_with_directorist_listing($listing_id, $group_id);
-                    $this->save_category_name_as_group_type($_POST, $group_id);
+                    if (isset($_POST['tax_input']['at_biz_dir-category'])) {
+                        $this->save_category_name_as_group_type($_POST, $group_id);
+                    } else {
+                        $this->save_category_name_as_group_type_listing($listing_id, $group_id);
+                    }
                 }
             }
 
@@ -78,13 +84,25 @@ class BuddyBoss_Group_Custom
         }
     }
 
+    public function save_category_name_as_group_type_listing($listing_id = 0, $group_id = 0)
+    {
+        $categories = get_the_terms($listing_id, ATBDP_CATEGORY);
+        if ($categories && !is_wp_error($categories)) {
+            if ($categories && count($categories) > 0) {
+                $category_title = $categories[0]->name;
+                $this->set_bb_group_type_from_directorist_category($category_title, $group_id);
+            }
+        }
+    }
+
     //Custom Import Hook
     public function buddyboss_create_group_after_import_listing($post_id, $post)
     {
+        $author_id = get_post_field('post_author', $post_id);
         // Create BuddyBoss Group Starts
         $bb_group_args = array(
             'name'          => get_the_title($post_id),
-            'creator_id'    => get_current_user_id(),
+            'creator_id'    => $author_id,
             'description'   => get_post_meta($post_id, '_excerpt', true),
             'enable_forum'  => true,
             'status'        => 'public'

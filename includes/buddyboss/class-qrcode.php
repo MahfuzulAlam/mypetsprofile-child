@@ -65,7 +65,7 @@ class MPP_QRCode
         if ($bb_group_id && !empty($bb_group_id)) :
             if (is_user_logged_in() && groups_is_user_admin(get_current_user_id(), $bb_group_id)) :
                 $user_url = bbp_get_user_profile_url(get_current_user_id());
-                $link = $user_url . '/scan-qr-code/?type=biz&id=' . $bb_group_id;
+                $link = get_permalink(20859) . '/?type=biz&id=' . $bb_group_id;
                 echo do_shortcode('[kaya_qrcode content="' . $link . '" align="aligncenter" size="400"]');
             endif;
         endif;

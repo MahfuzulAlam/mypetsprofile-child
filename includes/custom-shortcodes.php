@@ -27,6 +27,10 @@ class MPP_Child_Shortcode
         add_shortcode('claim-listing-iap', array($this, 'claim_listing_iap'));
         // Test Shortcode
         add_shortcode('test-shortcode', array($this, 'test_shortcode'));
+        // GROUP Listing - Directorist
+        add_shortcode('mpp-group-listings', array($this, 'mpp_group_listings'));
+        // Copy the link
+        add_shortcode('mpp-copy-listing-link', array($this, 'mpp_copy_listing_link'));
     }
 
     // BuddyBoss Group Link on Linsting Page
@@ -597,8 +601,45 @@ class MPP_Child_Shortcode
         if (current_user_can('administrator')) :
             ?>
             <a href="<?php echo MPP_SITE_URL; ?>" target="_blank">Download</a>
-<?php
+        <?php
         endif;
+        return ob_get_clean();
+    }
+
+    /**
+     * MPP GROUP LISTINGS BY DIRECTORIST
+     */
+    public function mpp_group_listings()
+    {
+        $group_id = bp_get_current_group_id();
+        $listings = groups_get_groupmeta($group_id, 'directorist_listings_ids', true);
+        if ($listings && count($listings) > 0) {
+            $url = get_the_permalink($listings[0])
+        ?>
+            <script type="text/javascript">
+                window.location.replace("<?php echo $url; ?>");
+            </script>
+        <?php
+        } else {
+            ob_start();
+        ?>
+            <p>No biz listing found!</p>
+        <?php
+            return ob_get_clean();
+        }
+    }
+
+    /**
+     * MPP COPY LISIGN LINK
+     */
+    public function mpp_copy_listing_link()
+    {
+        ob_start();
+        $listing_id = get_the_ID();
+        ?>
+        <a href="#" data-listing="<?php echo get_the_permalink(get_the_ID()); ?>" class="copy_listing_link button">Copy Link</a>
+        <span class="copy_listing_link_msg"></span>
+<?php
         return ob_get_clean();
     }
 }

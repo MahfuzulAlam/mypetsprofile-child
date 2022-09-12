@@ -28,6 +28,7 @@ remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_re
 
 function mypetsprofile_loop_get_the_thumbnail($class = '')
 {
+    $image_alt = '';
     $default_image_src = MPP_SITE_URL . "/wp-content/uploads/2020/12/MPP-Transparent-logo-product.jpg";
 
     $id = get_the_ID();
@@ -71,10 +72,25 @@ function mypetsprofile_loop_get_the_thumbnail($class = '')
         }
     }
 
+    // CHECK the unit and get image from the apartments
+    $mpp_housing = get_post_meta(get_the_ID(), '_mpp-housing', true);
+    if ($mpp_housing && !empty($mpp_housing)) {
+        $mpp_images = get_post_meta($mpp_housing, '_mpp_photos', true);
+        if (!empty($mpp_images) && count($mpp_images) > 0) {
+            $mpp_image = $mpp_images[array_rand($mpp_images)];
+            $thumbnail_img = $mpp_image->thumbnailUrl;
+            $image_src = get_the_title();
+        }
+    }
+    // CHECK the unit and get image from the apartments
+
+
     $image_src    = $thumbnail_img;
-    $image_alt = get_post_meta($thumbnail_id, '_wp_attachment_image_alt', true);
-    $image_alt = (!empty($image_alt)) ? esc_attr($image_alt) : esc_html(get_the_title($thumbnail_id));
-    $image_alt = (!empty($image_alt)) ? $image_alt : esc_html(get_the_title());
+    if (empty($image_alt)) {
+        $image_alt = get_post_meta($thumbnail_id, '_wp_attachment_image_alt', true);
+        $image_alt = (!empty($image_alt)) ? esc_attr($image_alt) : esc_html(get_the_title($thumbnail_id));
+        $image_alt = (!empty($image_alt)) ? $image_alt : esc_html(get_the_title());
+    }
 
     return "<img src='$image_src' alt='$image_alt' class='$class' />";
 }
@@ -141,11 +157,13 @@ add_action('init', function () {
     $tools->importable_fields['social_facebook'] = "Facebook Url";
 });
 
-function mpp_bbd_inspect_scripts()
-{
-    if (!is_singular('at_biz_dir') && !is_admin()) wp_dequeue_script('directorist-global-script');
-}
-add_action('wp_print_scripts', 'mpp_bbd_inspect_scripts');
+// function mpp_bbd_inspect_scripts()
+// {
+//     if (!is_singular('at_biz_dir') && !is_admin()) wp_dequeue_script('directorist-google-map');
+//     wp_dequeue_script('directorist-google-map');
+//     wp_deregister_script('directorist-google-map');
+// }
+//add_action('wp_print_scripts', 'mpp_bbd_inspect_scripts');
 
 function bbd_get_option_data()
 {
@@ -284,6 +302,64 @@ function mpp_event_id_in_the_order($order_id)
     return false;
 }
 
+// GET acive pricing plan from all orders list
+function mpp_get_active_pricing_plans_from_all_orders()
+{
+    $args = [
+        'post_type'   => 'shop_order',
+        'post_status' => ["wc-completed"],
+        'numberposts' => -1,
+        'fields'      => 'ids',
+        'meta_query'  => [
+            'relation' => 'AND',
+            [
+                'key'     => '_customer_user',
+                'value'   => get_current_user_id(),
+                'compare' => '=',
+            ],
+            [
+                'relation' => 'OR',
+                [
+                    'key'     => '_listing_id',
+                    'value'   => '0',
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => '_listing_id',
+                    'value'   => '',
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => '_listing_id',
+                    'compare' => 'NOT EXISTS',
+                ],
+            ],
+        ],
+    ];
+
+    $pricing_plans = array();
+
+    $active_orders = new WP_Query($args);
+
+    if ($active_orders) {
+        if (isset($active_orders->posts) && count($active_orders->posts) > 0) {
+            foreach ($active_orders->posts as $order_id) {
+                $order = wc_get_order($order_id);
+                foreach ($order->get_items() as $item_key => $item) :
+                    $item_id = $item->get_product_id();
+                    // Exceptions
+                    if ($item_id == 20139) $pricing_plans[] = 20140;
+                    // Subcsription check else use plan ID
+                    $plan_id = get_post_meta($item_id, '_linked_pricing_plan', true) ? get_post_meta($item_id, '_linked_pricing_plan', true) : $item_id;
+                    if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans' && !in_array($plan_id, array(18059, 18242)))  $pricing_plans[] = $plan_id;
+                endforeach;
+            }
+        }
+    }
+
+    return $pricing_plans;
+}
+
 // GET acive pricing plan from all orders
 function mpp_get_active_pricing_plan_from_all_orders()
 {
@@ -329,6 +405,41 @@ function mpp_get_active_pricing_plan_from_all_orders()
 
             $plan_id = get_post_meta($item_id, '_linked_pricing_plan', true) ? get_post_meta($item_id, '_linked_pricing_plan', true) : $item_id;
             if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans' && !in_array($plan_id, array(18059, 18242)))  return $plan_id;
+        endforeach;
+    endwhile;
+
+    return false;
+}
+
+// GET acive apartment pricing plan from all orders
+function mpp_get_active_apartment_pricing_plan_from_all_orders()
+{
+    $args = [
+        'post_type'   => 'shop_order',
+        'post_status' => ["wc-completed"],
+        'numberposts' => -1,
+        'meta_query'  => [
+            'relation' => 'AND',
+            [
+                'key'     => '_customer_user',
+                'value'   => get_current_user_id(),
+                'compare' => '=',
+            ],
+        ],
+    ];
+
+    $active_orders = new WP_Query($args);
+
+    //e_var_dump($active_orders);
+
+    while ($active_orders->have_posts()) : $active_orders->the_post();
+        $order = wc_get_order(get_the_ID());
+        foreach ($order->get_items() as $item_key => $item) :
+            $item_id = $item->get_product_id();
+            if ($item_id == 598) {
+                $plan_id = get_post_meta($item_id, '_linked_pricing_plan', true) ? get_post_meta($item_id, '_linked_pricing_plan', true) : $item_id;
+                if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans')  return $plan_id;
+            }
         endforeach;
     endwhile;
 
@@ -615,6 +726,8 @@ function mpp_is_android_or_ios()
 
 add_action('atbdp_before_plan_page_loaded', function () {
     $active_plan = mpp_get_active_pricing_plan_from_all_orders();
+    //$active_apartment_plan = mpp_get_active_apartment_pricing_plan_from_all_orders();
+
     if ($active_plan) :
         $directory_type = get_post_meta($active_plan, '_assign_to_directory', true) ? get_post_meta($active_plan, '_assign_to_directory', true) : default_directory_type();
         $url = MPP_SITE_URL . '/add-listing/?directory_type=' . $directory_type . '&plan=' . $active_plan;
@@ -1815,6 +1928,7 @@ add_filter('atbdp_all_listings_meta_queries', 'mpp_directorist_remove_directory_
 
 function mpp_directorist_remove_directory_type($args)
 {
+    /*
     if (isset($args['directory_type']) && !in_array(1418, $args['directory_type'])) {
         $args['directory_type'] = array(
             'key' => '_directory_type',
@@ -1822,6 +1936,7 @@ function mpp_directorist_remove_directory_type($args)
             'compare' => 'IN'
         );
     }
+    */
     /*
     if (isset($args['directory_type'])) {
         $args['directory_type'] = array(
@@ -2154,51 +2269,216 @@ function mpp_facility_option_list($options)
     return $new_options;
 }
 
-// After Login
-/*
-add_action('bp_core_activated_user', function ($user_id) {
-    if ($user_id) :
-        $welcome_msg_status = get_user_meta($user_id, 'welcome_msg_status', true);
-        $user = get_user_by('id', $user_id);
+// APP MENU ISSUE
 
-        if (!$welcome_msg_status || empty($welcome_msg_status)) {
-            $username = $user->data->user_login;
-            $content = '';
-            $content .= '<p>Hey ' . $username . '<br />';
-            $content .= 'Welcome to MyPetsProfile™️</p>';
-            $content .= '<p>Meet, share & chat with neighboring pet parents and local pet businesses and service.</p>';
-            $content .= '<p>We love seeing photos as well.</p>';
-            $content .= '<p>Enjoy<br />MyPetsProfile™️ Team</p>';
-            $result = messages_new_message(
-                array(
-                    'sender_id' => 1,
-                    'recipients' => array($user_id),
-                    'content'   => $content,
-                    'subject' => 'Welcome to MyPetsProfile™️',
-                )
-            );
-            if ($result) update_user_meta($user_id, 'welcome_msg_status', true);
-        }
-    endif;
-    file_put_contents(dirname(__FILE__) . '/file.json', json_encode(array($user)));
-});
-*/
+add_filter('bbapp_app_menu_filter', 'mpp_bbapp_app_menu_filter', 10, 2);
 
-// Login Redirect
-
-function mpp_login_redirect_first_time($url, $req, $user)
+function mpp_bbapp_app_menu_filter($app_menu, $menu_type)
 {
-    if ($user && is_object($user) && is_a($user, 'WP_User')) {
-        if (!$user->has_cap('administrator')) {
-            $first_login = get_user_meta($user->ID, 'first_login', true);
-            if (!$first_login || empty($first_login)) {
-                update_user_meta($user->ID, 'first_login', 'completed');
-                return home_url('/search-directory/');
+    if ($menu_type == 'tabbar') {
+        $app_menu[] = array(
+            'label' => 'More',
+            'icon' =>
+            array(
+                'uri' => 'bbapp/list',
+                'monochrome_setting' => '{\"icon_monochrome_checkbox\":\"yes\",\"monochrome_option\":\"default\",\"icon_monochrome_color\":\"#0e5073\"}',
+            ),
+            'original' => 'More',
+            'id' => '6092b9c98b037',
+            'object' => 'more',
+            'data' =>
+            array(
+                'id' => 'more',
+                'parent' => '',
+            ),
+            'type' => 'core',
+        );
+    }
+
+    return $app_menu;
+}
+
+// APP MENU ISSUE
+
+// add_action('init', function(){
+//     do_action('after_inserting_referral', 1, 1);
+// });
+
+
+// Function::GET VACANCY OPTION NAME
+
+function mpp_get_vacancy_option_name($key = '', $options = array())
+{
+    if (!empty($options) && !empty($key)) {
+        foreach ($options as $option) {
+            if ($option['option_value'] == $key) return $option['option_label'];
+        }
+    }
+    return '';
+}
+
+// DIRECTORIST QUERY ARGS
+
+/*
+add_filter('atbdp_listing_search_query_argument', function ($args) {
+    unset($args['meta_key']);
+    unset($args['meta_query']['_featured']);
+
+    $custom_fields = isset($_REQUEST['custom_field']) && !empty($_REQUEST['custom_field']) ? $_REQUEST['custom_field'] : array();
+
+    //e_var_dump($custom_fields);
+
+    if (count($custom_fields) > 0 && isset($custom_fields['custom-category'])) {
+        unset($args['meta_query']['directory_type']);
+        //e_var_dump($custom_fields);
+        if ($custom_fields['custom-category'] == "apartments") {
+            $args['meta_query']['directory_type'] = array(
+                "key" => "_directory_type",
+                "value" => array(1414),
+                "compare" => "IN"
+            );
+        } elseif ($custom_fields['custom-category'] == "backyard") {
+            $args['meta_query']['directory_type'] = array(
+                "key" => "_directory_type",
+                "value" => array(1414),
+                "compare" => "IN"
+            );
+            $args['tax_query'] = array(
+                array(
+                    'taxonomy' => ATBDP_CATEGORY,
+                    'field'    => 'slug',
+                    'terms'    => 'backyard-dog-parks',
+                ),
+            );
+        } elseif ($custom_fields['custom-category'] == "condos") {
+            $args['meta_query']['directory_type'] = array(
+                "key" => "_directory_type",
+                "value" => array(1414),
+                "compare" => "IN"
+            );
+            $args['tax_query'] = array(
+                array(
+                    'taxonomy' => ATBDP_CATEGORY,
+                    'field'    => 'slug',
+                    'terms'    => 'condos',
+                ),
+            );
+        } elseif ($custom_fields['custom-category'] == "pooprint") {
+            $args['meta_query']['directory_type'] = array(
+                "key" => "_directory_type",
+                "value" => array(1414),
+                "compare" => "IN"
+            );
+            $args['tax_query'] = array(
+                array(
+                    'taxonomy' => ATBDP_CATEGORY,
+                    'field'    => 'slug',
+                    'terms'    => 'pooprints-community',
+                ),
+            );
+        } else {
+            $args['meta_query']['directory_type'] = array(
+                "key" => "_directory_type",
+                "value" => array(1445),
+                "compare" => "IN"
+            );
+        }
+
+        if ($args['meta_query'] && count($args['meta_query']) > 0) {
+            foreach ($args['meta_query'] as $key => $meta_query) {
+                if ($meta_query['key'] == '_custom-category') unset($args['meta_query'][$key]);
             }
         }
     }
-    return $url;
-}
-add_filter('login_redirect', 'mpp_login_redirect_first_time', 10, 3);
 
-// Login Redirect
+    return $args;
+});
+
+*/
+
+//atbdp_all_listings_query_arguments
+
+add_filter('atbdp_all_listings_query_arguments', function ($args) {
+    unset($args['meta_key']);
+    unset($args['meta_query']['_featured']);
+    unset($args['meta_query']['directory_type']);
+    $args['meta_query']['directory_type'] = array(
+        "key" => "_directory_type",
+        "value" => array(200, 1418, 1414),
+        "compare" => "IN"
+    );
+
+    //e_var_dump($args);
+    return $args;
+});
+
+
+/**
+ * CUSTOM FUNCTION - mpp_listing_directory_type
+ */
+
+if (!function_exists('mpp_listing_directory_type')) {
+    function mpp_listing_directory_type($listing_id = 0, $return = 'obj')
+    {
+        if (!$listing_id) return;
+        $terms = get_the_terms($listing_id, ATBDP_DIRECTORY_TYPE);
+        if ($terms && count($terms) > 0) {
+            if ($return == 'obj') return $terms[0];
+            if (isset($terms[0]->{$return})) return $terms[0]->{$return};
+        }
+        return false;
+    }
+}
+
+
+/**
+ * QRCODE REDIRECT
+ */
+
+add_shortcode('mpp-app-qrcode-redirect', function () {
+    //Detect special conditions devices
+    /*
+    $iPod    = stripos($_SERVER['HTTP_USER_AGENT'],"iPod");
+    $iPhone  = stripos($_SERVER['HTTP_USER_AGENT'],"iPhone");
+    $iPad    = stripos($_SERVER['HTTP_USER_AGENT'],"iPad");
+    $android = stripos($_SERVER['HTTP_USER_AGENT'],"Android");
+    $webOS   = stripos($_SERVER['HTTP_USER_AGENT'],"webOS");
+    
+    $link = "";
+    e_var_dump($_SERVER['HTTP_USER_AGENT']);
+    if($iPod || $iPhone || $iPad){
+        echo $link = "https://apps.apple.com/us/app/mypetsprofile/id1565456057";
+    }else if($android){
+        echo $link = "https://play.google.com/store/apps/details?id=com.mypetsprofile.mypetsprofile";
+    }else{
+        echo $link = "http://mypetsprofile.com";
+    }
+    */
+    ob_start();
+
+?>
+    <p>Redirecting to other site...</p>
+    <script type="text/javascript">
+        var userAgent = window.navigator.userAgent,
+            platform = window.navigator?.userAgentData?.platform || window.navigator.platform,
+            macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'],
+            windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'],
+            iosPlatforms = ['iPhone', 'iPad', 'iPod'],
+            link = "https://mypetsprofile.com";
+
+        if (macosPlatforms.indexOf(platform) !== -1) {
+            link = 'https://apps.apple.com/us/app/mypetsprofile/id1565456057';
+        } else if (iosPlatforms.indexOf(platform) !== -1) {
+            link = 'https://apps.apple.com/us/app/mypetsprofile/id1565456057';
+        } else if (windowsPlatforms.indexOf(platform) !== -1) {
+            link = 'https://mypetsprofile.com';
+        } else if (/Android/.test(userAgent)) {
+            link = 'https://play.google.com/store/apps/details?id=com.mypetsprofile.mypetsprofile';
+        } else if (/Linux/.test(platform)) {
+            link = 'https://mypetsprofile.com';
+        }
+        window.location = link;
+    </script>
+<?php
+    return ob_get_clean();
+});

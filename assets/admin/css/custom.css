@@ -1,42 +1,89 @@
 .atbdp-importer-mapping-table-name code {
-    line-break: anywhere;
+  line-break: anywhere;
 }
 
-#atbdp-categories-app-image-wrapper {
-    position: relative;
-    display: inline-block;
+#atbdp-categories-app-image-wrapper,
+#atbdp-categories-app-image-cover-wrapper {
+  position: relative;
+  display: inline-block;
 }
 
-#atbdp-categories-app-image-wrapper img{
-    width: 150px;
+#atbdp-categories-app-image-wrapper img,
+#atbdp-categories-app-image-cover-wrapper img {
+  width: 150px;
 }
 
-#atbdp-categories-app-image-wrapper .remove_cat_app_img {
-    position: absolute;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: #c4c4c4;
-    right: -5px;
-    top: -5px;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-        -ms-flex-align: center;
-            align-items: center;
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
-        -ms-flex-pack: center;
-            justify-content: center;
-    text-decoration: none;
-    -webkit-transition: 0.2s ease;
-    transition: 0.2s ease;
+#atbdp-categories-app-image-wrapper .remove_cat_app_img,
+#atbdp-categories-app-image-cover-wrapper .remove_cat_app_img_cover {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #c4c4c4;
+  right: -5px;
+  top: -5px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  text-decoration: none;
+  -webkit-transition: 0.2s ease;
+  transition: 0.2s ease;
 }
 
-#atbdp-categories-app-image-wrapper .remove_cat_app_img:hover {
-    background: #ff0000;
-    color: #fff;
+#atbdp-categories-app-image-wrapper .remove_cat_app_img:hover,
+#atbdp-categories-app-image-cover-wrapper .remove_cat_app_img_cover:hover {
+  background: #ff0000;
+  color: #fff;
+}
+
+/*
+* Progress Bar Style 
+*/
+
+.progress-bar__container {
+  display: none;
+  width: 80%;
+  margin: auto;
+  margin-top: 50px;
+  height: 2rem;
+  border-radius: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s;
+  will-change: transform;
+  box-shadow: 0 0 5px #e76f51;
+}
+
+.progress-bar {
+  position: absolute;
+  height: 100%;
+  width: 0%;
+  content: "";
+  background-color: #e76f51;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: inherit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-family: sans-serif;
+}
+
+.progress-bar__text {
+  display: none;
+}
+
+.rentsync_admin_button {
+  margin-bottom: 10px !important;
 }
