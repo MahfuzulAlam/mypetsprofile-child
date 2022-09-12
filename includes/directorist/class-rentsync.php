@@ -1,7 +1,5 @@
 <?php
 
-use Mpdf\Tag\A;
-
 /**
  * @author  mahfuz
  * @since   1.0
@@ -1433,13 +1431,20 @@ class MPP_Rentsync
                     "value" => array(1414),
                     "compare" => "IN"
                 );
+                $args['tax_query']['category'] = array(
+                    array(
+                        'taxonomy' => ATBDP_CATEGORY,
+                        'field'    => 'slug',
+                        'terms'    => 'apartments',
+                    ),
+                );
             } elseif ($custom_fields['custom-category'] == "backyard") {
                 $args['meta_query']['directory_type'] = array(
                     "key" => "_directory_type",
                     "value" => array(1414),
                     "compare" => "IN"
                 );
-                $args['tax_query'] = array(
+                $args['tax_query']['category'] = array(
                     array(
                         'taxonomy' => ATBDP_CATEGORY,
                         'field'    => 'slug',
@@ -1452,7 +1457,7 @@ class MPP_Rentsync
                     "value" => array(1414),
                     "compare" => "IN"
                 );
-                $args['tax_query'] = array(
+                $args['tax_query']['category'] = array(
                     array(
                         'taxonomy' => ATBDP_CATEGORY,
                         'field'    => 'slug',
@@ -1465,7 +1470,7 @@ class MPP_Rentsync
                     "value" => array(1414),
                     "compare" => "IN"
                 );
-                $args['tax_query'] = array(
+                $args['tax_query']['category'] = array(
                     array(
                         'taxonomy' => ATBDP_CATEGORY,
                         'field'    => 'slug',

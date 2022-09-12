@@ -62,5 +62,5 @@ $listings = new WP_Query(
 <?php endif; ?>
 <input type="hidden" id="pooprint_page_link" value="<?php echo home_url('/pooprints-registration/'); ?>" />
 <input type="hidden" id="pooprint_form_link" value="" />
-<a href="#" class="button" id="pooprint_select_listing_button">Register to the PooPrints</a>
+<a href="#" class="button" id="pooprint_select_listing_button">Register with PooPrints</a>
 <p id="pooprint_select_listing_msg"></p>

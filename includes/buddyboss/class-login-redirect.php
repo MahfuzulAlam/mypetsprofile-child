@@ -28,7 +28,8 @@ class BuddyBoss_Login_Redirect
             if (!$user->has_cap('administrator')) {
                 $welcome_message = get_user_meta($user->ID, 'welcome_message', true);
                 if (!$welcome_message || empty($welcome_message || $welcome_message != 'completed')) {
-                    $message = '<p>Just a standard Welcome to MyPetsProfile&#x2122;&#xfe0f;. Please look around, meet other pet parents, upload your pets profile and more.</p><p>Enjoy.</p><p>Let us know if you have any questions?</p><p>Hello@mypetsprofile.com</p>';
+                    $message = '<p>Welcome to MyPetsProfile&#x2122;&#xfe0f;. Please feel free to look around, upload your pets profile photo, meet other pet parents and more…</p><p>Let us know if you have any questions or suggestions?</p><p>Enjoy.</p><p>Hello@mypetsprofile.com</p>';
+
                     $sent = messages_new_message(
                         array(
                             'sender_id'     =>  311,
@@ -37,6 +38,7 @@ class BuddyBoss_Login_Redirect
                             'content'       =>  $message,
                         )
                     );
+
                     if ($sent && !is_wp_error($sent)) update_user_meta($user->ID, 'welcome_message', 'completed');
                 }
             }
