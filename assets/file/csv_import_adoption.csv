@@ -1,0 +1,3 @@
+animal_name,animal_gender,animal_type,animal_age_group,spayed_neutered,animal_weight,animal_main_breed,animal_breed_2,animal_main_color,animal_adoption_status,animal_address,cityLat,cityLng,image_url
+Floss,Male,Dog,Young,No,10,Unknows,Unknown,White,Black,"Toronto, ON, Canada",43.7184038,-79.5181414,https://mypetsprofile.com/wp-content/uploads/2022/05/cat-1.jpg
+Fiona,Female,Cat,Young,No,5,Unknows,Unknown,Black,White,"Toronto, ON, Canada",43.7184038,-79.5181414,https://cdn.mypetsprofile.com/wp-content/uploads/2022/05/02102554/69f4b75f46f0e241d652737c8d353229.jpg

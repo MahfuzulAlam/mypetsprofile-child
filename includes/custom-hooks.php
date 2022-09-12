@@ -20,6 +20,22 @@ class MPP_Child_Hooks
         add_action(ATBDP_CATEGORY . '_edit_form_fields', array($this, 'edit_category_icon_field'), 10, 2);
         // Update App Image Meta
         add_action('edited_' . ATBDP_CATEGORY, array($this, 'update_category_app_image'), 10, 2);
+        // Create Order Create a WooMembership
+        add_action('wc_memberships_user_membership_created', array($this, 'wc_memberships_user_membership_created'), 10, 2);
+        // MPP Calculate Funnies Contest CRON Job
+        add_action('mpp_calculate_funnies_contest', array($this, 'mpp_calculate_funnies_contest'));
+        // Claim listing after the payment
+        add_action('atbdp_order_completed', array($this, 'atbdp_order_completed'), 10, 2);
+        // Tempate Redirects
+        add_action('template_redirect', array($this, 'template_redirect'));
+        // Remove All Pricing Plan from the Product List Shop Page
+        add_filter('pre_get_posts', array($this, 'remove_pricing_plans_from_shop_page'));
+        // Change the price label of the sale product
+        add_filter('woocommerce_subscriptions_product_price_string', array($this, 'woocommerce_subscriptions_product_price_string'), 10, 3);
+        // WooCommerce Quick Action Custom Field Display
+        add_action('woocommerce_product_quick_edit_start', array($this, 'mpp_custom_field_bulk_edit_input'));
+        // WooCommerce Quick Action Custom Field Save
+        add_action('woocommerce_product_quick_edit_save', array($this, 'mpp_custom_field_bulk_edit_save'));
     }
 
     // Change the pricing plan url for mobile
@@ -31,17 +47,29 @@ class MPP_Child_Hooks
         ) {
             $iap_plan_id = 0;
             switch ($plan_id) {
-                case 12172:
+                case 18059:
                     $iap_plan_id = 1;
                     break;
-                case 4183:
-                    $iap_plan_id = 3;
-                    break;
-                case 4182:
+                case 18064:
                     $iap_plan_id = 4;
                     break;
+                case 18065:
+                    $iap_plan_id = 3;
+                    break;
+                case 18066:
+                    $iap_plan_id = 7;
+                    break;
+                case 18242:
+                    $iap_plan_id = 8;
+                    break;
+                case 18243:
+                    $iap_plan_id = 9;
+                    break;
+                case 18244:
+                    $iap_plan_id = 10;
+                    break;
             }
-            if ($iap_plan_id !== 0) $url = 'https://communityportal.mypetsprofile.com/bbapp/products/' . $iap_plan_id;
+            if ($iap_plan_id !== 0) $url = MPP_SITE_URL . '/bbapp/products/' . $iap_plan_id;
         }
         return $url;
     }
@@ -51,7 +79,7 @@ class MPP_Child_Hooks
     {
         // Assign Pricing Plan
         update_post_meta($post_id, '_fm_plans_by_admin', 1);
-        update_post_meta($post_id, '_fm_plans', 4337);
+        update_post_meta($post_id, '_fm_plans', 18060);
         update_post_meta($post_id, '_never_expire', 1);
 
         // Update post status to publish
@@ -78,24 +106,24 @@ class MPP_Child_Hooks
             }
 
             $custom_avatar_fetch = $this->bp_process_group_icon($groups_template->group->id);
-            $custom_avatar = !empty($custom_avatar_fetch) ? $custom_avatar_fetch : $custom_avatar;
+            $custom_avatar = isset($custom_avatar_fetch['full']) && !empty($custom_avatar_fetch['full']) ? $custom_avatar_fetch['full'] : $custom_avatar;
 
             if ($bp->current_action == "")
-                return '<img class="avatar" src="' . $custom_avatar . '" alt="' . attribute_escape($groups_template->group->name) . '" width="' . BP_AVATAR_THUMB_WIDTH . '" height="' . BP_AVATAR_THUMB_HEIGHT . '" />';
+                return '<img class="avatar" src="' . $custom_avatar . '" alt="' . esc_attr($groups_template->group->name) . '" width="' . BP_AVATAR_THUMB_WIDTH . '" height="' . BP_AVATAR_THUMB_HEIGHT . '" />';
             else
-                return '<img class="avatar" src="' . $custom_avatar . '" alt="' . attribute_escape($groups_template->group->name) . '" width="' . BP_AVATAR_FULL_WIDTH . '" height="' . BP_AVATAR_FULL_HEIGHT . '" />';
+                return '<img class="avatar" src="' . $custom_avatar . '" alt="' . esc_attr($groups_template->group->name) . '" width="' . BP_AVATAR_FULL_WIDTH . '" height="' . BP_AVATAR_FULL_HEIGHT . '" />';
         }
     }
 
     // Default Group Avatar for App
     public function bp_rest_groups_prepare_value($response, $request, $item)
     {
-        $custom_avatar = get_stylesheet_directory_uri() . '/assets/img/default-group.png';
-        $custom_avatar_fetch = $this->bp_process_group_icon($item->id, 'app_image');
-        $custom_avatar = !empty($custom_avatar_fetch) ? $custom_avatar_fetch : $custom_avatar;
-
-        $response->data['avatar_urls']['thumb'] = $custom_avatar;
-        $response->data['avatar_urls']['full'] = $custom_avatar;
+        $custom_avatars = $this->bp_process_group_icon($item->id, 'app_image');
+        if (!empty($custom_avatars)) {
+            $response->data['avatar_urls']['thumb'] = $custom_avatars['full'];
+            $response->data['avatar_urls']['full'] = $custom_avatars['full'];
+            $response->data['avatar_urls']['is_default'] = false;
+        }
 
         return $response;
     }
@@ -103,7 +131,7 @@ class MPP_Child_Hooks
     // Get/Process Group Icon
     public function bp_process_group_icon($group_id = 0, $image_type = 'image')
     {
-        $custom_avatar = "";
+        $custom_avatars = array();
         if ($group_id == 0) return $custom_avatar;
         $directorist_category = groups_get_groupmeta($group_id, 'directorist_category', true);
         if (!$directorist_category || empty($directorist_category)) {
@@ -120,10 +148,11 @@ class MPP_Child_Hooks
         if ($directorist_category) {
             $category_image = get_term_meta($directorist_category,  $image_type, true);
             if ($category_image) {
-                $custom_avatar = wp_get_attachment_image_url($category_image);
+                $custom_avatars['thumb'] = wp_get_attachment_image_url($category_image, 'bb-app-group-avatar');
+                $custom_avatars['full'] = wp_get_attachment_image_url($category_image, 'full');
             }
         }
-        return $custom_avatar;
+        return $custom_avatars;
     }
 
     // Edit Custom Category Fields
@@ -150,7 +179,7 @@ class MPP_Child_Hooks
                 </p>
             </td>
         </tr>
-<?php
+    <?php
     }
 
     // Save Category App Image Meta
@@ -161,6 +190,294 @@ class MPP_Child_Hooks
             update_term_meta($term_id, 'app_image', (int)$_POST['app_image']);
         } else {
             update_term_meta($term_id, 'app_image', '');
+        }
+    }
+
+    public function wc_user_membership_created_by_order($user_membership = 'UNDEFINED')
+    {
+        $orders = get_posts(
+            array(
+                'post_type' => 'shop_order',
+                'post_status' => 'any',
+                'numberposts' => 1,
+                'fields' => 'ids',
+                'meta_query' => array(
+                    'relation' => 'OR',
+                    array(
+                        'key' => '_user_membership_id',
+                        'value' => $user_membership
+                    ),
+                    array(
+                        'key' => '_wc_memberships_access_granted',
+                        'value' => $user_membership,
+                        'compare' => 'LIKE'
+                    )
+                )
+            )
+        );
+        if ($orders && count($orders) > 0) return true;
+        return false;
+    }
+
+    // Create Order Create a WooMembership
+    public function wc_memberships_user_membership_created($membership_plan, $data)
+    {
+        $product_ids = get_post_meta($membership_plan->id, '_product_ids', true);
+
+        if ($product_ids && count($product_ids) > 0) {
+            foreach ($product_ids as $product) {
+                // Add/Activate Affiliate
+                $this->add_affiliate_member($product, $data['user_id']);
+                // Event Activate Order
+                $this->on_activate_event_plan($product, $data['user_id']);
+            }
+        }
+
+        if ($this->wc_user_membership_created_by_order($data['user_membership_id'])) return;
+
+        if ($product_ids && count($product_ids) > 0) {
+            $this->add_woocommerce_order_on_create_membership($data, $product_ids);
+
+            // SEND ADD LISTING LINK
+            // if (!empty($data['user_id'])) {
+            //     $user_membership = wc_memberships_get_user_membership($data['user_id'], $membership_plan->id);
+            //     $user_membership->add_note('Please go to the following link and add your listing - <a href="https://communityportal.mypetsprofile.com/add-listing/">Add Biz/Event</a>', true);
+            // }
+        }
+    }
+
+    // Create an Order on create a membership
+    public function add_woocommerce_order_on_create_membership($user, $product_ids)
+    {
+        $user_id = $user['user_id'];
+        $user_membership_id = $user['user_membership_id'];
+
+        /* USER EMAIL */
+        global $current_user;
+        $user_email = $current_user->user_email;
+
+        if (!empty($user_id)) {
+
+            $address = array(
+                'first_name' => get_user_meta($user_id, 'first_name', true),
+                'last_name'  => get_user_meta($user_id, 'last_name', true),
+                'company'    => get_user_meta($user_id, 'billing_company', true),
+                'email'      => $user_email,
+                'phone'      => get_user_meta($user_id, 'billing_phone', true),
+                'address_1'  => get_user_meta($user_id, 'billing_address_1', true) . get_user_meta($user_id, 'billing_address_2', true),
+                'address_2'  => 'IAP',
+                'city'       => get_user_meta($user_id, 'billing_city', true),
+                'state'      => get_user_meta($user_id, 'billing_state', true),
+                'postcode'   => get_user_meta($user_id, 'billing_postcode', true),
+                'country'    => get_user_meta($user_id, 'billing_country', true),
+            );
+
+            // Now we create the order
+            $order = wc_create_order();
+
+            // The add_product() function below is located in /plugins/woocommerce/includes/abstracts/abstract_wc_order.php
+            if ($product_ids && count($product_ids) > 0) {
+                foreach ($product_ids as $product) {
+                    $order->add_product(get_product($product), 1); // This is an existing SIMPLE product
+                }
+            }
+
+            $order->set_address($address, 'billing');
+
+            $order->calculate_totals();
+            $order->update_status("wc-completed", "IAP order", TRUE);
+
+            $order_id = $order->get_id();
+
+            // save required data as order post meta
+            update_post_meta($order_id, '_fm_plan_ordered', $product_ids[0]);
+            update_post_meta($order_id, '_user_membership_id', $user_membership_id);
+            update_post_meta($order_id, '_customer_user', $user_id);
+            update_post_meta($order_id, '_listing_id', '');
+            update_post_meta($order_id, '_order_status', 'exit');
+        }
+    }
+
+    // ADD Affiliate Member
+    public function add_affiliate_member($product_id, $user_id)
+    {
+        if (function_exists("affwp_get_affiliate_id") && $product_id == 18053) {
+            $affiliate_id = affwp_get_affiliate_id($user_id);
+            if ($affiliate_id) {
+                affwp_set_affiliate_status($affiliate_id, 'active');
+            } else {
+                affwp_add_affiliate(array('user_id' => $user_id));
+            }
+        }
+    }
+
+    // On Activate Events
+    public function on_activate_event_plan($product_id, $user_id)
+    {
+        if ($product_id == 18236) {
+            update_user_meta($user_id, 'mec_active_plan', 8);
+            update_user_meta($user_id, 'mec_event_status', 'active');
+        }
+    }
+
+    // MPP Funnies Contest calculation CRON Job
+    public function mpp_calculate_funnies_contest()
+    {
+        $group_id = get_option('mpp_funnies_group') ? get_option('mpp_funnies_group') : 0;
+        update_option('mpp_funnies_contest', mpp_get_funnies_activities($group_id));
+    }
+
+    // Claim listing automatically afetr the payment
+    public function atbdp_order_completed($order_id, $listing_id)
+    {
+        // Publish the listing
+        $my_post = array();
+        $my_post['ID'] = $listing_id;
+        $my_post['post_status'] = 'publish';
+        $my_post['post_author'] = get_current_user_id();
+        wp_update_post($my_post);
+
+        // Approve the claim
+        $claim_posts = get_posts(
+            array(
+                'post_type' => 'dcl_claim_listing',
+                'numberposts' => 1,
+                'meta_key' => '_claimed_listing',
+                'meta_value' => $listing_id,
+                'fields' => 'ids'
+            )
+        );
+
+        if ($claim_posts && count($claim_posts) > 0) {
+            update_post_meta($claim_posts[0], '_claim_status', 'approved');
+            update_post_meta($listing_id, '_claimed_by_admin', 1);
+            update_post_meta($listing_id, '_claim_fee', 'claim_approved');
+            update_post_meta($listing_id, '_never_expire', 0);
+            update_post_meta($listing_id, '_expiry_date', date('Y-m-d H:i:s', strtotime('+1 year')));
+        }
+    }
+
+    // Template Redirects
+    public function template_redirect()
+    {
+        $this->redirect_frontpage();
+        $this->redirect_claimed_user();
+        $this->redirect_to_add_listing_page_after_purchase();
+    }
+
+    // Redirect template if user is in Homepage ( For logged out user )
+    public function redirect_frontpage()
+    {
+        if (is_user_logged_in() && (is_home() || is_front_page())) {
+            if (!current_user_can('editor') && !current_user_can('administrator')) {
+                exit(wp_redirect(home_url('/news-feed/')));
+            }
+        }
+    }
+
+    // Redirect user to the edit listing page after claiming a listing
+    public function redirect_claimed_user()
+    {
+        if (is_user_logged_in() && is_page('payment-receipt')) {
+            $action = get_query_var('atbdp_action');
+            $order_id = get_query_var('atbdp_order_id');
+            if ($action == 'order' && !empty($order_id)) {
+                $listing_id = get_post_meta($order_id, '_listing_id', true);
+                if ($listing_id) exit(wp_redirect(home_url('/add-listing/edit/' . $listing_id)));
+            }
+        }
+    }
+
+    // Redirect to add listing page after completing an order in woocommerce
+    public function redirect_to_add_listing_page_after_purchase()
+    {
+        global $wp;
+        if (is_checkout()) {
+            if (isset($wp->query_vars['order-received']) && !empty($wp->query_vars['order-received'])) {
+                $order_id = $wp->query_vars['order-received'];
+                // EVENT
+                if (mpp_event_id_in_the_order($order_id)) {
+                    exit(wp_redirect(MPP_SITE_URL . '/add-edit-pet-friendly-event'));
+                }
+                // PLANS
+                $order = new WC_Order($order_id);
+                $order->update_status('wc-completed');
+                $plan_id = mpp_get_pricing_plan_from_the_order($order_id);
+                if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans') {
+                    if ($plan_id == 18059) {
+                        exit(wp_redirect(MPP_SITE_URL . '/affiliate-area'));
+                    } else {
+                        $directory_type = get_post_meta($plan_id, '_assign_to_directory', true) ? get_post_meta($plan_id, '_assign_to_directory', true) : default_directory_type();
+                        exit(wp_redirect(MPP_SITE_URL . '/add-listing/?directory_type=' . $directory_type . '&plan=' . $plan_id));
+                    }
+                }
+            }
+        }
+    }
+
+    // Remove all pricing plans from shop page
+    public function remove_pricing_plans_from_shop_page($query)
+    {
+        if (!is_admin() && is_post_type_archive('product') && $query->query_vars['post_type'] == 'product') {
+            $tax_query = $query->query_vars['tax_query'];
+            $tax_query[] = array(
+                'taxonomy' => 'product_type',
+                'field'    => 'slug',
+                'terms'    => array('listing_pricing_plans'),
+                'operator'  => 'NOT IN'
+            );
+            $query->set('tax_query', $tax_query);
+            $query->set('posts_per_page', -1);
+            $query->set('meta_query', array(
+                'relation' => 'OR',
+                'rank_position' => array(
+                    'key' => 'rank_position',
+                    'compare' => 'EXISTS',
+                ),
+                'rank_position_not' => array(
+                    'key' => 'rank_position',
+                    'compare' => 'NOT EXISTS',
+                )
+            ));
+            $query->set('orderby', array('rank_position' => 'ASC'));
+        }
+        return $query;
+    }
+
+    // Change the Price of the Sale products
+    public function woocommerce_subscriptions_product_price_string($string, $product, $include)
+    {
+        $sign_up_fee = get_post_meta($product->get_id(), '_subscription_sign_up_fee', true);
+        if ($sign_up_fee && $sign_up_fee > 0) {
+            if ($product->get_id() == 20139) {
+                return '<span class="price"><ins><bdi><span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol() . '</span><span class="woocommerce-Price-amount amount">' . $sign_up_fee . '</span></bdi></ins><span> +Tax</span></span>';
+            }
+            return '<span class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $product->get_price() . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi>' . get_woocommerce_currency_symbol() . $sign_up_fee . '<span class="woocommerce-Price-currencySymbol"></span></bdi></span></ins> <span class="subscription-details"><small class="woocommerce-price-suffix"> +Tax</small> / year</span></span>';
+        }
+        return $string;
+    }
+
+    // WooCommerce Quick Action Custom Field Display
+    function mpp_custom_field_bulk_edit_input()
+    {
+    ?>
+        <label>
+            <span class="title"><?php esc_html_e('Rank', 'woocommerce'); ?></span>
+            <span class="input-text-wrap">
+                <input type="text" name="rank_position" class="text" value="">
+            </span>
+        </label>
+        <br class="clear" />
+<?php
+    }
+
+    // WooCommerce Quick Action Custom Field Save
+    function mpp_custom_field_bulk_edit_save($product)
+    {
+        $post_id = $product->get_id();
+        if (isset($_REQUEST['rank_position'])) {
+            $rank_position = $_REQUEST['rank_position'];
+            update_post_meta($post_id, 'rank_position', wc_clean($rank_position));
         }
     }
 }
