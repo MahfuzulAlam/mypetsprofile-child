@@ -81,7 +81,7 @@ $listings = new WP_Query($query_args);
     <input type="hidden" id="pooprint_form_link" class="pooprint_form_link" value="" />
     <input type="hidden" id="selection_type" class="selection_type" value="<?php echo $selection_type; ?>" />
     <input type="hidden" id="selection_type_link" class="selection_type_link" value="<?php echo $selection_type_link; ?>" />
-    <input type="hidden" class="mpp_product_url" value="<?php echo get_the_permalink(403); ?>" />
+    <input type="hidden" class="mpp_product_url" value="<?php echo get_the_permalink(21198); ?>" />
     <a href="#" class="button pooprint_select_listing_button" id="pooprint_select_listing_button">Register with PooPrints</a>
     <p id="pooprint_select_listing_msg" class="pooprint_select_listing_msg"></p>
 </div>

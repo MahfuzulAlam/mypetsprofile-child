@@ -577,7 +577,7 @@ class MPP_Child_Hooks
         if ($order_id) {
             $order = wc_get_order($order_id);
             foreach ($order->get_items() as $item) :
-                if ($item->get_product_id() == 403) {
+                if ($item->get_product_id() == 21198) { //21198
                     if (isset($_COOKIE['mpp_building']) && !empty($_COOKIE['mpp_building'])) {
                         update_user_meta(get_current_user_id(), 'mpp_building', $_COOKIE['mpp_building']);
                     }
