@@ -1182,22 +1182,54 @@ jQuery(document).ready(function ($) {
   // });
 
   // POOPRINTS LISTING SELECTION BUTTONS
-  $("#pooprint_select_listing_button").on("click", function (e) {
+  $(".pooprint_select_listing_button").on("click", function (e) {
     e.preventDefault();
-    var listing = $("#pooprint_select_listing").val();
-    var link = $("#pooprint_page_link").val();
-    var formLink = $("#pooprint_select_listing")
-      .find(":selected")
-      .attr("data-pooprint-link");
-    if (listing != "" && listing != 0) {
-      $("#pooprint_select_listing_msg").text("Loading Registration Page");
-      if (mppChild.isLogin) {
-        if (formLink != "") window.location.href = formLink;
+
+    var $form_holder = $(this).parents(".mpp-custom-registration-form-holder");
+    var type = $form_holder.find(".selection_type").val();
+
+    var pooprint_select_listing = $form_holder.find(".pooprint_select_listing");
+    var pooprint_select_listing_msg = $form_holder.find(
+      ".pooprint_select_listing_msg"
+    );
+
+    if (type == "pooprints") {
+      var listing = $form_holder.find(".pooprint_select_listing").val();
+      var link = $form_holder.find(".pooprint_page_link").val();
+
+      var formLink = pooprint_select_listing
+        .find(":selected")
+        .attr("data-pooprint-link");
+      if (listing != "" && listing != 0) {
+        pooprint_select_listing_msg.text("Loading Registration Page ...");
+        if (mppChild.isLogin) {
+          if (formLink != "") window.location.href = formLink;
+        } else {
+          window.location.href = link + "?listing=" + listing;
+        }
       } else {
-        window.location.href = link + "?listing=" + listing;
+        pooprint_select_listing_msg.text("Please select a listing first");
       }
-    } else {
-      $("#pooprint_select_listing_msg").text("Please select a listing first");
+    } else if (type == "pet-profile-community") {
+      var formUrl = $form_holder.find(".selection_type_link").val();
+      var listing = $form_holder.find(".pooprint_select_listing").val();
+
+      var access_type = pooprint_select_listing
+        .find(":selected")
+        .attr("data-access-type");
+
+      if (formUrl != "" && listing != 0) {
+        pooprint_select_listing_msg.text("Loading Registration Page ...");
+        if (access_type == "paid") {
+          window.location.href = formUrl + "?listing=" + listing;
+        } else {
+          var mpp_product_url = $form_holder.find(".mpp_product_url").val();
+          if (mpp_product_url && mpp_product_url != "")
+            window.location.href = mpp_product_url + "?mpp_building=" + listing;
+        }
+      } else {
+        pooprint_select_listing_msg.text("Please select a listing first");
+      }
     }
   });
 
