@@ -235,10 +235,10 @@ class MPP_Registration
     public function set_listing_as_cookie()
     {
         if (!is_admin()) {
-            $mpp_building = isset($_REQUEST['mpp_building']) && !empty($_REQUEST['mpp_building']) ? $_REQUEST['mpp_building'] : 0;
-            if ($mpp_building) {
+            $mpp_building = isset($_REQUEST['mpp_building']) && !empty($_REQUEST['mpp_building']) ? $_REQUEST['mpp_building'] : '';
+            if (!empty($mpp_building)) {
                 // set a cookie for 1 year
-                setcookie('mpp_building', $mpp_building, time() + 90000);
+                setcookie('mpp_building', $mpp_building, time() + 90000, '/');
             }
         }
     }

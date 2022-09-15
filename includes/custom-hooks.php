@@ -577,11 +577,11 @@ class MPP_Child_Hooks
         if ($order_id) {
             $order = wc_get_order($order_id);
             foreach ($order->get_items() as $item) :
-                if ($item->get_product_id() == 21198) { //21198
+                if ($item->get_product_id() == 28824) { //28824 //6300
                     if (isset($_COOKIE['mpp_building']) && !empty($_COOKIE['mpp_building'])) {
                         update_user_meta(get_current_user_id(), 'mpp_building', $_COOKIE['mpp_building']);
                     }
-                    exit(wp_redirect(MPP_SITE_URL . '/me'));
+                    exit(wp_redirect(MPP_SITE_URL . '/members/me/'));
                 }
             endforeach;
             return false;
@@ -697,7 +697,9 @@ class MPP_Child_Hooks
                     WC()->cart->apply_coupon($coupon_code);
                 }
             } else {
-                WC()->cart->apply_coupon('100discount');
+                if (!in_array($product['product_id'], array(28824, 28785, 28323, 27267, 27265))) {
+                    WC()->cart->apply_coupon('100discount');
+                }
             }
         }
         // if product in the cart

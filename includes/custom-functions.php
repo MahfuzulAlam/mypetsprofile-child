@@ -285,7 +285,8 @@ function mpp_get_pricing_plan_from_the_order($order_id)
     $order = wc_get_order($order_id);
     foreach ($order->get_items() as $item_key => $item) :
         $item_id = $item->get_product_id();
-        $plan_id = get_post_meta($item_id, '_linked_pricing_plan', true) ? get_post_meta($item_id, '_linked_pricing_plan', true) : $item_id;
+        $plan_id = get_post_meta($item_id, 'linked_pricing_plan', true) ? get_post_meta($item_id, 'linked_pricing_plan', true) : $item_id;
+        $plan_id = get_post_meta($item_id, '_linked_pricing_plan', true) ? get_post_meta($item_id, '_linked_pricing_plan', true) : $plan_id;
         return $plan_id;
     endforeach;
     return false;
