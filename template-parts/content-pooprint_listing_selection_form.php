@@ -12,7 +12,7 @@ $selection_type = isset($args['type']) && !empty($args['type']) ? $args['type'] 
 $selection_type_link = '';
 
 if ($selection_type == 'pet-profile-community') {
-    $selection_type_link = home_url('/pet-profile-registration/');
+    $selection_type_link = home_url('/pet-profile-registration-form/');
 }
 
 $pets_community = array('pooprints', 'pet-profile-community');

@@ -1220,7 +1220,7 @@ jQuery(document).ready(function ($) {
 
       if (formUrl != "" && listing != 0) {
         pooprint_select_listing_msg.text("Loading Registration Page ...");
-        if (access_type == "paid") {
+        if (access_type == "free") {
           window.location.href = formUrl + "?listing=" + listing;
         } else {
           var mpp_product_url = $form_holder.find(".mpp_product_url").val();
