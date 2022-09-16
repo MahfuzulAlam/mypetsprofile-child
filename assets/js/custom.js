@@ -1210,7 +1210,7 @@ jQuery(document).ready(function ($) {
       } else {
         pooprint_select_listing_msg.text("Please select a listing first");
       }
-    } else if (type == "pet-profile-community") {
+    } else {
       var formUrl = $form_holder.find(".selection_type_link").val();
       var listing = $form_holder.find(".pooprint_select_listing").val();
 

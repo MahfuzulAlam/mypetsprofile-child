@@ -10,9 +10,30 @@ if (!defined('ABSPATH')) exit;
 
 $selection_type = isset($args['type']) && !empty($args['type']) ? $args['type'] : 'pooprints';
 $selection_type_link = '';
+$button_text = 'PooPrints';
+$property_title = 'Property';
+
+
+$selection_type_link = home_url('/pet-profile-registration-form/');
 
 if ($selection_type == 'pet-profile-community') {
-    $selection_type_link = home_url('/pet-profile-registration-form/');
+    $button_text = 'Community';
+    $property_title = 'Community';
+} else if ($selection_type == 'pet-profile-condo') {
+    $button_text = 'Condos';
+    $property_title = 'Condo';
+} else if ($selection_type == 'pet-profile-hotel') {
+    $button_text = 'Hotels';
+    $property_title = 'Hotel';
+} else if ($selection_type == 'pet-profile-license') {
+    $button_text = 'License';
+    $property_title = 'Municipal';
+} else if ($selection_type == 'pet-profile-health') {
+    $button_text = 'Health';
+    $property_title = 'veterinarian';
+} else {
+    $button_text = 'PooPrints';
+    $property_title = 'Building';
 }
 
 $pets_community = array('pooprints', 'pet-profile-community');
@@ -31,6 +52,50 @@ if (in_array($selection_type, $pets_community)) {
             'field' => 'slug',
             'terms' => 'pets-community'
         ),
+    );
+}
+
+if ($selection_type == 'pet-profile-condo') {
+    $query_args['tax_query'] = array(
+        'relation' => 'AND',
+        array(
+            'taxonomy' => ATBDP_CATEGORY,
+            'field' => 'slug',
+            'terms' => 'condos'
+        )
+    );
+}
+
+if ($selection_type == 'pet-profile-hotel') {
+    $query_args['tax_query'] = array(
+        'relation' => 'AND',
+        array(
+            'taxonomy' => ATBDP_CATEGORY,
+            'field' => 'slug',
+            'terms' => 'hotels'
+        )
+    );
+}
+
+if ($selection_type == 'pet-profile-license') {
+    $query_args['tax_query'] = array(
+        'relation' => 'AND',
+        array(
+            'taxonomy' => ATBDP_CATEGORY,
+            'field' => 'slug',
+            'terms' => 'municipal-pet-licensing'
+        )
+    );
+}
+
+if ($selection_type == 'pet-profile-health') {
+    $query_args['tax_query'] = array(
+        'relation' => 'AND',
+        array(
+            'taxonomy' => ATBDP_CATEGORY,
+            'field' => 'slug',
+            'terms' => 'veterinarians'
+        )
     );
 }
 
@@ -59,7 +124,7 @@ $listings = new WP_Query($query_args);
         <div class="pooprint_select_listing_wrapper">
             <select id="pooprint_select_listing" class="pooprint_select_listing">
 
-                <option value="0">Select Building</option>
+                <option value="0">Select a <?php echo $property_title; ?></option>
 
                 <!-- the loop -->
                 <?php while ($listings->have_posts()) : $listings->the_post(); ?>
@@ -82,6 +147,6 @@ $listings = new WP_Query($query_args);
     <input type="hidden" id="selection_type" class="selection_type" value="<?php echo $selection_type; ?>" />
     <input type="hidden" id="selection_type_link" class="selection_type_link" value="<?php echo $selection_type_link; ?>" />
     <input type="hidden" class="mpp_product_url" value="<?php echo get_the_permalink(28824); ?>" /> <!-- 28824/6300 -->
-    <a href="#" class="button pooprint_select_listing_button" id="pooprint_select_listing_button">Register with PooPrints</a>
+    <a href="#" class="button pooprint_select_listing_button" id="pooprint_select_listing_button">Register with <?php echo $button_text; ?></a>
     <p id="pooprint_select_listing_msg" class="pooprint_select_listing_msg"></p>
 </div>

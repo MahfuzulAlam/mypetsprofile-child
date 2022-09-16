@@ -224,7 +224,7 @@ class MPP_Registration
     {
         ?>
         <script type="text/javascript">
-            window.location.href = "<?php echo home_url(); ?>";
+            window.location.href = "<?php echo home_url(); ?>/members/me/";
         </script>
 <?php
     }
