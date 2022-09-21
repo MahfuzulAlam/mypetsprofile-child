@@ -1568,3 +1568,80 @@ form.messenger-form {
 #pooprint_select_listing_msg {
   margin: 10px 0;
 }
+
+/* Mypetsprofile ID Style - Starts */
+.mypetsprofile-user-header {
+  text-align: center;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.mypetsprofile-user-header h3,
+.mypetsprofile-user-header h4 {
+  margin-bottom: 5px;
+}
+
+.mypetsprofile-user-header h4 {
+  font-size: 14px;
+  font-weight: 400;
+  color: steelblue;
+}
+
+.mypetsprofile-user-avatar {
+  text-align: center;
+  width: 150px;
+  height: 150px;
+  margin: auto;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.mypetsprofile-title {
+  text-align: center;
+}
+
+.mypetsprofile-action {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.mypetsprofile-action a {
+  margin-top: 10px;
+}
+
+.mpp-copy-link-status {
+  padding: 10px;
+}
+
+.mpp-copy-link {
+  margin-bottom: 10px;
+}
+
+.mpp_profile_box .form_title {
+  text-align: center;
+}
+
+.mypetsprofile-display-info {
+}
+
+.mypetsprofile-display-info .info-title {
+  text-align: center;
+}
+
+.mypetsprofile-display-info .info-block {
+  margin-bottom: 10px;
+}
+
+.mypetsprofile-display-info .info-label {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.mypetsprofile-display-info .info-value {
+  font-weight: 400;
+  font-size: 16px;
+}
+
+/* Mypetsprofile ID Style - Ends */

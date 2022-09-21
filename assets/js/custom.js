@@ -1249,5 +1249,17 @@ jQuery(document).ready(function ($) {
     }
   });
 
+  // COPY POOPRINTS QRCODE LINK
+  $(".mpp-copy-link").on("click", function (e) {
+    e.preventDefault();
+    var link = $(this).attr("data-qrcode");
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val(link).select();
+    document.execCommand("copy");
+    $temp.remove();
+    $(".mpp-copy-link-status").text("Link Copied!");
+  });
+
   // END SCRIPT
 });
