@@ -19,23 +19,82 @@ class MPP_Petsprofile
      * GLOBAL VARIABLES
      */
     private $petsprofile_id = 'mypetsprofile-id';
+    private $petsprofile_housing_id = 'petsprofile-housing-id';
+    private $petsprofile_travel_id = 'petsprofile-travel-id';
+    private $petsprofile_points_id = 'petsprofile-points-id';
+    private $petsprofile_health_id = 'petsprofile-health-id';
+    private $petsprofile_license_id = 'petsprofile-license-id';
+    private $petsprofile_service_id = 'petsprofile-service-animal-id';
 
     /**
      * MYPETPROFILE ID QRCODE
      */
-    public function mypetsprofile_id_qrcode()
+    public function mypetsprofile_id_qrcode($atts)
     {
+        $type = isset($atts['type']) && !empty($atts['type']) ? $atts['type'] : 'general';
+        $args = $this->get_qrcode_args($atts);
+
         ob_start();
         if (is_user_logged_in()) :
             $this->get_mypetsprofile_header();
-            $link = home_url('/' . $this->petsprofile_id . '/?user=' . get_current_user_id() . '&secret=' . $this->get_user_secret_key());
-            $update_link = home_url('/' . $this->petsprofile_id . '/?action=update');
             echo '<h3 class="mypetsprofile-title">MyPetsProfile ID</h3>';
-            echo do_shortcode('[kaya_qrcode content="' . $link . '" align="aligncenter" title_align="aligncenter" size="400"]');
-            echo '<div class="mypetsprofile-action"><a class="button update-info" href="' . $update_link . '" style="">Update Information</a><br>';
-            echo '<a class="button mpp-copy-link" data-qrcode="' . $link . '" href="#">Copy Link</a> <br><span class="mpp-copy-link-status"></span></div>';
+            echo do_shortcode('[kaya_qrcode content="' . $args['link'] . '" align="aligncenter" title_align="aligncenter" size="400"]');
+            echo '<div class="mypetsprofile-action"><a class="button update-info" href="' . $args['update_link'] . '" style="">Update Information</a><br>';
+            echo '<a class="button mpp-copy-link" data-qrcode="' . $args['link'] . '" href="#">Copy Link</a> <br><span class="mpp-copy-link-status"></span></div>';
         endif;
         return ob_get_clean();
+    }
+
+    /**
+     * GET QRCODE ARGS
+     */
+    public function get_qrcode_args($atts = [])
+    {
+        $type = isset($atts['type']) && !empty($atts['type']) ? $atts['type'] : 'general';
+        $args = [];
+        switch ($type) {
+            case 'general':
+                $args['title'] = 'MyPetsProfile ID';
+                $args['link'] = home_url('/' . $this->petsprofile_id . '/?user=' . get_current_user_id() . '&secret=' . $this->get_user_secret_key());
+                $args['update_link'] = home_url('/' . $this->petsprofile_id . '/?action=update');
+                break;
+            case 'housing':
+                $args['title'] = 'MyPetsProfile Housing ID';
+                $args['link'] = home_url('/' . $this->petsprofile_housing_id . '/?user=' . get_current_user_id() . '&secret=' . $this->get_user_secret_key());
+                $args['update_link'] = home_url('/' . $this->petsprofile_housing_id . '/?action=update');
+                break;
+            case 'travel':
+                $args['title'] = 'MyPetsProfile Travel ID';
+                $args['link'] = home_url('/' . $this->petsprofile_travel_id . '/?user=' . get_current_user_id() . '&secret=' . $this->get_user_secret_key());
+                $args['update_link'] = home_url('/' . $this->petsprofile_travel_id . '/?action=update');
+                break;
+            case 'points':
+                $args['title'] = 'MyPetsProfile Points ID';
+                $args['link'] = home_url('/' . $this->petsprofile_points_id . '/?user=' . get_current_user_id() . '&secret=' . $this->get_user_secret_key());
+                $args['update_link'] = home_url('/' . $this->petsprofile_points_id . '/?action=update');
+                break;
+            case 'health':
+                $args['title'] = 'MyPetsProfile Health ID';
+                $args['link'] = home_url('/' . $this->petsprofile_health_id . '/?user=' . get_current_user_id() . '&secret=' . $this->get_user_secret_key());
+                $args['update_link'] = home_url('/' . $this->petsprofile_health_id . '/?action=update');
+                break;
+            case 'license':
+                $args['title'] = 'MyPetsProfile License ID';
+                $args['link'] = home_url('/' . $this->petsprofile_license_id . '/?user=' . get_current_user_id() . '&secret=' . $this->get_user_secret_key());
+                $args['update_link'] = home_url('/' . $this->petsprofile_license_id . '/?action=update');
+                break;
+            case 'service':
+                $args['title'] = 'MyPetsProfile Service Animal ID';
+                $args['link'] = home_url('/' . $this->petsprofile_service_id . '/?user=' . get_current_user_id() . '&secret=' . $this->get_user_secret_key());
+                $args['update_link'] = home_url('/' . $this->petsprofile_service_id . '/?action=update');
+                break;
+            default:
+                $args['title'] = 'MyPetsProfile ID';
+                $args['link'] = home_url('/' . $this->petsprofile_id . '/?user=' . get_current_user_id() . '&secret=' . $this->get_user_secret_key());
+                $args['update_link'] = home_url('/' . $this->petsprofile_id . '/?action=update');
+                break;
+        }
+        return $args;
     }
 
     /**
@@ -64,6 +123,9 @@ class MPP_Petsprofile
         } else {
             $field_group = [1, 2, 3, 4];
         }
+
+        // UPDATE DATA
+        $this->mypetsprofile_update_form_data();
 
 ?>
         <form id="mpp_profile_box" class="mpp_profile_box" method="post">
@@ -97,7 +159,7 @@ class MPP_Petsprofile
                     </div>
                 <?php } ?>
                 <div class="dna_form_submit_buttons">
-                    <input type="submit" class="button mpp_dna_form_submitted" value="Update" name="mpp_dna_form_submitted_sava_data" />
+                    <input type="submit" class="button mpp_dna_form_submitted" value="Update" name="mypetsprofile_form_submitted_sava_data" />
                 </div>
             <?php
             }
@@ -107,12 +169,45 @@ class MPP_Petsprofile
     }
 
     /**
+     * SAVE MYPETSPROFILE DATA
+     */
+    public function mypetsprofile_update_form_data()
+    {
+        if (is_user_logged_in()) {
+            // Export CSV From DNA PROFILE
+            if (isset($_POST['mypetsprofile_form_submitted_sava_data']) && !empty($_POST['mypetsprofile_form_submitted_sava_data'])) {
+                $member_id = get_current_user_id();
+                if (isset($_POST['mpp_profile_box']) && count($_POST['mpp_profile_box']) > 0) {
+                    $profile_fields = $_POST['mpp_profile_box'];
+                    foreach ($profile_fields as $field_id => $field_value) {
+                        $field_options = xprofile_get_field($field_id, $member_id);
+                        if ($field_options->type == 'datebox') $field_value = $field_value . ' 00:00:00';
+
+                        // Save User Data
+                        if (get_current_user_id() == $member_id) {
+                            xprofile_set_field_data($field_id, $member_id, $field_value);
+                            if (isset($_POST['mpp_visibility_' . $field_id]) && !empty($_POST['mpp_visibility_' . $field_id])) {
+                                xprofile_set_field_visibility_level($field_id, $member_id, $_POST['mpp_visibility_' . $field_id]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * MYPETSPROFILE DISPLAY INFORMATION
      */
     public function mypetsprofile_display_information($atts = [])
     {
         $member_id = isset($_REQUEST['user']) && !empty($_REQUEST['user']) ? $_REQUEST['user'] : 0;
         if (!$member_id) return;
+        $secret_key = isset($_REQUEST['secret']) && !empty($_REQUEST['secret']) ? $_REQUEST['secret'] : 0;
+        if (!$secret_key) return;
+        $mpp_user_secret = get_user_meta($member_id, 'mpp_user_secret', true);
+        if (!$mpp_user_secret || empty($mpp_user_secret)) return;
+        if ($mpp_user_secret !== $secret_key) return;
 
         $field_group = [];
         if (isset($atts['fields']) && !empty($atts['fields'])) {
@@ -162,7 +257,10 @@ class MPP_Petsprofile
             }
             ?>
 
-
+            <p>
+                <a class="button" href="#">Register</a></br>
+                <a class="button" href="#">Download App</a>
+            </p>
         </div>
     <?php
     }

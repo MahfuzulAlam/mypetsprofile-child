@@ -1250,7 +1250,7 @@ jQuery(document).ready(function ($) {
   });
 
   // COPY POOPRINTS QRCODE LINK
-  $(".mpp-copy-link").on("click", function (e) {
+  $(document).on("click", ".mpp-copy-link", function (e) {
     e.preventDefault();
     var link = $(this).attr("data-qrcode");
     var $temp = $("<input>");
