@@ -13,6 +13,9 @@ class MPP_Petsprofile
     {
         add_shortcode('mypetsprofile-id-qrcode', array($this, 'mypetsprofile_id_qrcode'));
         add_shortcode('mypetsprofile-id-display', array($this, 'mypetsprofile_id_display'));
+
+        add_action('wp_ajax_mypetsprofile_registration', array($this, 'ajax_mypetsprofile_registration'));
+        add_action('wp_ajax_nopriv_mypetsprofile_registration', array($this, 'ajax_mypetsprofile_registration'));
     }
 
     /**
@@ -37,7 +40,8 @@ class MPP_Petsprofile
         ob_start();
         if (is_user_logged_in()) :
             $this->get_mypetsprofile_header();
-            echo '<h3 class="mypetsprofile-title">MyPetsProfile ID</h3>';
+            $title = isset($atts['title']) ? $atts['title'] : 'PetsProfile ID';
+            echo '<h3 class="mypetsprofile-title">' . $title . '</h3>';
             echo do_shortcode('[kaya_qrcode content="' . $args['link'] . '" align="aligncenter" title_align="aligncenter" size="400"]');
             echo '<div class="mypetsprofile-action"><a class="button update-info" href="' . $args['update_link'] . '" style="">Update Information</a><br>';
             echo '<a class="button mpp-copy-link" data-qrcode="' . $args['link'] . '" href="#">Copy Link</a> <br><span class="mpp-copy-link-status"></span></div>';
@@ -199,7 +203,18 @@ class MPP_Petsprofile
     /**
      * MYPETSPROFILE DISPLAY INFORMATION
      */
+
     public function mypetsprofile_display_information($atts = [])
+    {
+        $registered = isset($_REQUEST['registered']) && !empty($_REQUEST['registered']) ? $_REQUEST['registered'] : '';
+        if ($registered == 'yes' || is_user_logged_in()) {
+            $this->mypetsprofile_display_information_html($atts);
+        } else {
+            $this->mypetsprofile_display_information_registration($atts);
+        }
+    }
+
+    public function mypetsprofile_display_information_html($atts = [])
     {
         $member_id = isset($_REQUEST['user']) && !empty($_REQUEST['user']) ? $_REQUEST['user'] : 0;
         if (!$member_id) return;
@@ -265,6 +280,37 @@ class MPP_Petsprofile
     <?php
     }
 
+    public function mypetsprofile_display_information_registration($atts = [])
+    {
+    ?>
+        <div class="mypetsprofile_registration_form">
+            <h3 class="info-title"><?php echo isset($atts['title']) ? $atts['title'] : ''; ?></h3>
+            <p class="info-detail">
+                Welcome to MyPetsProfile™️<br>
+                To view the pet profile information provided, please enter your email address for immediate access.<br>
+                Thank you
+            </p>
+            <div class="mypetsprofile_registration_field">
+                <input type="email" name="email" class="email" id="email_address" placeholder="Email Address" />
+                <span class="description">Please enter your email address.</span>
+            </div>
+            <div class="mypetsprofile_registration_field">
+                <input type="email" name="confirm-email" class="email" id="confirm_email" placeholder="Confirm Email Address" />
+                <span class="description">Please confirm your email address.</span>
+            </div>
+            <div class="mypetsprofile_registration_field">
+                <span class="description error-message" id="error_message"></span>
+            </div>
+            <div class="mypetsprofile_registration_field">
+                <span class="description success-message" id="success_message"></span>
+            </div>
+            <div class="mypetsprofile_registration_field">
+                <a class="button" id="submit_email" href="#">Submit Email</a>
+            </div>
+        </div>
+    <?php
+    }
+
     /**
      * MYPETSPROFILE HEADER
      */
@@ -293,7 +339,7 @@ class MPP_Petsprofile
         // ));
 
         $user = get_userdata($user_id);
-        $username = $user->user_login;
+        $username = $user->nickname;
     ?>
         <div class="mypetsprofile-user-header">
             <div class="mypetsprofile-user-avatar">
@@ -303,6 +349,87 @@ class MPP_Petsprofile
             <h4><?php echo '@' . $username; ?></h4>
         </div>
 <?php
+    }
+
+    /**
+     * AJAX MYPETSPROFILE REGISTRATION
+     */
+    public function ajax_mypetsprofile_registration()
+    {
+        $email = isset($_POST['email']) && !empty($_POST['email']) ? $_POST['email'] : '';
+        $response = ["result" => false];
+        if (!empty($email)) {
+            if (email_exists($email)) {
+                $response['result'] = true;
+                $response['registration'] = false;
+                $response['status'] = 'exists';
+            } else {
+                $username = $this->mpp_generate_username('', '', $email);
+                $password = wp_generate_password(8);
+                $meta['user_pass'] = wp_hash_password($password);
+                $user_id = bp_core_signup_user($username, $password, $email, $meta);
+                if ($user_id) {
+                    $response['result'] = true;
+                    $response['registration'] = true;
+                    $response['status'] = 'registered';
+                }
+            }
+        }
+        echo json_encode($response);
+        die();
+    }
+
+    /**
+     * MPP GENERATE USERNAME
+     */
+    public function mpp_generate_username($firstname = '', $lastname = '', $email = '')
+    {
+        $fullname = !empty($lastname) ? trim($firstname . '_' . $lastname) : trim($firstname);
+        $username = !empty($fullname) ? $this->mpp_slugify_text($fullname, '_') : '';
+        if (!$username || empty($username)) {
+            $username = implode('@', explode('@', $email, -1));
+        }
+        $x = 1;
+        $y = 3;
+        while ($x <= $y) {
+            if (username_exists($username)) {
+                $username = $username . $x;
+            } else {
+                return $username;
+            }
+            $x++;
+            $y++;
+        }
+    }
+
+    /**
+     * MPP SLUGIFY TEXT
+     */
+    public function mpp_slugify_text($text, $divider = '-')
+    {
+        // replace non letter or digits by divider
+        $text = preg_replace('~[^\pL\d]+~u', $divider, $text);
+
+        // transliterate
+        $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+
+        // remove unwanted characters
+        $text = preg_replace('~[^-\w]+~', '', $text);
+
+        // trim
+        $text = trim($text, $divider);
+
+        // remove duplicate divider
+        $text = preg_replace('~-+~', $divider, $text);
+
+        // lowercase
+        $text = strtolower($text);
+
+        if (empty($text)) {
+            return false;
+        }
+
+        return $text;
     }
 
     /**

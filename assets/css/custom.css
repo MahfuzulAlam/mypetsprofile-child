@@ -1578,7 +1578,7 @@ form.messenger-form {
 
 .mypetsprofile-user-header h3,
 .mypetsprofile-user-header h4 {
-  margin-bottom: 5px;
+  margin-bottom: 5px !important;
 }
 
 .mypetsprofile-user-header h4 {
@@ -1626,7 +1626,8 @@ form.messenger-form {
 .mypetsprofile-display-info {
 }
 
-.mypetsprofile-display-info .info-title {
+.mypetsprofile-display-info .info-title,
+.mypetsprofile_registration_form .info-title {
   text-align: center;
 }
 
@@ -1642,6 +1643,48 @@ form.messenger-form {
 .mypetsprofile-display-info .info-value {
   font-weight: 400;
   font-size: 16px;
+}
+
+.mypetsprofile_registration_form {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.mypetsprofile_registration_form .info-detail {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.mypetsprofile_registration_field {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.mypetsprofile_registration_field .error-message {
+  color: rgb(88, 13, 13);
+}
+
+.mypetsprofile_registration_field .success-message {
+  color: green;
+}
+
+.mypetsprofile_registration_field label,
+.mypetsprofile_registration_field input,
+.mypetsprofile_registration_field span {
+  margin-bottom: 5px;
+  display: block;
+}
+
+.mypetsprofile_registration_field span.description {
+  font-size: 12px;
+}
+
+@media only screen and (max-width: 767px) {
+  .mypetsprofile_registration_field input {
+    width: 100%;
+  }
 }
 
 /* Mypetsprofile ID Style - Ends */

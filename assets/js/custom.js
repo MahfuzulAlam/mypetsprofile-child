@@ -1261,5 +1261,64 @@ jQuery(document).ready(function ($) {
     $(".mpp-copy-link-status").text("Link Copied!");
   });
 
+  // REGISTER NEW USER - MYPETSPROFILE ID FORM
+  $(document).on("click", "#submit_email", function (e) {
+    e.preventDefault();
+    var email = $("#email_address").val();
+    var confirm_email = $("#confirm_email").val();
+    var $error_message = $("#error_message");
+    var $success_message = $("#success_message");
+    var $url = window.location.href;
+
+    if (email == "" || !validateEmail(email)) {
+      $error_message.text("Please enter a valid email address");
+      return;
+    }
+
+    if (confirm_email != email) {
+      $error_message.text("Retyped email address does not match");
+      return;
+    }
+
+    $error_message.text("");
+    $success_message.text("Checking...");
+
+    // AJAX CALL
+    $.ajax({
+      type: "post",
+      dataType: "json",
+      url: mppChild.ajaxurl,
+      data: { action: "mypetsprofile_registration", email: email },
+      success: function (response) {
+        if (response.result == true) {
+          if (response.registration == true) {
+            $success_message.text(
+              "Thank you for registering, redirecting to the ID information..."
+            );
+            window.location.href = $url + "&registered=yes";
+          } else {
+            if (response.status == "exists") {
+              $success_message.text(
+                "Email already exist, redirecting to the ID information..."
+              );
+              window.location.href = $url + "&registered=yes";
+            }
+          }
+        } else {
+          $error_message.text("Sorry, something went wrong");
+        }
+      },
+    });
+    // AJAX CALL
+  });
+
+  // EMAIL VALIDATION
+  const validateEmail = (email) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+  };
   // END SCRIPT
 });
