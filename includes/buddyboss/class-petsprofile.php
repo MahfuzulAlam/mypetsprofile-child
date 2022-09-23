@@ -24,6 +24,7 @@ class MPP_Petsprofile
     private $petsprofile_id = 'mypetsprofile-id';
     private $petsprofile_housing_id = 'petsprofile-housing-id';
     private $petsprofile_travel_id = 'petsprofile-travel-id';
+    private $petsprofile_passport_id = 'petsprofile-passport-id';
     private $petsprofile_points_id = 'petsprofile-points-id';
     private $petsprofile_health_id = 'petsprofile-health-id';
     private $petsprofile_license_id = 'petsprofile-license-id';
@@ -70,6 +71,11 @@ class MPP_Petsprofile
                 $args['title'] = 'MyPetsProfile Travel ID';
                 $args['link'] = home_url('/' . $this->petsprofile_travel_id . '/?user=' . get_current_user_id() . '&secret=' . $this->get_user_secret_key());
                 $args['update_link'] = home_url('/' . $this->petsprofile_travel_id . '/?action=update');
+                break;
+            case 'passport':
+                $args['title'] = 'MyPetsProfile Passport ID';
+                $args['link'] = home_url('/' . $this->petsprofile_passport_id . '/?user=' . get_current_user_id() . '&secret=' . $this->get_user_secret_key());
+                $args['update_link'] = home_url('/' . $this->petsprofile_passport_id . '/?action=update');
                 break;
             case 'points':
                 $args['title'] = 'MyPetsProfile Points ID';
@@ -435,13 +441,16 @@ class MPP_Petsprofile
         $title = isset($atts['title']) && !empty($atts['title']) ? $atts['title'] : '';
         $logo = '';
         switch ($type) {
+            case 'general':
+                $logo = get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/mypetsprofile.png';
+                break;
             case 'health':
                 $logo = get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/health.png';
                 break;
             case 'license':
                 $logo = get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/license.png';
                 break;
-            case 'pasport':
+            case 'passport':
                 $logo = get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/passport.png';
                 break;
             case 'points':
