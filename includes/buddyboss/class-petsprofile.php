@@ -36,6 +36,7 @@ class MPP_Petsprofile
     public function mypetsprofile_id_qrcode($atts)
     {
         $args = $this->get_qrcode_args($atts);
+        $type = isset($atts['type']) && !empty($atts['type']) ? $atts['type'] : 'general';
 
         ob_start();
         if (is_user_logged_in()) :
@@ -43,8 +44,10 @@ class MPP_Petsprofile
             $title = isset($atts['title']) ? $atts['title'] : 'PetsProfile ID';
             $this->get_profile_title($atts);
             echo do_shortcode('[kaya_qrcode content="' . $args['link'] . '" align="aligncenter" title_align="aligncenter" size="400" alt="' . $title . '"]');
-            echo '<div class="mypetsprofile-action"><a class="button update-info" href="' . $args['update_link'] . '" style="">Update Information</a><br>';
-            echo '<a class="button mpp-copy-link" data-qrcode="' . $args['link'] . '" href="#">Share Link</a> <br><span class="mpp-copy-link-status"></span></div>';
+            echo '<div class="mypetsprofile-action">';
+            if ($type !== 'general') echo '<a class="button update-info" href="' . $args['update_link'] . '" style="">Update Information</a><br>';
+            echo '<a class="button mpp-copy-link" data-qrcode="' . $args['link'] . '" href="#">Share Link</a> <br><span class="mpp-copy-link-status"></span>';
+            echo '</div>';
         endif;
         return ob_get_clean();
     }
@@ -54,13 +57,13 @@ class MPP_Petsprofile
      */
     public function get_qrcode_args($atts = [])
     {
-        $type = isset($atts['type']) && !empty($atts['type']) ? $atts['type'] : 'general';
+        $type = isset($atts['type']) && !empty($atts['type']) ? $atts['type'] : '';
         $args = [];
         switch ($type) {
             case 'general':
                 $args['title'] = 'MyPetsProfile ID';
-                $args['link'] = home_url('/' . $this->petsprofile_id . '/?user=' . get_current_user_id() . '&secret=' . $this->get_user_secret_key());
-                $args['update_link'] = home_url('/' . $this->petsprofile_id . '/?action=update');
+                $args['link'] = bbp_get_user_profile_url(get_current_user_id());
+                $args['update_link'] = 'https://facebook.com';
                 break;
             case 'housing':
                 $args['title'] = 'MyPetsProfile Housing ID';

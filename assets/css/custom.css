@@ -1687,6 +1687,10 @@ form.messenger-form {
   width: 200px;
 }
 
+.wpkqcg_qrcode_wrapper img {
+  max-width: 75% !important;
+}
+
 @media only screen and (max-width: 767px) {
   .mypetsprofile_registration_field input {
     width: 100%;
