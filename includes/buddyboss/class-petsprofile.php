@@ -278,7 +278,7 @@ class MPP_Petsprofile
     {
     ?>
         <div class="mypetsprofile_registration_form">
-            <h3 class="info-title"><?php echo isset($atts['title']) ? $atts['title'] : ''; ?></h3>
+            <?php $this->get_profile_title($atts); ?>
             <p class="info-detail">
                 Welcome to MyPetsProfile™️<br>
                 To view the pet profile information provided, please enter your email address for immediate access.<br>
