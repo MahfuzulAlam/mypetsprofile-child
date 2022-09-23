@@ -1258,7 +1258,9 @@ jQuery(document).ready(function ($) {
     $temp.val(link).select();
     document.execCommand("copy");
     $temp.remove();
-    $(".mpp-copy-link-status").text("Link Copied!");
+    $(".mpp-copy-link-status").text(
+      "Link copied! You can share this on any platform."
+    );
   });
 
   // REGISTER NEW USER - MYPETSPROFILE ID FORM

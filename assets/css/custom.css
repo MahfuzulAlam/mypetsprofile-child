@@ -1573,7 +1573,6 @@ form.messenger-form {
 .mypetsprofile-user-header {
   text-align: center;
   margin-top: 30px;
-  margin-bottom: 30px;
 }
 
 .mypetsprofile-user-header h3,
@@ -1612,6 +1611,7 @@ form.messenger-form {
 }
 
 .mpp-copy-link-status {
+  font-size: 12px;
   padding: 10px;
 }
 
@@ -1623,9 +1623,7 @@ form.messenger-form {
   text-align: center;
 }
 
-.mypetsprofile-display-info {
-}
-
+.mypetsprofile-id-title,
 .mypetsprofile-display-info .info-title,
 .mypetsprofile_registration_form .info-title {
   text-align: center;
@@ -1679,6 +1677,14 @@ form.messenger-form {
 
 .mypetsprofile_registration_field span.description {
   font-size: 12px;
+}
+
+.mypetsprofile-id-image-wrapper {
+  text-align: center;
+}
+
+.mypetsprofile-id-image-wrapper img {
+  width: 200px;
 }
 
 @media only screen and (max-width: 767px) {

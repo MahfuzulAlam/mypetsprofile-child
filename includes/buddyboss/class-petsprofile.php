@@ -34,17 +34,16 @@ class MPP_Petsprofile
      */
     public function mypetsprofile_id_qrcode($atts)
     {
-        $type = isset($atts['type']) && !empty($atts['type']) ? $atts['type'] : 'general';
         $args = $this->get_qrcode_args($atts);
 
         ob_start();
         if (is_user_logged_in()) :
             $this->get_mypetsprofile_header();
             $title = isset($atts['title']) ? $atts['title'] : 'PetsProfile ID';
-            echo '<h3 class="mypetsprofile-title">' . $title . '</h3>';
+            $this->get_profile_title($atts);
             echo do_shortcode('[kaya_qrcode content="' . $args['link'] . '" align="aligncenter" title_align="aligncenter" size="400"]');
             echo '<div class="mypetsprofile-action"><a class="button update-info" href="' . $args['update_link'] . '" style="">Update Information</a><br>';
-            echo '<a class="button mpp-copy-link" data-qrcode="' . $args['link'] . '" href="#">Copy Link</a> <br><span class="mpp-copy-link-status"></span></div>';
+            echo '<a class="button mpp-copy-link" data-qrcode="' . $args['link'] . '" href="#">Share Link</a> <br><span class="mpp-copy-link-status"></span></div>';
         endif;
         return ob_get_clean();
     }
@@ -235,8 +234,8 @@ class MPP_Petsprofile
         <div class="mypetsprofile-display-info">
             <?php
             $this->get_mypetsprofile_header();
+            $this->get_profile_title($atts);
             ?>
-            <h3 class="info-title"><?php echo isset($atts['title']) ? $atts['title'] : ''; ?></h3>
 
             <?php
             foreach ($field_group as $field_id) {
@@ -271,11 +270,6 @@ class MPP_Petsprofile
                 }
             }
             ?>
-
-            <p>
-                <a class="button" href="#">Register</a></br>
-                <a class="button" href="#">Download App</a>
-            </p>
         </div>
     <?php
     }
@@ -430,6 +424,42 @@ class MPP_Petsprofile
         }
 
         return $text;
+    }
+
+    /**
+     * GET THE TITLE
+     */
+    public function get_profile_title($atts = [])
+    {
+        $type = isset($atts['type']) && !empty($atts['type']) ? $atts['type'] : 'general';
+        $title = isset($atts['title']) && !empty($atts['title']) ? $atts['title'] : '';
+        $logo = '';
+        switch ($type) {
+            case 'health':
+                $logo = get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/health.png';
+                break;
+            case 'license':
+                $logo = get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/license.png';
+                break;
+            case 'pasport':
+                $logo = get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/passport.png';
+                break;
+            case 'points':
+                $logo = get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/points.png';
+                break;
+            case 'travel':
+                $logo = get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/travel.png';
+                break;
+            default:
+                $logo = '';
+                break;
+        }
+
+        if (!empty($logo)) {
+            echo '<div class="mypetsprofile-id-image-wrapper"><img src="' . $logo . '" class="mypetsprofile-id-logo"/></div>';
+        } else {
+            echo '<h3 class="mypetsprofile-id-title">' . $title . '</h3>';
+        }
     }
 
     /**
