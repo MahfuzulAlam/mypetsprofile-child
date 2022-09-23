@@ -41,7 +41,7 @@ class MPP_Petsprofile
             $this->get_mypetsprofile_header();
             $title = isset($atts['title']) ? $atts['title'] : 'PetsProfile ID';
             $this->get_profile_title($atts);
-            echo do_shortcode('[kaya_qrcode content="' . $args['link'] . '" align="aligncenter" title_align="aligncenter" size="400"]');
+            echo do_shortcode('[kaya_qrcode content="' . $args['link'] . '" align="aligncenter" title_align="aligncenter" size="400" alt="' . $title . '"]');
             echo '<div class="mypetsprofile-action"><a class="button update-info" href="' . $args['update_link'] . '" style="">Update Information</a><br>';
             echo '<a class="button mpp-copy-link" data-qrcode="' . $args['link'] . '" href="#">Share Link</a> <br><span class="mpp-copy-link-status"></span></div>';
         endif;
@@ -132,7 +132,7 @@ class MPP_Petsprofile
 
 ?>
         <form id="mpp_profile_box" class="mpp_profile_box" method="post">
-            <h2 class="form_title"><?php echo isset($atts['title']) ? $atts['title'] : ''; ?></h2>
+            <?php $this->get_profile_title($atts); ?>
             <?php
             if ($member_id || current_user_can('administrator')) {
                 foreach ($field_group as $field_id) {
