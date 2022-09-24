@@ -16,6 +16,8 @@ class MPP_Petsprofile
 
         add_action('wp_ajax_mypetsprofile_registration', array($this, 'ajax_mypetsprofile_registration'));
         add_action('wp_ajax_nopriv_mypetsprofile_registration', array($this, 'ajax_mypetsprofile_registration'));
+
+        add_action('init', array($this, 'mpp_csv_export'));
     }
 
     /**
@@ -239,6 +241,8 @@ class MPP_Petsprofile
             $field_group = [1, 2, 3, 4];
         }
 
+        $exportable_fields = [];
+
     ?>
         <div class="mypetsprofile-display-info">
             <?php
@@ -270,6 +274,7 @@ class MPP_Petsprofile
                 //e_var_dump($visibility_level);
 
                 if ($visibility) {
+                    $exportable_fields[] = $field_id;
             ?>
                     <div class="info-block">
                         <label class="info-label"><?php echo $field->alternate_name ? $field->alternate_name : $field->name; ?></label>
@@ -279,10 +284,16 @@ class MPP_Petsprofile
                 }
             }
             ?>
+            <?php
+            $this->mpp_csv_export_form($exportable_fields);
+            ?>
         </div>
     <?php
     }
 
+    /**
+     * MYPETSPROFILE DISPLAY INFORMATION REGISTRATION
+     */
     public function mypetsprofile_display_information_registration($atts = [])
     {
     ?>
@@ -312,6 +323,73 @@ class MPP_Petsprofile
             </div>
         </div>
     <?php
+    }
+
+    /**
+     * MYPETSPROFILE CSV EXPORT FORM
+     */
+    public function mpp_csv_export_form($exportable_fields = [])
+    {
+        $fields = $exportable_fields && count($exportable_fields) > 0 ? implode(',', $exportable_fields) : '';
+        $member_id = isset($_REQUEST['user']) && !empty($_REQUEST['user']) ? $_REQUEST['user'] : 0;
+        if (!$member_id || empty($member_id)) return;
+    ?>
+        <form method="post" name="csv_export_form">
+            <input type="hidden" name="profile_fields" value="<?php echo $fields; ?>" />
+            <input type="hidden" name="member_id" value="<?php echo $member_id; ?>" />
+            <input type="submit" name="csv_export_submit" value="Export CSV" class="button" />
+        </form>
+    <?php
+    }
+
+    // MYPETSPROFILE CSV EXPORT
+    public function mpp_csv_export()
+    {
+        // Export CSV From DNA PROFILE
+        if (isset($_POST['csv_export_submit']) && !empty($_POST['csv_export_submit'])) {
+            $member_id = isset($_POST['member_id']) && !empty($_POST['member_id']) ? $_POST['member_id'] : 0;
+            if (!$member_id) return;
+
+            $profile_fields = isset($_POST['profile_fields']) && !empty($_POST['profile_fields']) ? explode(',', $_POST['profile_fields']) : [];
+
+            $exported_fields = [];
+
+            if (empty($profile_fields)) return;
+
+            foreach ($profile_fields as $field_id) {
+                $field = xprofile_get_field($field_id, $member_id);
+                $field_value = in_array($field->type, array("telephone", "url", "email")) ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
+                $exported_fields['header'][] = $field->name;
+                $exported_fields['data'][] = $field_value;
+            }
+
+            //Export CSV
+            if (count($exported_fields) > 0) $this->mpp_export_dna_csv($exported_fields);
+        }
+    }
+
+    // EXPORT DNA CSV FUNCTION
+    public function mpp_export_dna_csv($exported_fields)
+    {
+        $header_row = $exported_fields['header'];
+        ob_start();
+        $filename = 'profile_info.csv';
+        $fh = @fopen('php://output', 'w');
+        fprintf($fh, chr(0xEF) . chr(0xBB) . chr(0xBF));
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Content-Description: File Transfer');
+        header('Content-type: text/csv');
+        header("Content-Disposition: attachment; filename={$filename}");
+        header('Expires: 0');
+        header('Pragma: public');
+
+        fputcsv($fh, $header_row);
+        fputcsv($fh, $exported_fields['data']);
+
+        fclose($fh);
+
+        ob_end_flush();
+        die();
     }
 
     /**
