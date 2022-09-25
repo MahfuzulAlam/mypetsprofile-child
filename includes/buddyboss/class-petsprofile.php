@@ -14,6 +14,8 @@ class MPP_Petsprofile
         add_shortcode('mypetsprofile-id-qrcode', array($this, 'mypetsprofile_id_qrcode'));
         add_shortcode('mypetsprofile-id-display', array($this, 'mypetsprofile_id_display'));
 
+        add_shortcode('mypetsprofile-qr-list', array($this, 'mypetsprofile_qr_list'));
+
         add_action('wp_ajax_mypetsprofile_registration', array($this, 'ajax_mypetsprofile_registration'));
         add_action('wp_ajax_nopriv_mypetsprofile_registration', array($this, 'ajax_mypetsprofile_registration'));
 
@@ -225,6 +227,10 @@ class MPP_Petsprofile
         }
     }
 
+    /**
+     * MYPETSPROFILE DISPLAY INFORMATION HTML
+     */
+
     public function mypetsprofile_display_information_html($atts = [])
     {
         $member_id = isset($_REQUEST['user']) && !empty($_REQUEST['user']) ? $_REQUEST['user'] : 0;
@@ -398,6 +404,70 @@ class MPP_Petsprofile
 
         ob_end_flush();
         die();
+    }
+
+    /**
+     * MYPETSPROFILE QR LIST
+     */
+    public function mypetsprofile_qr_list($atts = [])
+    {
+        ob_start();
+    ?>
+        <div class="mypetsprofile_qr_list_wrapper">
+            <h3 class="mypetsprofile_qr_list_title">All Profile ID’s</h3>
+            <ul class="mypetsprofile_qr_list">
+                <li class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetsprofile-id/'); ?>">
+                        <i class="las la-address-card"></i>
+                        MyPetsProfile&#8482; ID
+                    </a>
+                </li>
+                <li class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetshousing-id/'); ?>">
+                        <i class="las la-home"></i>
+                        MyPetsHousing&#8482; ID
+                    </a>
+                </li>
+                <li class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetstravel-id/'); ?>">
+                        <i class="las la-globe"></i>
+                        MyPetsTravel&#8482; ID
+                    </a>
+                </li>
+                <li class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetspassport-id/'); ?>">
+                        <i class="las la-passport"></i>
+                        MyPetsPassport&#8482; ID
+                    </a>
+                </li>
+                <li class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetspoints-id/'); ?>">
+                        <i class="las la-coins"></i>
+                        MyPetsPoints&#8482; ID
+                    </a>
+                </li>
+                <li class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetshealth-id/'); ?>">
+                        <i class="las la-heartbeat"></i>
+                        MyPetsHealth ID
+                    </a>
+                </li>
+                <li class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetslicense-id/'); ?>">
+                        <i class="las la-scroll"></i>
+                        MyPetsLicense&#8482; ID
+                    </a>
+                </li>
+                <li class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetsservice-id/'); ?>">
+                        <i class="las la-paw"></i>
+                        MyPetsService Animal & ESA ID
+                    </a>
+                </li>
+            </ul>
+        </div>
+    <?php
+        return ob_get_clean();
     }
 
     /**
