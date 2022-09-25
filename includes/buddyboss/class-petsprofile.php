@@ -284,7 +284,7 @@ class MPP_Petsprofile
             }
             ?>
             <?php
-            $this->mpp_csv_export_form($exportable_fields);
+            $this->mpp_csv_export_form($exportable_fields, $atts);
             ?>
         </div>
     <?php
@@ -327,13 +327,15 @@ class MPP_Petsprofile
     /**
      * MYPETSPROFILE CSV EXPORT FORM
      */
-    public function mpp_csv_export_form($exportable_fields = [])
+    public function mpp_csv_export_form($exportable_fields = [], $atts = [])
     {
         $fields = $exportable_fields && count($exportable_fields) > 0 ? implode(',', $exportable_fields) : '';
         $member_id = isset($_REQUEST['user']) && !empty($_REQUEST['user']) ? $_REQUEST['user'] : 0;
         if (!$member_id || empty($member_id)) return;
+        $page_title = isset($atts['title']) && !empty($atts['title']) ? $atts['title'] : '';
     ?>
         <form method="post" name="csv_export_form">
+            <input type="hidden" name="page_title" value="<?php echo $page_title; ?>" />
             <input type="hidden" name="profile_fields" value="<?php echo $fields; ?>" />
             <input type="hidden" name="member_id" value="<?php echo $member_id; ?>" />
             <input type="submit" name="csv_export_submit" value="Export CSV" class="button" />
@@ -355,6 +357,8 @@ class MPP_Petsprofile
 
             if (empty($profile_fields)) return;
 
+            $page_title = isset($_POST['page_title']) && !empty($_POST['page_title']) ? $_POST['page_title'] : '';
+
             foreach ($profile_fields as $field_id) {
                 $field = xprofile_get_field($field_id, $member_id);
                 $field_value = in_array($field->type, array("telephone", "url", "email")) ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
@@ -363,16 +367,16 @@ class MPP_Petsprofile
             }
 
             //Export CSV
-            if (count($exported_fields) > 0) $this->mpp_export_dna_csv($exported_fields);
+            if (count($exported_fields) > 0) $this->mpp_export_dna_csv($exported_fields, $page_title);
         }
     }
 
     // EXPORT DNA CSV FUNCTION
-    public function mpp_export_dna_csv($exported_fields)
+    public function mpp_export_dna_csv($exported_fields, $title = '')
     {
         $header_row = $exported_fields['header'];
         ob_start();
-        $filename = 'profile_info.csv';
+        $filename = !empty($title) ? $this->mpp_slugify_text($title, '_') . '.csv' : 'profile_info.csv';
         $fh = @fopen('php://output', 'w');
         fprintf($fh, chr(0xEF) . chr(0xBB) . chr(0xBF));
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
