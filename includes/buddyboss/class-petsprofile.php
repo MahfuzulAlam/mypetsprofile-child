@@ -362,6 +362,11 @@ class MPP_Petsprofile
             foreach ($profile_fields as $field_id) {
                 $field = xprofile_get_field($field_id, $member_id);
                 $field_value = in_array($field->type, array("telephone", "url", "email")) ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
+                if ($field->type == 'datebox') {
+                    if (empty($field_value) || $field_value == '01/01/1970') {
+                        $field_value = '';
+                    }
+                }
                 $exported_fields['header'][] = $field->name;
                 $exported_fields['data'][] = $field_value;
             }
