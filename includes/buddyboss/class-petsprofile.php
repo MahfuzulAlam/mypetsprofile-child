@@ -48,7 +48,7 @@ class MPP_Petsprofile
             echo do_shortcode('[kaya_qrcode content="' . $args['link'] . '" align="aligncenter" title_align="aligncenter" size="400" alt="' . $title . '"]');
             echo '<div class="mypetsprofile-action">';
             echo '<a class="button update-info" href="' . $args['update_link'] . '" style="">Update Information</a><br>';
-            echo '<a class="button mpp-copy-link" data-qrcode="' . $args['link'] . '" href="#">Share Link</a> <br><span class="mpp-copy-link-status"></span>';
+            echo '<a class="button mpp-copy-link" data-qrcode="' . $args['link'] . '" href="#">Share</a> <br><span class="mpp-copy-link-status"></span>';
             echo '</div>';
         endif;
         return ob_get_clean();
@@ -271,8 +271,6 @@ class MPP_Petsprofile
                 } else {
                     $visibility = true;
                 }
-
-                //e_var_dump($visibility_level);
 
                 if ($visibility) {
                     $exportable_fields[] = $field_id;
