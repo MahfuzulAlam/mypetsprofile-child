@@ -47,7 +47,7 @@ class MPP_Petsprofile
             $this->get_profile_title($atts);
             echo do_shortcode('[kaya_qrcode content="' . $args['link'] . '" align="aligncenter" title_align="aligncenter" size="400" alt="' . $title . '"]');
             echo '<div class="mypetsprofile-action">';
-            if ($type !== 'general') echo '<a class="button update-info" href="' . $args['update_link'] . '" style="">Update Information</a><br>';
+            echo '<a class="button update-info" href="' . $args['update_link'] . '" style="">Update Information</a><br>';
             echo '<a class="button mpp-copy-link" data-qrcode="' . $args['link'] . '" href="#">Share Link</a> <br><span class="mpp-copy-link-status"></span>';
             echo '</div>';
         endif;
@@ -65,7 +65,7 @@ class MPP_Petsprofile
             case 'general':
                 $args['title'] = 'MyPetsProfile ID';
                 $args['link'] = bbp_get_user_profile_url(get_current_user_id());
-                $args['update_link'] = 'https://facebook.com';
+                $args['update_link'] = home_url('/' . $this->petsprofile_id . '/?action=update');
                 break;
             case 'housing':
                 $args['title'] = 'MyPetsProfile Housing ID';
@@ -173,6 +173,7 @@ class MPP_Petsprofile
                     </div>
                 <?php } ?>
                 <div class="dna_form_submit_buttons">
+                    <a class="button" href="<?php echo home_url('/documents/'); ?>">Upload PDF</a></br>
                     <input type="submit" class="button mpp_dna_form_submitted" value="Update" name="mypetsprofile_form_submitted_sava_data" />
                 </div>
             <?php
