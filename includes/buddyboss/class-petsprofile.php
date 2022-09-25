@@ -414,57 +414,55 @@ class MPP_Petsprofile
         ob_start();
     ?>
         <div class="mypetsprofile_qr_list_wrapper">
-            <h3 class="mypetsprofile_qr_list_title">All Profile ID’s</h3>
-            <ul class="mypetsprofile_qr_list">
-                <li class="mypetsprofile_qr_list_item">
+            <div class="mypetsprofile_qr_list">
+                <div class="mypetsprofile_qr_list_item">
                     <a href="<?php echo home_url('/mpp-qrcode-mypetsprofile-id/'); ?>">
-                        <i class="las la-address-card"></i>
-                        MyPetsProfile&#8482; ID
+                        <img src="<?php echo get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/mypetsprofile.png'; ?>" />
+                        <p>MyPetsProfile&#8482; <br> General ID</p>
                     </a>
-                </li>
-                <li class="mypetsprofile_qr_list_item">
-                    <a href="<?php echo home_url('/mpp-qrcode-mypetshousing-id/'); ?>">
-                        <i class="las la-home"></i>
-                        MyPetsHousing&#8482; ID
-                    </a>
-                </li>
-                <li class="mypetsprofile_qr_list_item">
-                    <a href="<?php echo home_url('/mpp-qrcode-mypetstravel-id/'); ?>">
-                        <i class="las la-globe"></i>
-                        MyPetsTravel&#8482; ID
-                    </a>
-                </li>
-                <li class="mypetsprofile_qr_list_item">
-                    <a href="<?php echo home_url('/mpp-qrcode-mypetspassport-id/'); ?>">
-                        <i class="las la-passport"></i>
-                        MyPetsPassport&#8482; ID
-                    </a>
-                </li>
-                <li class="mypetsprofile_qr_list_item">
-                    <a href="<?php echo home_url('/mpp-qrcode-mypetspoints-id/'); ?>">
-                        <i class="las la-coins"></i>
-                        MyPetsPoints&#8482; ID
-                    </a>
-                </li>
-                <li class="mypetsprofile_qr_list_item">
+                </div>
+                <div class="mypetsprofile_qr_list_item">
                     <a href="<?php echo home_url('/mpp-qrcode-mypetshealth-id/'); ?>">
-                        <i class="las la-heartbeat"></i>
-                        MyPetsHealth ID
+                        <img src="<?php echo get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/health.png'; ?>" />
+                        <p>MyPetsHealth&#8482; <br> Share with Vets</p>
                     </a>
-                </li>
-                <li class="mypetsprofile_qr_list_item">
+                </div>
+                <div class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetshousing-id/'); ?>">
+                        <img src="<?php echo get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/housing.png'; ?>" />
+                        <p>MyPetsHousing&#8482; <br> Share with Landlords</p>
+                    </a>
+                </div>
+                <div class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetstravel-id/'); ?>">
+                        <img src="<?php echo get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/travel.png'; ?>" />
+                        <p>MyPetsTravel&#8482; <br> Share with hotels</p>
+                    </a>
+                </div>
+                <div class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetspassport-id/'); ?>">
+                        <img src="<?php echo get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/passport.png'; ?>" />
+                        <p>MyPetsPassport&#8482; <br> Share with airlines & customs</p>
+                    </a>
+                </div>
+                <div class="mypetsprofile_qr_list_item">
                     <a href="<?php echo home_url('/mpp-qrcode-mypetslicense-id/'); ?>">
-                        <i class="las la-scroll"></i>
-                        MyPetsLicense&#8482; ID
+                        <img src="<?php echo get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/license.png'; ?>" />
+                        <p>MyPetsLicense&#8482; <br> Receipt</p>
                     </a>
-                </li>
-                <li class="mypetsprofile_qr_list_item">
-                    <a href="<?php echo home_url('/mpp-qrcode-mypetsservice-id/'); ?>">
-                        <i class="las la-paw"></i>
-                        MyPetsService Animal & ESA ID
+                </div>
+                <div class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetspoints-id/'); ?>">
+                        <img src="<?php echo get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/points.png'; ?>" />
+                        <p>MyPetsPoints&#8482; <br> Earn points</p>
                     </a>
-                </li>
-            </ul>
+                </div>
+                <div class="mypetsprofile_qr_list_item">
+                    <a href="<?php echo home_url('/mpp-qrcode-mypetsservice-id/'); ?>" class="mypetsprofile-service">
+                        <p>Service Animal & Emotional Support Animal (ESA)</p>
+                    </a>
+                </div>
+            </div>
         </div>
     <?php
         return ob_get_clean();
@@ -605,6 +603,9 @@ class MPP_Petsprofile
                 break;
             case 'health':
                 $logo = get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/health.png';
+                break;
+            case 'housing':
+                $logo = get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/housing.png';
                 break;
             case 'license':
                 $logo = get_stylesheet_directory_uri() . '/assets/img/petsprofile-ids/license.png';
