@@ -141,7 +141,7 @@ class MPP_Petsprofile
         }
 
         // UPDATE DATA
-        $this->mypetsprofile_update_form_data();
+        $this->mypetsprofile_update_form_data($atts);
 
 ?>
         <form id="mpp_profile_box" class="mpp_profile_box" method="post">
@@ -151,7 +151,8 @@ class MPP_Petsprofile
                 foreach ($field_group as $field_id) {
                     $field = xprofile_get_field($field_id, $member_id);
                     $field_value = in_array($field->type, array("telephone", "url", "email")) ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
-                    $visibility_level =  xprofile_get_field_visibility_level($field->id, $member_id);
+                    //$visibility_level =  xprofile_get_field_visibility_level($field->id, $member_id);
+                    $visibility_level = $this->get_petsprofile_visibility_level($field->id, $member_id, $atts['type']);
             ?>
                     <div class="mpp-profile-field">
                         <div class="mpp-profile-header">
@@ -188,7 +189,7 @@ class MPP_Petsprofile
     /**
      * SAVE MYPETSPROFILE DATA
      */
-    public function mypetsprofile_update_form_data()
+    public function mypetsprofile_update_form_data($atts = [])
     {
         if (is_user_logged_in()) {
             // Export CSV From DNA PROFILE
@@ -204,7 +205,8 @@ class MPP_Petsprofile
                         if (get_current_user_id() == $member_id) {
                             xprofile_set_field_data($field_id, $member_id, $field_value);
                             if (isset($_POST['mpp_visibility_' . $field_id]) && !empty($_POST['mpp_visibility_' . $field_id])) {
-                                xprofile_set_field_visibility_level($field_id, $member_id, $_POST['mpp_visibility_' . $field_id]);
+                                //xprofile_set_field_visibility_level($field_id, $member_id, $_POST['mpp_visibility_' . $field_id]);
+                                $this->set_petsprofile_visibility_level($field_id, $member_id, $atts['type'], $_POST['mpp_visibility_' . $field_id]);
                             }
                         }
                     }
@@ -261,7 +263,8 @@ class MPP_Petsprofile
             foreach ($field_group as $field_id) {
                 $field = xprofile_get_field($field_id, $member_id);
                 $field_value = in_array($field->type, array("telephone", "url", "email")) ? BP_XProfile_ProfileData::get_value_byid($field->id, $member_id) : xprofile_get_field_data($field->id, $member_id);
-                $visibility_level =  xprofile_get_field_visibility_level($field->id, $member_id);
+                //$visibility_level =  xprofile_get_field_visibility_level($field->id, $member_id);
+                $visibility_level = $this->get_petsprofile_visibility_level($field->id, $member_id, $atts['type']);
                 //public loggedin friends adminsonly
                 $visibility = false;
                 if ($visibility_level == 'adminsonly') {
@@ -629,6 +632,36 @@ class MPP_Petsprofile
         } else {
             echo '<h3 class="mypetsprofile-id-title">' . $title . '</h3>';
         }
+    }
+
+    /**
+     * GET PETSPROFILE VISIBILITY LEVEL
+     */
+    public function get_petsprofile_visibility_level($field = 0, $user_id = 0, $profile = 'general')
+    {
+        if (!$field || !$user_id) return 'adminsonly';
+        $petsprofile_visibility_levels = bp_get_user_meta($user_id, 'bp_petsprofile_visibility_levels', true);
+        if (!$petsprofile_visibility_levels || empty($petsprofile_visibility_levels)) return 'adminsonly';
+        if (isset($petsprofile_visibility_levels[$profile][$field]) && !empty($petsprofile_visibility_levels[$profile][$field])) {
+            return $petsprofile_visibility_levels[$profile][$field];
+        } else {
+            return 'adminsonly';
+        }
+    }
+
+    /**
+     * SET PETSPROFILE VISIBILITY LEVEL
+     */
+    public function set_petsprofile_visibility_level($field = 0, $user_id = 0, $profile = 'general', $visibility_level = 'adminsonly')
+    {
+        if (!$field || !$user_id) return 'adminsonly';
+        $petsprofile_visibility_levels = bp_get_user_meta($user_id, 'bp_petsprofile_visibility_levels', true);
+        $updated_visibility_levels = array();
+        if ($petsprofile_visibility_levels && !empty($petsprofile_visibility_levels)) {
+            $updated_visibility_levels = $petsprofile_visibility_levels;
+        }
+        $updated_visibility_levels[$profile][$field] = $visibility_level;
+        return bp_update_user_meta($user_id, 'bp_petsprofile_visibility_levels', $updated_visibility_levels);
     }
 
     /**
