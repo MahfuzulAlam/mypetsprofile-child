@@ -1568,3 +1568,196 @@ form.messenger-form {
 #pooprint_select_listing_msg {
   margin: 10px 0;
 }
+
+/* Mypetsprofile ID Style - Starts */
+.mypetsprofile-user-header {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.mypetsprofile-user-header h3,
+.mypetsprofile-user-header h4 {
+  margin-bottom: 5px !important;
+}
+
+.mypetsprofile-user-header h4 {
+  font-size: 14px;
+  font-weight: 400;
+  color: steelblue;
+}
+
+.mypetsprofile-user-avatar {
+  text-align: center;
+  width: 150px;
+  height: 150px;
+  margin: auto;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.mypetsprofile-title {
+  text-align: center;
+}
+
+.mypetsprofile-action {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.mypetsprofile-action a {
+  margin-top: 10px;
+}
+
+.mpp-copy-link-status {
+  font-size: 12px;
+  padding: 10px;
+}
+
+.mpp-copy-link {
+  margin-bottom: 10px;
+}
+
+.mpp_profile_box .form_title {
+  text-align: center;
+}
+
+.mypetsprofile-id-title,
+.mypetsprofile-display-info .info-title,
+.mypetsprofile_registration_form .info-title {
+  text-align: center;
+}
+
+.mypetsprofile-display-info .info-block {
+  margin-bottom: 10px;
+}
+
+.mypetsprofile-display-info .info-label {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.mypetsprofile-display-info .info-value {
+  font-weight: 400;
+  font-size: 16px;
+}
+
+.mypetsprofile_registration_form {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.mypetsprofile_registration_form .info-detail {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.mypetsprofile_registration_field {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.mypetsprofile_registration_field .error-message {
+  color: rgb(88, 13, 13);
+}
+
+.mypetsprofile_registration_field .success-message {
+  color: green;
+}
+
+.mypetsprofile_registration_field label,
+.mypetsprofile_registration_field input,
+.mypetsprofile_registration_field span {
+  margin-bottom: 5px;
+  display: block;
+}
+
+.mypetsprofile_registration_field span.description {
+  font-size: 12px;
+}
+
+.mypetsprofile-id-image-wrapper {
+  text-align: center;
+}
+
+.mypetsprofile-id-image-wrapper img {
+  width: 200px;
+}
+
+.wpkqcg_qrcode_wrapper img {
+  max-width: 75% !important;
+}
+
+.mypetsprofile_qr_list_wrapper {
+  margin: 0;
+}
+
+.mypetsprofile_qr_list_wrapper .mypetsprofile_qr_list {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.mypetsprofile_qr_list_wrapper .mypetsprofile_qr_list_title {
+  font-size: 25px;
+  text-align: center;
+}
+
+.mypetsprofile_qr_list_wrapper .mypetsprofile_qr_list_item {
+  margin: 10px 0;
+  width: 47%;
+  padding: 10px;
+  border: 1px solid #eee;
+  margin-right: 3%;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.mypetsprofile_qr_list_wrapper .mypetsprofile_qr_list_item img {
+  max-height: 60px;
+}
+
+.mypetsprofile_qr_list_wrapper .mypetsprofile_qr_list_item p {
+  margin-bottom: 0;
+  margin-top: 10px;
+}
+
+.mypetsprofile_qr_list_wrapper .mypetsprofile_qr_list_item a {
+  color: #122b46;
+  display: block;
+  font-size: 12px;
+  text-align: center;
+  word-break: break-word;
+  line-height: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mypetsprofile_qr_list_wrapper a.mypetsprofile-service {
+  padding: 20px 0;
+}
+
+.mypetsprofile_qr_list_wrapper .mypetsprofile_qr_list_item a:hover,
+.mypetsprofile_qr_list_wrapper .mypetsprofile_qr_list_item a:active {
+  color: #2c4560;
+  background-color: #eee;
+}
+
+.mypetsprofile_qr_list_wrapper .mypetsprofile_qr_list_item i {
+  font-size: 25px;
+  margin-right: 10px;
+  color: #e85126;
+}
+
+@media only screen and (max-width: 767px) {
+  .mypetsprofile_registration_field input {
+    width: 100%;
+  }
+}
+
+/* Mypetsprofile ID Style - Ends */

@@ -42,7 +42,7 @@ if (!defined('MPP_SITE_URL')) {
 }
 
 if (!defined('MPP_VERSION')) {
-	define('MPP_VERSION', '1.1.21');
+	define('MPP_VERSION', '1.1.28');
 }
 
 if (!defined('MPP_MAP_VERSION')) {
@@ -162,6 +162,7 @@ if (directorist_is_plugin_active('directorist/directorist-base.php')) :
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-referral-email.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-registration.php');
 	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-login-redirect.php');
+	require_once(get_stylesheet_directory() . '/includes/buddyboss/class-petsprofile.php');
 
 	// DIRECTORIST
 	require_once(get_stylesheet_directory() . '/includes/directorist/class-fields.php');

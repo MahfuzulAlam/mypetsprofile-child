@@ -1182,22 +1182,54 @@ jQuery(document).ready(function ($) {
   // });
 
   // POOPRINTS LISTING SELECTION BUTTONS
-  $("#pooprint_select_listing_button").on("click", function (e) {
+  $(".pooprint_select_listing_button").on("click", function (e) {
     e.preventDefault();
-    var listing = $("#pooprint_select_listing").val();
-    var link = $("#pooprint_page_link").val();
-    var formLink = $("#pooprint_select_listing")
-      .find(":selected")
-      .attr("data-pooprint-link");
-    if (listing != "" && listing != 0) {
-      $("#pooprint_select_listing_msg").text("Loading Registration Page");
-      if (mppChild.isLogin) {
-        if (formLink != "") window.location.href = formLink;
+
+    var $form_holder = $(this).parents(".mpp-custom-registration-form-holder");
+    var type = $form_holder.find(".selection_type").val();
+
+    var pooprint_select_listing = $form_holder.find(".pooprint_select_listing");
+    var pooprint_select_listing_msg = $form_holder.find(
+      ".pooprint_select_listing_msg"
+    );
+
+    if (type == "pooprints") {
+      var listing = $form_holder.find(".pooprint_select_listing").val();
+      var link = $form_holder.find(".pooprint_page_link").val();
+
+      var formLink = pooprint_select_listing
+        .find(":selected")
+        .attr("data-pooprint-link");
+      if (listing != "" && listing != 0) {
+        pooprint_select_listing_msg.text("Loading Registration Page ...");
+        if (mppChild.isLogin) {
+          if (formLink != "") window.location.href = formLink;
+        } else {
+          window.location.href = link + "?listing=" + listing;
+        }
       } else {
-        window.location.href = link + "?listing=" + listing;
+        pooprint_select_listing_msg.text("Please select a listing first");
       }
     } else {
-      $("#pooprint_select_listing_msg").text("Please select a listing first");
+      var formUrl = $form_holder.find(".selection_type_link").val();
+      var listing = $form_holder.find(".pooprint_select_listing").val();
+
+      var access_type = pooprint_select_listing
+        .find(":selected")
+        .attr("data-access-type");
+
+      if (formUrl != "" && listing != 0) {
+        pooprint_select_listing_msg.text("Loading Registration Page ...");
+        if (access_type == "free") {
+          window.location.href = formUrl + "?listing=" + listing;
+        } else {
+          var mpp_product_url = $form_holder.find(".mpp_product_url").val();
+          if (mpp_product_url && mpp_product_url != "")
+            window.location.href = mpp_product_url + "?mpp_building=" + listing;
+        }
+      } else {
+        pooprint_select_listing_msg.text("Please select a listing first");
+      }
     }
   });
 
@@ -1217,5 +1249,78 @@ jQuery(document).ready(function ($) {
     }
   });
 
+  // COPY POOPRINTS QRCODE LINK
+  $(document).on("click", ".mpp-copy-link", function (e) {
+    e.preventDefault();
+    var link = $(this).attr("data-qrcode");
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val(link).select();
+    document.execCommand("copy");
+    $temp.remove();
+    $(".mpp-copy-link-status").text(
+      "Link copied! You can share this on any platform."
+    );
+  });
+
+  // REGISTER NEW USER - MYPETSPROFILE ID FORM
+  $(document).on("click", "#submit_email", function (e) {
+    e.preventDefault();
+    var email = $("#email_address").val();
+    var confirm_email = $("#confirm_email").val();
+    var $error_message = $("#error_message");
+    var $success_message = $("#success_message");
+    var $url = window.location.href;
+
+    if (email == "" || !validateEmail(email)) {
+      $error_message.text("Please enter a valid email address");
+      return;
+    }
+
+    if (confirm_email != email) {
+      $error_message.text("Retyped email address does not match");
+      return;
+    }
+
+    $error_message.text("");
+    $success_message.text("Checking...");
+
+    // AJAX CALL
+    $.ajax({
+      type: "post",
+      dataType: "json",
+      url: mppChild.ajaxurl,
+      data: { action: "mypetsprofile_registration", email: email },
+      success: function (response) {
+        if (response.result == true) {
+          if (response.registration == true) {
+            $success_message.text(
+              "Thank you for registering, redirecting to the ID information..."
+            );
+            window.location.href = $url + "&registered=yes";
+          } else {
+            if (response.status == "exists") {
+              $success_message.text(
+                "Email already exist, redirecting to the ID information..."
+              );
+              window.location.href = $url + "&registered=yes";
+            }
+          }
+        } else {
+          $error_message.text("Sorry, something went wrong");
+        }
+      },
+    });
+    // AJAX CALL
+  });
+
+  // EMAIL VALIDATION
+  const validateEmail = (email) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+  };
   // END SCRIPT
 });
