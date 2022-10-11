@@ -297,6 +297,10 @@ class MPP_Petsprofile
             ?>
         </div>
     <?php
+
+        // ADD GAMIPRESS POINTS
+        if ($atts['type'] == 'points')
+            do_action('mpp_after_scan_user_qr_code', array('type' => 'user', 'id' => $member_id));
     }
 
     /**
@@ -641,11 +645,11 @@ class MPP_Petsprofile
     {
         if (!$field || !$user_id) return 'adminsonly';
         $petsprofile_visibility_levels = bp_get_user_meta($user_id, 'bp_petsprofile_visibility_levels', true);
-        if (!$petsprofile_visibility_levels || empty($petsprofile_visibility_levels)) return 'adminsonly';
+        if (!$petsprofile_visibility_levels || empty($petsprofile_visibility_levels)) return 'public';
         if (isset($petsprofile_visibility_levels[$profile][$field]) && !empty($petsprofile_visibility_levels[$profile][$field])) {
             return $petsprofile_visibility_levels[$profile][$field];
         } else {
-            return 'adminsonly';
+            return 'public';
         }
     }
 
@@ -654,7 +658,7 @@ class MPP_Petsprofile
      */
     public function set_petsprofile_visibility_level($field = 0, $user_id = 0, $profile = 'general', $visibility_level = 'adminsonly')
     {
-        if (!$field || !$user_id) return 'adminsonly';
+        if (!$field || !$user_id) return;
         $petsprofile_visibility_levels = bp_get_user_meta($user_id, 'bp_petsprofile_visibility_levels', true);
         $updated_visibility_levels = array();
         if ($petsprofile_visibility_levels && !empty($petsprofile_visibility_levels)) {
