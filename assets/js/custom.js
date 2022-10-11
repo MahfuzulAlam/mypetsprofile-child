@@ -1297,13 +1297,15 @@ jQuery(document).ready(function ($) {
             $success_message.text(
               "Thank you for registering, redirecting to the ID information..."
             );
-            window.location.href = $url + "&registered=yes";
+            window.location.href =
+              $url + "&registered=yes&scanner=" + response.user;
           } else {
             if (response.status == "exists") {
               $success_message.text(
                 "Email already exist, redirecting to the ID information..."
               );
-              window.location.href = $url + "&registered=yes";
+              window.location.href =
+                $url + "&registered=yes&scanner=" + response.user;
             }
           }
         } else {

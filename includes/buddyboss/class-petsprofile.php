@@ -298,11 +298,47 @@ class MPP_Petsprofile
         </div>
     <?php
 
+        // TRACK SCAN DATA
+        $scanner_id = isset($_REQUEST['scanner']) && !empty($_REQUEST['scanner']) ? (int)$_REQUEST['scanner'] : get_current_user_id();
+        $this->track_scan_data($scanner_id, $member_id, $atts['type']);
+
         // ADD GAMIPRESS POINTS
         if ($atts['type'] == 'points')
             do_action('mpp_after_scan_user_qr_code', array('type' => 'user', 'id' => $member_id));
     }
 
+    /**
+     * TRACK SCAN DATA
+     */
+
+    public function track_scan_data($scanner_id = 0, $scanned_id = 0, $type = 'general')
+    {
+        // Scanner ID
+        if ($scanner_id && $scanned_id) {
+            $mpp_scan_info = get_user_meta($scanner_id, 'mpp_scans', true) ? get_user_meta($scanner_id, 'mpp_scans', true) : [];
+            $scanner_info = array(
+                'type'  => $type,
+                'user_id' => $scanned_id,
+                'date' => date('Y-m-d'),
+                'time' => date('H:i:s'),
+            );
+            array_push($mpp_scan_info, $scanner_info);
+            update_user_meta($scanner_id, 'mpp_scans', $mpp_scan_info);
+        }
+
+        // Scanned ID
+        if ($scanned_id) {
+            $mpp_scanned_info = get_user_meta($scanned_id, 'mpp_scanned', true) ? get_user_meta($scanned_id, 'mpp_scanned', true) : [];
+            $scanned_info = array(
+                'type'  => $type,
+                'user_id' => $scanner_id,
+                'date' => date('Y-m-d'),
+                'time' => date('H:i:s'),
+            );
+            array_push($mpp_scanned_info, $scanned_info);
+            update_user_meta($scanned_id, 'mpp_scanned', $mpp_scanned_info);
+        }
+    }
     /**
      * MYPETSPROFILE DISPLAY INFORMATION REGISTRATION
      */
@@ -523,10 +559,12 @@ class MPP_Petsprofile
         $email = isset($_POST['email']) && !empty($_POST['email']) ? $_POST['email'] : '';
         $response = ["result" => false];
         if (!empty($email)) {
-            if (email_exists($email)) {
+            $user_exists = email_exists($email);
+            if ($user_exists) {
                 $response['result'] = true;
                 $response['registration'] = false;
                 $response['status'] = 'exists';
+                $response['user'] = $user_exists;
             } else {
                 $username = $this->mpp_generate_username('', '', $email);
                 $password = wp_generate_password(8);
@@ -536,6 +574,7 @@ class MPP_Petsprofile
                     $response['result'] = true;
                     $response['registration'] = true;
                     $response['status'] = 'registered';
+                    $response['user'] = $user_id;
                 }
             }
         }
