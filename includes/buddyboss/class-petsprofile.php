@@ -16,6 +16,9 @@ class MPP_Petsprofile
 
         add_shortcode('mypetsprofile-qr-list', array($this, 'mypetsprofile_qr_list'));
 
+        add_shortcode('mypetsprofile-qr-scanned-report', array($this, 'myopetsprofile_qr_scanned_report'));
+        add_shortcode('mypetsprofile-qr-scanner-report', array($this, 'myopetsprofile_qr_scanner_report'));
+
         add_action('wp_ajax_mypetsprofile_registration', array($this, 'ajax_mypetsprofile_registration'));
         add_action('wp_ajax_nopriv_mypetsprofile_registration', array($this, 'ajax_mypetsprofile_registration'));
 
@@ -339,6 +342,68 @@ class MPP_Petsprofile
             update_user_meta($scanned_id, 'mpp_scanned', $mpp_scanned_info);
         }
     }
+
+    /**
+     * MYPETSPROFILE QR SCANNER REPORT
+     */
+    public function myopetsprofile_qr_scanner_report()
+    {
+        if (!is_user_logged_in() || !current_user_can('editor') || !current_user_can('administrator')) return;
+        ob_start();
+        $user_id = isset($_REQUEST['user']) && !empty($_REQUEST['user']) ? $_REQUEST['user'] : 0;
+        if ($user_id) {
+            $user = get_user_by('id', $user_id);
+            echo $user ? 'Username: ' . $user->user_login : '';
+            $mpp_scanned_info = get_user_meta($user_id, 'mpp_scans', true) ? get_user_meta($user_id, 'mpp_scans', true) : [];
+            if (!empty($mpp_scanned_info)) {
+                $total_scanned = count($mpp_scanned_info);
+                echo '<p>Total scans: ' . $total_scanned . '</p>';
+                $mpp_scanned_info = array_reverse($mpp_scanned_info);
+                foreach ($mpp_scanned_info as $scanned_info) {
+                    $date = isset($scanned_info['date']) && !empty($scanned_info['date']) ? $scanned_info['date'] : '';
+                    $time = isset($scanned_info['time']) && !empty($scanned_info['time']) ? $scanned_info['time'] : '';
+                    $type = isset($scanned_info['type']) && !empty($scanned_info['type']) ? $scanned_info['type'] : '';
+                    $user_id = isset($scanned_info['user_id']) && !empty($scanned_info['user_id']) ? $scanned_info['user_id'] : '';
+                    echo '<p class="mpp-scan-line">- ' . $date . ' ' . $time . ' (' . $type . ') by ' . $user_id . '</p>';
+                }
+            }
+        } else {
+            echo '<p>No user is selected</p>';
+        }
+        return ob_get_clean();
+    }
+
+    /**
+     * MYPETSPROFILE QR SCANNED REPORT
+     */
+    public function myopetsprofile_qr_scanned_report()
+    {
+        if (!is_user_logged_in() || !current_user_can('editor') || !current_user_can('administrator')) return;
+        ob_start();
+        $user_id = isset($_REQUEST['user']) && !empty($_REQUEST['user']) ? $_REQUEST['user'] : 0;
+        if ($user_id) {
+            $user = get_user_by('id', $user_id);
+            echo $user ? 'Username: ' . $user->user_login : '';
+            $mpp_scanned_info = get_user_meta($user_id, 'mpp_scanned', true) ? get_user_meta($user_id, 'mpp_scanned', true) : [];
+            if (!empty($mpp_scanned_info)) {
+                $total_scanned = count($mpp_scanned_info);
+                echo '<p>Total scanned: ' . $total_scanned . '</p>';
+                $mpp_scanned_info = array_reverse($mpp_scanned_info);
+                foreach ($mpp_scanned_info as $scanned_info) {
+                    $date = isset($scanned_info['date']) && !empty($scanned_info['date']) ? $scanned_info['date'] : '';
+                    $time = isset($scanned_info['time']) && !empty($scanned_info['time']) ? $scanned_info['time'] : '';
+                    $type = isset($scanned_info['type']) && !empty($scanned_info['type']) ? $scanned_info['type'] : '';
+                    $user_id = isset($scanned_info['user_id']) && !empty($scanned_info['user_id']) ? $scanned_info['user_id'] : '';
+                    echo '<p class="mpp-scan-line">- ' . $date . ' ' . $time . ' (' . $type . ') by ' . $user_id . '</p>';
+                }
+            }
+        } else {
+            echo '<p>No user is selected</p>';
+        }
+        return ob_get_clean();
+    }
+
+
     /**
      * MYPETSPROFILE DISPLAY INFORMATION REGISTRATION
      */
