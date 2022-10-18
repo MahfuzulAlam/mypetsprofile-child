@@ -1250,17 +1250,42 @@ jQuery(document).ready(function ($) {
   });
 
   // COPY POOPRINTS QRCODE LINK
+  // $(document).on("click", ".mpp-copy-link", function (e) {
+  //   e.preventDefault();
+  //   var link = $(this).attr("data-qrcode");
+  //   var $temp = $("<input>");
+  //   $("body").append($temp);
+  //   $temp.val(link).select();
+  //   document.execCommand("copy");
+  //   $temp.remove();
+  //   $(".mpp-copy-link-status").text(
+  //     "Link copied! You can share this on any platform."
+  //   );
+  // });
+
   $(document).on("click", ".mpp-copy-link", function (e) {
     e.preventDefault();
     var link = $(this).attr("data-qrcode");
-    var $temp = $("<input>");
-    $("body").append($temp);
-    $temp.val(link).select();
-    document.execCommand("copy");
-    $temp.remove();
-    $(".mpp-copy-link-status").text(
-      "Link copied! You can share this on any platform."
-    );
+    if (navigator.share) {
+      navigator
+        .share({
+          text: "MyPetsProfile™",
+          url: link,
+        })
+        .then(() => {
+          $(".mpp-copy-link-status").text("Thank you for sharing the link!");
+        })
+        .catch((err) => console.error(err));
+    } else {
+      var $temp = $("<input>");
+      $("body").append($temp);
+      $temp.val(link).select();
+      document.execCommand("copy");
+      $temp.remove();
+      $(".mpp-copy-link-status").text(
+        "Link copied! You can share this on any platform."
+      );
+    }
   });
 
   // REGISTER NEW USER - MYPETSPROFILE ID FORM

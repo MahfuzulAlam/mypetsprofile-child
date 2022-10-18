@@ -59,9 +59,9 @@ class MPP_Child_Shortcode
             $msg .= " " . MPP_SITE_URL . "/elite-affiliate-program/?ep=" . $affiliate_id;
             $encoded_sms = rawurlencode($msg);
             if (strpos($_SERVER['HTTP_USER_AGENT'], 'iPhone') !== false) {
-                $sms_string = 'sms://?&amp;';
+                $sms_string = 'sms://&amp;?&';
             } else {
-                $sms_string = 'sms:?';
+                $sms_string = 'sms: ?';
             }
 ?>
             <a class="button" href="<?php echo $sms_string; ?>body=<?php echo $encoded_sms; ?>">Send referral invites via Text</a>

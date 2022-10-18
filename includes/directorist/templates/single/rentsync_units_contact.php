@@ -11,8 +11,7 @@
         <span class="directorist-single-info__label--text">Phone</span>
     </div>
     <div class="contact_unit_owner directorist-single-info__value">
-        <?php echo $phone; ?>
-        <!-- <a href="tel:<?php echo $phone_formatted; ?>" target="_blank"><?php echo $phone; ?></a> -->
+        <a href="tel:<?php echo $phone_formatted; ?>" target="_blank"><?php echo $phone; ?></a>
     </div>
 </div>
 <?php if ($email && !empty($email)) : ?>
@@ -22,8 +21,7 @@
             <span class="directorist-single-info__label--text">Email</span>
         </div>
         <div class="contact_unit_owner directorist-single-info__value">
-            <?php echo $email; ?>
-            <!-- <a href="mailto:<?php echo $email; ?>" target="_blank"><?php echo $email; ?></a> -->
+            <a href="mailto:<?php echo $email; ?>" target="_blank"><?php echo $email; ?></a>
         </div>
     </div>
 <?php endif; ?>
