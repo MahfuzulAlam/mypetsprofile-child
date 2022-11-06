@@ -2405,7 +2405,7 @@ add_filter('atbdp_all_listings_query_arguments', function ($args) {
     unset($args['meta_query']['directory_type']);
     $args['meta_query']['directory_type'] = array(
         "key" => "_directory_type",
-        "value" => array(200, 1418, 1414),
+        "value" => array(200, 1418, 1414, 288),
         "compare" => "IN"
     );
 
@@ -2483,3 +2483,20 @@ add_shortcode('mpp-app-qrcode-redirect', function () {
 <?php
     return ob_get_clean();
 });
+
+function mpp_modify_post_api($data, $post, $context)
+{
+    $featured_image_id = $data->data['featured_media']; // get featured image id
+    $featured_image_url = wp_get_attachment_image_src($featured_image_id, 'full'); // get url of the original size
+
+    $data->data['featured_image_url'] = $featured_image_url ? $featured_image_url[0] : '';
+    $data->data['post_excerpt'] = $post->post_excerpt ? $post->post_excerpt : '';
+
+    if ($post->post_excerpt) {
+        $parse = parse_url($post->post_excerpt);
+        $data->data['news_source'] = $parse ? strtoupper($parse['host']) : '';
+    }
+
+    return $data;
+}
+add_filter('rest_prepare_post', 'mpp_modify_post_api', 10, 3);

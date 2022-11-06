@@ -77,7 +77,8 @@ $directory_type = get_post_meta($listing_id, '_directory_type', true);
 				</div>
 			</div>
 			<div class="directorist-listing-single__info--excerpt"><?php $listings->render_loop_fields($loop_fields['body']['excerpt']); ?></div>
-			<?php if (!$claimed && $directory_type != 1418) echo '<div><span class="claim-this-listing">Claim this listing</span></div>'; ?>
+			<?php //if (!$claimed && $directory_type != 1418) echo '<div><span class="claim-this-listing">Claim this listing</span></div>'; 
+			?>
 			<div class="directorist-listing-single__info--right"><?php $listings->render_loop_fields($loop_fields['body']['right']); ?></div>
 		</div>
 
