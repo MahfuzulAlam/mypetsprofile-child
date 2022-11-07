@@ -65,5 +65,6 @@ $listing = isset($_REQUEST['listing']) && !empty($_REQUEST['listing']) ? $_REQUE
             <input type="submit" name="signup_submit" id="signup_submit" value="Create Account" />
         </div>
         <input type="hidden" id="listing" name="listing" value="<?php echo $listing; ?>" />
+        <input type="hidden" id="form_type" name="form_type" value="pet-profile-registration" />
     </form>
 </div>

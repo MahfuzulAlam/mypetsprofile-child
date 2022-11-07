@@ -22,6 +22,9 @@ class MPP_Registration
 
         // DIRECTORIST - SET COOKIE
         add_action('init', array($this, 'set_listing_as_cookie'));
+
+        // CREATE USER
+        add_action('template_redirect', array($this, 'create_user_process'));
     }
 
     /**
@@ -55,31 +58,68 @@ class MPP_Registration
         $listing_id = isset($_REQUEST['listing']) && !empty($_REQUEST['listing']) ? $_REQUEST['listing'] : 0;
         $form_type = isset($atts['form_type']) && !empty($atts['form_type']) ? $atts['form_type'] : 'pooprints';
 
-        if (!$listing_id || is_user_logged_in()) {
+        if ((!$listing_id && $form_type != 'apartment-registration') || is_user_logged_in()) {
             echo '<p>Sorry! This page is not available right now.</p>';
             return ob_get_clean();
         }
         // Create Account
-        $user = $this->create_account();
+        //$user = $this->create_account();
 
         // Redirection
-        if ($user) {
-            if ($form_type == 'pooprints') {
-                $this->redirect_to_pooprint_link();
-            } else if ($form_type == 'pet-profile-registration') {
-                $this->redirect_to_pet_profile_link();
-            }
-            return ob_get_clean();
-        }
+        // if ($user) {
+        //     if ($form_type == 'pooprints') {
+        //         $this->redirect_to_pooprint_link();
+        //     } else if ($form_type == 'pet-profile-registration') {
+        //         $this->redirect_to_pet_profile_link();
+        //     } else if ($form_type == 'apartment-registration') {
+        //         wp_set_current_user($user);
+        //         wp_set_auth_cookie($user);
+        //     }
+        //     return ob_get_clean();
+        // }
 
         if ($form_type == 'pooprints') {
             get_template_part('template-parts/content', 'pooprint_registration_form', $atts);
+        } else if ($form_type == 'apartment-registration') {
+            get_template_part('template-parts/content', 'apartment_registration_form', $atts);
         } else if ($form_type == 'pet-profile-registration') {
             get_template_part('template-parts/content', 'petprofile_registration_form', $atts);
         }
 
         return ob_get_clean();
     }
+
+    /**
+     * CRETAE USER PROCESS
+     */
+
+    public function create_user_process()
+    {
+        if (
+            is_page('apartment-registration') ||
+            is_page('pet-profile-registration-form') ||
+            is_page('pooprints-registration')
+        ) {
+            $form_type = isset($_POST['form_type']) && !empty($_POST['form_type']) ? $_POST['form_type'] : '';
+            // Create Account
+            $user = $this->create_account();
+
+            // Redirection
+            if ($user) {
+                if ($form_type == 'pooprints') {
+                    $this->redirect_to_pooprint_link();
+                } else if ($form_type == 'pet-profile-registration') {
+                    $this->redirect_to_pet_profile_link();
+                } else if ($form_type == 'apartment') {
+                    wp_set_current_user($user);
+                    wp_set_auth_cookie($user);
+                    $this->redirect_to_the_apartment_form();
+                }
+                return ob_get_clean();
+            }
+        }
+    }
+
 
     /**
      * CREATE ACCOUNT
@@ -92,6 +132,7 @@ class MPP_Registration
         $last_name = isset($_POST['last_name']) && !empty($_POST['last_name']) ? $_POST['last_name'] : '';
         $pet_name = isset($_POST['pet_name']) && !empty($_POST['pet_name']) ? $_POST['pet_name'] : '';
         $mpp_building = isset($_POST['listing']) && !empty($_POST['listing']) ? $_POST['listing'] : 0;
+        $form_type = isset($_POST['form_type']) && !empty($_POST['form_type']) ? $_POST['form_type'] : '';
 
         if (!empty($email) && !empty($password)) {
 
@@ -108,7 +149,11 @@ class MPP_Registration
                     xprofile_set_field_data(100, $user_id, $pet_name);
                 }
 
-                $this->update_user_role($user_id);
+                if ($form_type == 'apartment') {
+                    $this->update_user_role($user_id, 'pet_friendly_biz', 'pet-friendly-biz-member');
+                } else {
+                    $this->update_user_role($user_id, 'petowner', 'pet-owner');
+                }
 
                 return $user_id;
             }
@@ -120,15 +165,15 @@ class MPP_Registration
     /**
      * UPDATE USER ROLE
      */
-    public function update_user_role($user_id = 0)
+    public function update_user_role($user_id = 0, $user_role = 'petowner', $member_type = 'pet-owner')
     {
         if (!$user_id) return;
         // update member type
-        if (function_exists('bp_set_member_type')) bp_set_member_type($user_id, 'pet-owner');
+        if (function_exists('bp_set_member_type')) bp_set_member_type($user_id, $member_type);
         // update user role
-        if ($this->user_role_exists('petowner')) {
+        if ($this->user_role_exists($user_role)) {
             $user = new \WP_User($user_id);
-            $user->set_role('petowner');
+            $user->set_role($user_role);
         }
     }
 
@@ -207,10 +252,12 @@ class MPP_Registration
             $redirect_url = get_post_meta($mpp_building, '_pooprints_link', true);
         }
         if (!empty($redirect_url)) {
+            wp_redirect($redirect_url);
+            exit();
 ?>
             <p>Redirecting to the PooPrints Registration Page ... </p>
             <script type="text/javascript">
-                window.location.href = "<?php echo $redirect_url; ?>";
+                //window.location.href = "<?php echo $redirect_url; ?>";
             </script>
         <?php
         }
@@ -222,11 +269,23 @@ class MPP_Registration
      */
     public function redirect_to_pet_profile_link()
     {
+        wp_redirect(home_url() . '/members/me/');
+        exit();
         ?>
         <script type="text/javascript">
-            window.location.href = "<?php echo home_url(); ?>/members/me/";
+            //window.location.href = "<?php echo home_url(); ?>/members/me/";
         </script>
 <?php
+    }
+
+    //https://mypetsprofile.com/add-listing/?directory_type=1414&plan=30047
+    /**
+     * REDIRECT TO THE APARMENT FORM
+     */
+    public function redirect_to_the_apartment_form()
+    {
+        wp_redirect(home_url() . '/add-listing/?directory_type=1414&plan=30047');
+        exit();
     }
 
     /**

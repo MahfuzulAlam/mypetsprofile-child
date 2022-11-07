@@ -1767,3 +1767,7 @@ form.messenger-form {
 }
 
 /* Mypetsprofile ID Style - Ends */
+
+#signup_submit {
+  margin-top: 10px;
+}

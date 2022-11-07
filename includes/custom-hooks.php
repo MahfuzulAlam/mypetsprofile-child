@@ -560,6 +560,8 @@ class MPP_Child_Hooks
                 if (WC_Product_Factory::get_product_type($plan_id) == 'listing_pricing_plans') {
                     if ($plan_id == 18059) {
                         exit(wp_redirect(MPP_SITE_URL . '/affiliate-area'));
+                    } else if ($plan_id == 30047) {
+                        exit(wp_redirect(MPP_SITE_URL . '/dashboard'));
                     } else {
                         $directory_type = get_post_meta($plan_id, '_assign_to_directory', true) ? get_post_meta($plan_id, '_assign_to_directory', true) : default_directory_type();
                         exit(wp_redirect(MPP_SITE_URL . '/add-listing/?directory_type=' . $directory_type . '&plan=' . $plan_id));

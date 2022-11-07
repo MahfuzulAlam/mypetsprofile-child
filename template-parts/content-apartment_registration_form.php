@@ -17,7 +17,7 @@ $listing = isset($_REQUEST['listing']) && !empty($_REQUEST['listing']) ? $_REQUE
         <div class="layout-wrap">
             <div class="register-section default-profile" id="basic-details-section">
                 <div class="bb-signup-field signup_email">
-                    <label for="signup_email">Email *</label>
+                    <label for="signup_email">Email Address *</label>
                     <input type="email" name="signup_email" id="signup_email" value="" aria-required="true" required />
                     <div id="email-strength-result"></div>
                 </div>
@@ -52,17 +52,10 @@ $listing = isset($_REQUEST['listing']) && !empty($_REQUEST['listing']) ? $_REQUE
 
         <p class="register-privacy-info">
             By creating an account you are agreeing to the
-            <a class="popup-modal-register popup-terms" href="#terms-modal">
+            <a href="/terms-and-conditions/">
                 Terms of Service
             </a>
         </p>
-
-        <div id="terms-modal" class="mfp-hide registration-popup bb-modal">
-            <h1>Terms of Service</h1>
-            <button title="Close (Esc)" type="button" class="mfp-close">
-                ×
-            </button>
-        </div>
 
         <div class="g-recaptcha" data-sitekey="6Lfhu-MdAAAAAD6z5terepkOMyqZM4NAesLDt3S_"></div>
 
@@ -70,6 +63,6 @@ $listing = isset($_REQUEST['listing']) && !empty($_REQUEST['listing']) ? $_REQUE
             <input type="submit" name="signup_submit" id="signup_submit" value="Create Account" />
         </div>
         <input type="hidden" id="listing" name="listing" value="<?php echo $listing; ?>" />
-        <input type="hidden" id="form_type" name="form_type" value="pooprints" />
+        <input type="hidden" id="form_type" name="form_type" value="apartment" />
     </form>
 </div>

@@ -858,7 +858,14 @@ add_action('wp_head', function () {
         </style>
     <?php
     }
-    if (is_page('register')) echo '<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
+    if (
+        is_page('register') ||
+        is_page('apartment-registration') ||
+        is_page('pet-profile-registration-form') ||
+        is_page('pooprints-registration')
+    ) {
+        echo '<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
+    }
     echo '<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script> ';
 });
 
@@ -2500,3 +2507,18 @@ function mpp_modify_post_api($data, $post, $context)
     return $data;
 }
 add_filter('rest_prepare_post', 'mpp_modify_post_api', 10, 3);
+
+/**
+ * Change the group tab name
+ */
+
+function mpp_rename_group_tabs()
+{
+
+    if (!bp_is_group()) {
+        return;
+    }
+
+    buddypress()->groups->nav->edit_nav(array('name' => __('Meet Members', 'buddypress')), 'members', bp_current_item());
+}
+add_action('bp_actions', 'mpp_rename_group_tabs');
