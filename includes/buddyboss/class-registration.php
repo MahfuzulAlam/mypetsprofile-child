@@ -132,6 +132,10 @@ class MPP_Registration
         $last_name = isset($_POST['last_name']) && !empty($_POST['last_name']) ? $_POST['last_name'] : '';
         $pet_name = isset($_POST['pet_name']) && !empty($_POST['pet_name']) ? $_POST['pet_name'] : '';
         $mpp_building = isset($_POST['listing']) && !empty($_POST['listing']) ? $_POST['listing'] : 0;
+
+        $community_name = isset($_POST['community_name']) && !empty($_POST['community_name']) ? $_POST['community_name'] : '';
+        $admin_telephone = isset($_POST['admin_telephone']) && !empty($_POST['admin_telephone']) ? $_POST['admin_telephone'] : '';
+
         $form_type = isset($_POST['form_type']) && !empty($_POST['form_type']) ? $_POST['form_type'] : '';
 
         if (!empty($email) && !empty($password)) {
@@ -141,9 +145,12 @@ class MPP_Registration
 
             if ($user_id) {
                 // Add FirstName, LastName, Phone
-                if (!empty($firstname)) update_user_meta($user_id, 'first_name', $firstname);
-                if (!empty($lastname)) update_user_meta($user_id, 'last_name', $lastname);
+                if (!empty($first_name)) update_user_meta($user_id, 'first_name', $first_name);
+                if (!empty($last_name)) update_user_meta($user_id, 'last_name', $last_name);
                 if (!empty($mpp_building)) update_user_meta($user_id, 'mpp_building', $mpp_building);
+
+                if (!empty($community_name)) update_user_meta($user_id, 'community_name', $community_name);
+                if (!empty($admin_telephone)) update_user_meta($user_id, 'billing_phone', $admin_telephone);
 
                 if (!empty($pet_name)) {
                     xprofile_set_field_data(100, $user_id, $pet_name);

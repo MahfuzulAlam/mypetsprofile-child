@@ -47,6 +47,20 @@ $listing = isset($_REQUEST['listing']) && !empty($_REQUEST['listing']) ? $_REQUE
                         <input id="field_2" name="last_name" type="text" value="" aria-required="true" aria-labelledby="field_2-1" aria-describedby="field_2-3" />
                     </fieldset>
                 </div>
+
+                <div class="editfield field_3 field_community-name field_order_0 visibility-public alt field_type_textbox">
+                    <fieldset>
+                        <legend id=" field_3-1">Community Name </legend>
+                        <input id="field_3" name="community_name" type="text" value="" aria-required="true" aria-labelledby="field_2-1" aria-describedby="field_2-3" />
+                    </fieldset>
+                </div>
+
+                <div class="editfield field_4 field_admin-telephone field_order_0 visibility-public alt field_type_textbox">
+                    <fieldset>
+                        <legend id=" field_4-1">Admin Telephone </legend>
+                        <input id="field_4" name="admin_telephone" type="text" value="" aria-required="true" aria-labelledby="field_2-1" aria-describedby="field_2-3" />
+                    </fieldset>
+                </div>
             </div>
         </div>
 
