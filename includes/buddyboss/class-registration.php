@@ -20,11 +20,17 @@ class MPP_Registration
         // LISTING DNA PROPERTY SELECTION FORM
         add_shortcode('pooprints-dna-property-selection-form', array($this, 'pooprints_dna_property_selection_form'));
 
+        // USER ACTIVATION FORM
+        add_shortcode('mpp-activation-form', array($this, 'mpp_activation_form'));
+
         // DIRECTORIST - SET COOKIE
         add_action('init', array($this, 'set_listing_as_cookie'));
 
         // CREATE USER
         add_action('template_redirect', array($this, 'create_user_process'));
+
+        // ACTIVATION PROCESS
+        add_action('template_redirect', array($this, 'apartment_activation_process'));
     }
 
     /**
@@ -111,9 +117,7 @@ class MPP_Registration
                 } else if ($form_type == 'pet-profile-registration') {
                     $this->redirect_to_pet_profile_link();
                 } else if ($form_type == 'apartment') {
-                    wp_set_current_user($user);
-                    wp_set_auth_cookie($user);
-                    $this->redirect_to_the_apartment_form();
+                    $this->redirect_to_activation_form();
                 }
                 return ob_get_clean();
             }
@@ -154,6 +158,17 @@ class MPP_Registration
 
                 if (!empty($pet_name)) {
                     xprofile_set_field_data(100, $user_id, $pet_name);
+                }
+
+                // activation
+                if ($form_type == 'apartment') {
+                    global $wpdb;
+                    $activation_random = rand(100000, 999999);
+                    $activation_key = md5($activation_random);
+                    update_user_meta($user_id, 'activation_key', $activation_key);
+                    $wpdb->update($wpdb->users, array('user_status' => 2), array('ID' => $user_id));
+                    //send Email
+                    $this->mpp_signup_send_validation_email($user_id, $activation_key);
                 }
 
                 if ($form_type == 'apartment') {
@@ -282,7 +297,16 @@ class MPP_Registration
         <script type="text/javascript">
             //window.location.href = "<?php echo home_url(); ?>/members/me/";
         </script>
-<?php
+    <?php
+    }
+
+    /**
+     * REDIRECT TO ACTIVATION FORM
+     */
+    public function redirect_to_activation_form()
+    {
+        wp_redirect(home_url() . '/activate-apartment-registration');
+        exit();
     }
 
     //https://mypetsprofile.com/add-listing/?directory_type=1414&plan=30047
@@ -307,6 +331,70 @@ class MPP_Registration
                 setcookie('mpp_building', $mpp_building, time() + 90000, '/');
             }
         }
+    }
+
+    /**
+     * MPP ACTIVATION FORM
+     */
+    public function mpp_activation_form()
+    {
+        $user = isset($_REQUEST['user']) && !empty($_REQUEST['user']) ?  $_REQUEST['user'] : '';
+        $activation_key = isset($_REQUEST['key']) && !empty($_REQUEST['key']) ?  $_REQUEST['key'] : '';
+        ob_start();
+    ?>
+        <form method="post" name="mpp_user_activation" class="mpp_user_activation">
+            <label for="activation_key">Activation Key</label>
+            <input type="text" id="activation_key" name="activation_key" value="<?php echo $activation_key; ?>" />
+            <input type="hidden" id="user" name="user" value="<?php echo $user; ?>" />
+            <input type="submit" value="Submit" class="button btn" />
+        </form>
+<?php
+
+        return ob_get_clean();
+    }
+
+    /**
+     * APARTMENT ACTIVATION PROCESS
+     */
+    public function apartment_activation_process()
+    {
+        if (!is_page('activate-apartment-registration')) return;
+        global $wpdb;
+        $activation_key = isset($_POST['activation_key']) && !empty($_POST['activation_key']) ? $_POST['activation_key'] : '';
+        $user_id = isset($_POST['user']) && !empty($_POST['user']) ? $_POST['user'] : '';
+        if (empty($activation_key) || empty($user_id)) return;
+        $saved_key = get_user_meta($user_id, 'activation_key', true);
+        if ($saved_key == $activation_key) {
+            $wpdb->update($wpdb->users, array('user_status' => 0), array('ID' => $user_id));
+            // Redirect to the form
+            wp_set_current_user($user_id);
+            wp_set_auth_cookie($user_id);
+            $this->redirect_to_the_apartment_form();
+        }
+    }
+
+    /**
+     * SEND ACTIVATION EMAIL
+     */
+    function mpp_signup_send_validation_email($user_id, $key)
+    {
+        $user = get_userdata($user_id);
+        $args = array(
+            'tokens' => array(
+                'activate.url' => esc_url(home_url() . '/activate-apartment-registration/?key=' . $key . '&user=' . $user_id),
+                'key'          => $key,
+                'user.email'   => $user->user_email,
+                'user.id'      => $user_id,
+            ),
+        );
+
+        if ($user_id) {
+            $to = $user_id;
+        } else {
+            $to = array(array($user->user_email => $user->user_login));
+        }
+
+        bp_send_email('core-user-registration', $to, $args);
     }
 }
 

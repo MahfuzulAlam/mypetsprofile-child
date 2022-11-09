@@ -1771,3 +1771,18 @@ form.messenger-form {
 #signup_submit {
   margin-top: 10px;
 }
+
+.mpp_user_activation {
+  display: flex;
+  flex-direction: column;
+}
+
+.mpp_user_activation label {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.mpp_user_activation input {
+  margin-bottom: 10px;
+  max-width: 300px;
+}
